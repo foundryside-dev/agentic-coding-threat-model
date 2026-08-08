@@ -82,7 +82,7 @@ pollable long-running scan.
 
 When present, configuration lives in the `[wardline]` table of `weft.toml` at the scan root — a file shared across the Weft federation, of which wardline reads only its own table and which it never writes. Every command that loads policy reads the same table. Pass `--config PATH` to name a different TOML file.
 
-The full key set (the schema sets `additionalProperties: false` at every level, so a typo is a hard error, exit 2):
+The full key set (the schema sets `additionalProperties: false` at every level except `rules.severity`, whose keys are deliberately open — they are rule identifiers, and an unknown one is caught by `WLN-ENGINE-POLICY-CONFIG` instead — so a typo'd key is a hard error either way, exit 2):
 
 | Key | Type | Default | Purpose |
 |---|---|---|---|
@@ -167,7 +167,7 @@ wardline scan [OPTIONS] [PATH]
 | `--lang [python\|rust]` | Language frontend; default `python`. |
 | `--output PATH` | Write to an exact path, bypassing timestamping and retention. |
 | `--fail-on [CRITICAL\|ERROR\|WARN\|INFO]` | Exit 1 if any gating defect is at or above this severity. Case-insensitive. There is no `NONE` — `NONE` never gates. |
-| `--fail-on-inert` / `--no-fail-on-inert` | Exit 1 if the scan recognised zero trust boundaries over non-trivial code. Default off. |
+| `--fail-on-inert` / `--no-fail-on-inert` | Exit 1 if the scan recognised zero trust boundaries over non-trivial code. Default off. **Current branch** — not in released v1.5.0 (§7.2). |
 | `--fail-on-unanalyzed` / `--no-fail-on-unanalyzed` | Exit 1 if any discovered file could not be analysed. Default off. |
 | `--new-since REF` | PR-scoped gate: gate only on findings in files or entities changed since this git ref. |
 | `--affected FILE` | Scan only entities in this worklist (`-` for stdin). Advisory delta; mutually exclusive with `--new-since` and `--fail-on`. |
@@ -220,7 +220,7 @@ wardline doctor --repair
 
 `install [PACK]` writes a hash-fenced instruction block into `CLAUDE.md`/`AGENTS.md`, installs the `wardline-gate` skill, merges a `wardline` entry into `.mcp.json`, writes the Codex MCP entry, detects Loomweave and Filigree siblings, mints the attest signing key, and adds pre-commit hook configuration. Each step has a `--no-*` opt-out. Note the grant-residency caveat in §5.8: pack grants placed in the `.mcp.json` entry's `args` array are preserved across re-runs.
 
-`wardline mcp` runs a dependency-free MCP-over-stdio server (JSON-RPC 2.0) exposing eighteen tools: `scan`, `scan_job_start`, `scan_job_status`, `scan_job_cancel`, `scan_file_findings`, `file_finding`, `explain_taint`, `dossier`, `assure`, `decorator_coverage`, `attest`, `verify_attestation`, `judge`, `baseline`, `waiver_add`, `doctor`, `rekey`, and `fix`. Its own flags are `--root`, `--loomweave-url`, `--filigree-url`, `--read-only`, `--no-network`, `--trust-pack`, and `--allow-custom-packs`; the last two grant packs for every tool call so agents need not re-pass `trust_packs`. `wardline lsp` runs an LSP diagnostics server over stdio and takes only `--root`.
+`wardline mcp` runs a dependency-free MCP-over-stdio server (JSON-RPC 2.0) exposing eighteen tools: `scan`, `scan_job_start`, `scan_job_status`, `scan_job_cancel`, `scan_file_findings`, `file_finding`, `explain_taint`, `dossier`, `assure`, `decorator_coverage`, `attest`, `verify_attestation`, `judge`, `baseline`, `waiver_add`, `doctor`, `rekey`, and `fix` — plus MCP resources and prompts surfaces alongside the tools. Its own flags are `--root`, `--loomweave-url`, `--filigree-url`, `--read-only`, `--no-network`, `--trust-pack`, and `--allow-custom-packs`; the last two grant packs for every tool call so agents need not re-pass `trust_packs`. **Current branch:** the `--trust-pack` / `--allow-custom-packs` *launch flags* are not in released v1.5.0, which grants packs per call via the `trust_packs` / `trust_local_packs` tool arguments only (§5.8). `wardline lsp` runs an LSP diagnostics server over stdio and takes only `--root`.
 
 #### A.5 Suppression file formats
 
@@ -322,7 +322,7 @@ actually returns UNKNOWN_RAW (less trusted) — untrusted data reaches a trusted
 producer
 ```
 
-(The second finding is `WLN-ENGINE-METRICS` at severity `NONE`, an engine fact that never gates.) The actual state is `UNKNOWN_RAW` rather than `EXTERNAL_RAW` because the untrusted value passes through an intervening call on the way out and the analyser resolves the actual return conservatively. The declared level and the resolved level are what the finding compares; the exact resolution path is what `explain-taint` is for:
+(The second finding is `WLN-ENGINE-METRICS` at severity `NONE`, an engine fact that never gates. The `no weft.toml` advisory and the `gate: evaluated unsuppressed` line shown above are printed on every run in this example; the later transcripts elide them.) The actual state is `UNKNOWN_RAW` rather than `EXTERNAL_RAW` because the untrusted value passes through an intervening call on the way out and the analyser resolves the actual return conservatively. The declared level and the resolved level are what the finding compares; the exact resolution path is what `explain-taint` is for:
 
 ```bash
 wardline explain-taint <fingerprint> .
@@ -380,4 +380,4 @@ The pattern wardline uses on itself:
 
 `--fail-on ERROR` is what makes the dogfood scan a real gate rather than a report: a genuinely introduced `ERROR` finding goes red instead of being silently uploaded.
 
-Three additions are worth considering for a real deployment. Add `--fail-on-inert` so a project that has stopped declaring anything fails loudly rather than passing green (§3). Prefer `--new-since <merge-base>` on pull-request builds over `--trust-suppressions`, since a branch cannot forge its own merge base but can edit its own suppression files. And leave `--strict-defaults` on in any pipeline that scans code the pipeline's owner does not control.
+Three additions are worth considering for a real deployment. Add `--fail-on-inert` (current branch — §7.2) so a project that has stopped declaring anything fails loudly rather than passing green (§3). Prefer `--new-since <merge-base>` on pull-request builds over `--trust-suppressions`, since a branch cannot forge its own merge base but can edit its own suppression files. And leave `--strict-defaults` on in any pipeline that scans code the pipeline's owner does not control.

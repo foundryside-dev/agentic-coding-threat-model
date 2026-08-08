@@ -40,6 +40,9 @@ disabled for security. Grant it with --allow-custom-packs (CLI or `wardline
 mcp` launch flag) or the `trust_local_packs` MCP tool argument.
 ```
 
+!!! note "Release status"
+    The two messages above are current-branch text. Released v1.5.0 emits shorter forms — "Pass --trust-pack X to allow importing it." and "Use trust_local_packs to override." — because the `wardline mcp` launch-flag route they mention is itself branch-only (§5.8). The fail-closed behaviour is identical in both.
+
 The consequence is the one that matters for the poisoning threat. A repository can *ask* for arbitrary trust semantics. It cannot *obtain* them. The gate that decides is on the caller's side of the boundary, and the failure mode when the two disagree is a hard exit, not a silently weaker policy. Wardline's own documentation states the division plainly: `wardline install <pack>` only *emits guidance* to add a pack to `weft.toml`; it never writes the file on the operator's behalf.
 
 This does not make the declarations *correct* — a granted pack can encode a bad trust model just as a hand-written manifest could, and the residual risk survives (§9). What it removes is the class of attack where the repository upgrades its own policy without anyone choosing to let it.
@@ -132,6 +135,9 @@ The distinction matters. Under `--strict-defaults`, packs are not merely ungrant
 The flag is accepted by `scan`, `judge`, `baseline create`, `baseline update`, `attest`, `rekey`, `scan-job`, and `scan-file-findings`. Those same eight commands are the ones that accept `--trust-pack` and `--allow-custom-packs` — as does `wardline mcp`, which takes the two grants as launch flags but has no strict-defaults switch. The other policy-loading commands (`fix`, `findings`, `explain-taint`, `dossier`, `decorator-coverage`) take `--config` but neither the grants nor the strict-defaults switch, so in a project that declares packs they fail closed with `ConfigError`. The error tells the caller to pass `--trust-pack`, which those commands do not accept; the only routes open are a `--config` pointing at a pack-free policy, or fixing `weft.toml`. The grant surface is narrower than the policy-loading surface — a rough edge, not a security hole, since the failure direction is refusal.
 
 #### 5.8 Where grants reside
+
+!!! note "Release status"
+    The grant-residency machinery in this section — `wardline mcp --trust-pack` / `--allow-custom-packs` as launch flags, `install/mcp_json.py` preserving grant arguments across re-runs, and `install/doctor.py` reading grants back for diagnosis — is present on the `release/1.5.0` branch (committed 6 August 2026) and does not appear in the CHANGELOG or in the v1.5.0 release. What v1.5.0 *does* ship is the CLI grant flags on the scan-family commands and the per-call `trust_packs` / `trust_local_packs` MCP **tool arguments**. Read this section, §9.3 entry 8, and Part II-A §A.4's `wardline mcp` flags as current-branch behaviour.
 
 One caveat limits how the guarantee should be phrased, and it should be stated rather than glossed.
 

@@ -25,7 +25,7 @@ FRONTENDS: dict[str, LanguageFrontend] = {
 
 Two properties of this arrangement matter more than the interface itself.
 
-**`run_scan` does not change when a language is added.** The module's own docstring states the contract: write a class implementing the protocol, add it to `FRONTENDS`, and the engine is untouched. The docstring carries a worked `GoFrontend` sketch to make the point concrete.
+**`run_scan` does not change when a language is added.** The module's own docstring states the contract: write a class implementing the protocol, add it to `FRONTENDS`, and the engine is untouched. A worked `GoFrontend` sketch sits alongside the registry in the module source to make the point concrete.
 
 **Imports are lazy on purpose.** Neither frontend imports its analyser package at module load. Every heavyweight import happens inside `build_analyzer`, so `import wardline.core.frontends` does not pull in the scanner or the Rust package. This preserves the layering the engine already had, and it is why the Rust extra can be absent without breaking a Python scan.
 
