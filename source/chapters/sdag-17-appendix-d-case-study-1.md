@@ -95,7 +95,7 @@ Findings F1–F13 were identified in the primary evaluation. Findings F14–F20 
 | F12 | Silent coercion in configuration loading | ACF-T2 | Medium | None |
 | F13 | Thin test coverage / closed verification loop | §9.9 | Low | Partial |
 | F14† | Audit event failure silently absorbed | ACF-R1 (form b) | High | None |
-| F15† | Database result type-erasure (sqlite3.Row as untyped container) | ACF-S1 (upstream) | Medium | None |
+| F15† | Database result type-erasure (sqlite3.Row as untyped container) | ACF-S1 (upstream) | Medium | Partial |
 | F16† | Enablement response body not checked | ACF-T1, ACF-E1 | High | None |
 | F17† | Data access layer forces non-atomicity by design | ACF-R2 (structural) | High | None |
 | F18† | No status-transition validation (state machine absent) | adjacent to ACF-E2 | Medium | None |

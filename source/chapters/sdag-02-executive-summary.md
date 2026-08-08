@@ -33,7 +33,7 @@ Consider two uses of `.get()` with a default value — a shortcut that substitut
 
 [^exec-verification-examples]: Whether data crossing an authority tier was validated, whether a missing field was fabricated into a default, whether an audit-critical failure was swallowed, or whether fail-soft logic was applied to a fail-fast path.
 
-[^exec-language-caveat]: The assurance ceiling varies by language — the companion specification's Python binding (Part II-A, §A.2) acknowledges that Python's lack of ownership semantics and compile-time enforcement provides a lower assurance ceiling than a language with those properties could achieve.
+[^exec-language-caveat]: The assurance ceiling varies by language — and by how a binding encodes trust. The companion specification places both of its current frontends at the advisory end of an advisory-to-structural spectrum (Part I §11.4): a decorator marks a function as trusted, and nothing in Python prevents the function from violating the claim. A language whose type system could carry trust state would make mismatches unrepresentable rather than merely reportable — a higher assurance ceiling than any advisory binding reaches.
 
 [^exec-scope-caveat]: Current enforcement tooling operates at single-process scope — government systems with multiple interconnected services require supplementary governance controls at inter-service boundaries.
 

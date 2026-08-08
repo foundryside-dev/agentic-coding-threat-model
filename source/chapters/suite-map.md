@@ -2,7 +2,7 @@
 
 **A reading guide for the documents on AI-generated code risk in high-stakes systems.**
 
-**Date:** 24 March 2026\
+**Date:** 9 August 2026\
 **Prepared by:** John Morrissey\
 **Parent paper:** Semantic Defects in AI-Generated Code (SDAG)
 
@@ -23,6 +23,8 @@ These documents present one argument at different depths. They describe the prob
 *Reviewing AI-Generated Code: A Practical Guide* gives hands-on review guidance for staff who use AI to write code but do not have CI pipelines or developer tooling.
 
 The *Discussion Paper* (*Semantic Defects in AI-Generated Code*) is the full technical analysis underpinning both. It includes the complete STRIDE-based failure taxonomy, worked case studies, an annotated agent transcript, cross-model defect chaining analysis, and a systems thinking primer. It is detailed — approximately 200 pages — and is available for readers who need the evidence base.
+
+The *Companion Specification* (*Wardline: An As-Built Specification*) documents the shipped reference implementation of the semantic enforcement the paper calls for — for tool builders and assessors.
 
 ## Reading paths by role
 
@@ -50,8 +52,8 @@ The *Discussion Paper* (*Semantic Defects in AI-Generated Code*) is the full tec
 | Role | Start here | Then if needed |
 |------|-----------|----------------|
 | **Developer** | Practical Guide (23 pp) → Governing AI-Generated Code (for context) | For senior developers: Discussion paper §2, §4, App A, App D (simulation), App E (transcripts) |
-| **Development team lead** | Governing AI-Generated Code → Discussion paper §2, §4, §7, App A, App D (simulation), App E (transcripts) | Discussion paper §7.2 (technical controls — what is buildable) |
-| **Tool implementer** | Discussion paper §2–3, App A (detection approaches per entry) | Discussion paper §7.2 (technical controls), §8 (case studies), App E (transcripts) |
+| **Development team lead** | Governing AI-Generated Code → Discussion paper §2, §4, §7, App A, App D (simulation), App E (transcripts) | Discussion paper §7.2 (technical controls — what is buildable), Companion Specification (Wardline) for adopting the reference scanner |
+| **Tool implementer** | Discussion paper §2–3, App A (detection approaches per entry) → Companion Specification (Wardline, the as-built reference implementation) | Discussion paper §7.2 (technical controls), §8 (case studies), App E (transcripts) |
 
 ## The documents
 
@@ -59,4 +61,5 @@ The *Discussion Paper* (*Semantic Defects in AI-Generated Code*) is the full tec
 |----------|-------|----------|----------------|
 | **Governing AI-Generated Code** | ~13 | Everyone | The problem statement: what the defects are, why they are not targeted by existing checks, why updated assurance is needed. Entry point for all other reading. |
 | **Practical Guide** (Reviewing AI-Generated Code) | ~23 | Staff using AI to write code | Five review questions, worked code examples, hot-path identification — for people copying code from AI chat windows without CI or developer tooling. |
-| **Discussion Paper** (Semantic Defects in AI-Generated Code) | ~200 | Technical leads, assessors, security architects | Full analysis: 20-entry failure taxonomy (ACF), STRIDE mapping, two case studies (a simulation with full source code and a longitudinal observation with annotated transcripts), cross-model defect chaining, systems thinking primer. v0.1.0. |
+| **Discussion Paper** (Semantic Defects in AI-Generated Code) | ~200 | Technical leads, assessors, security architects | Full analysis: 20-entry failure taxonomy (ACF), STRIDE mapping, two case studies (a simulation with full source code and a longitudinal observation with annotated transcripts), cross-model defect chaining, systems thinking primer. v0.3.0. |
+| **Companion Specification** (Wardline: An As-Built Specification) | ~60 | Tool implementers, technical leads | As-built specification of the shipped reference scanner (`wardline` on PyPI): trust lattice, boundary declarations, rule catalogue, gate semantics, verification properties, and an inventory of designed-but-unbuilt features. Includes a Python practitioner reference (Part II-A). v1.0.0-draft. |

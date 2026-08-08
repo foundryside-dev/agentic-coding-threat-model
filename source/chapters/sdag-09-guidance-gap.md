@@ -150,7 +150,7 @@ Of these, items 1–3 are foundational — the remaining gaps are difficult to a
 3. **Controls for review effectiveness at scale** — not just "is code reviewed?" but "does the review process remain effective at agent-generated volume?"
 4. **Authority classification for agent output** — how should agent-generated code be treated in the system's authority model?
 5. **Accreditation criteria for agentic development workflows** — what evidence must organisations provide to demonstrate that agentic coding maintains the required security posture?
-6. **Vocabulary for context-dependent code weaknesses** — patterns that are correct in general but dangerous in specific security contexts, encoded in machine-readable form (§7.2; the companion specification sketches one candidate vocabulary for this)
+6. **Vocabulary for context-dependent code weaknesses** — patterns that are correct in general but dangerous in specific security contexts, encoded in machine-readable form (§7.2; the companion specification implements one candidate vocabulary for this — as built, a single generic trust-boundary group)
 7. **Correlated failure risk models** — testing and remediation strategies that account for the non-independent failure distribution of agent-generated code
 8. **Governance perimeter expansion** — controls for executable logic produced by non-developers using agentic tools outside traditional SDLC channels (§1.2.7)
 9. **Cross-model defect chaining** (emerging) — defects from different models may compose, where one model's failure creates preconditions for another's (§2.4(g); Appendix F). A candidate gap warranting attention as multi-model environments become common

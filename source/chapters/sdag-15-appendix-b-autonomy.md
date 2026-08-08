@@ -42,7 +42,7 @@ The control implications are:
 |-----------|-------|----------------------|
 | Auth / trust boundary logic | 1 | Existing SDLC sufficient; agent output is reference material, not integrated code |
 | Feature development | 2 | ACF pattern awareness in review; SAST rules for defensive anti-patterns on high-stakes paths |
-| Test scaffolding / boilerplate | 3 | CI-enforced validation boundary; provenance tracking; measured review effectiveness. The team should verify that agent-generated tests actually test the intended behaviour, not just pass (ACF-R3, provisional candidate) |
+| Test scaffolding / boilerplate | 3 | CI-enforced validation boundary; provenance tracking; measured review effectiveness. The team should verify that agent-generated tests actually test the intended behaviour, not just pass (ACF-R3) |
 
 The critical control gap in this scenario is not at Level 3 — it is at the **boundary between levels**. When a Level 3 agent generates a new feature that touches a Level 1 component (e.g., a refactoring that modifies an audit trail function), the code crosses from a low-control to a high-control zone. The organisation should define which components are Level 1 and enforce that agent-generated changes to those components receive Level 1 controls regardless of how the change was generated.
 
