@@ -58,6 +58,8 @@ A related pattern — not removal of existing guards but failure to *adopt* esta
 
 Safety guards are typically added in response to a past incident or an experienced developer's understanding of what can go wrong. Removing them silently reverses institutional learning. This is a maintenance-phase failure — it appears during refactoring, not during initial code generation, and targets a gap in the core taxonomy's coverage.
 
+**The erosion can also arrive at campaign scale, through a directive rather than a refactor.** A remediation ticket's own criteria marked an anti-masquerading guard for deletion — the campaign would have removed a control it existed to install. It was caught only because the executing session checked the ticket against its governing decision records before acting. See the [remediation-phase postscript]({{< relref "/appendices/case-study" >}}#e8-postscript-the-remediation-phase).
+
 ## Detection Approaches
 
 No existing tool detects this. Structural detection is feasible: flag removed `assert` statements and `if ... raise` guard patterns in agent-generated diffs, but only on code paths not covered by the current test suite. This scoping is critical — flagging all removed guards would produce unacceptable noise. The related convention-drift pattern (new code not adopting established guards) is harder to detect because there is no before/after diff to compare — the guard was never present. Detection would require a convention-expectation model that specifies which patterns should appear in which contexts, then flags their absence in new code.

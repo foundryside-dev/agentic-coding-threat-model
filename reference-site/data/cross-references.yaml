@@ -1,36 +1,80 @@
-# Cross-reference matrix: ACF ↔ Wardline Rules
+# Cross-reference matrix: ACF ↔ Wardline rules
+#
+# Updated 2026-08-08 for the as-built wardline specification (wardline v1.5.0).
+# The previous matrix mapped ACF entries onto the DESIGNED rules WL-001..WL-008,
+# five of which were never implemented.  This matrix maps onto the rules that
+# actually ship: PY-WL-101..126 (Python) and RS-WL-108/112 (Rust preview).
 #
 # Compiled from source/chapters/sdag-14-appendix-a-taxonomy.md (detection
-# approach sections), source/chapters/wardline-01-07-pattern-rules.md (rule
-# definitions).  Each mapping is verified against the source — not estimated.
+# approach sections) and source/chapters/wardline-01-02-the-problem.md §2.1
+# (coverage table) + wardline-01-06-rules-and-severity.md (rule catalogue).
+# Each mapping is verified against the source — not estimated.
 
-# ── ACF → Wardline pattern rules ──────────────────────────────────────────────
-# Only rules explicitly named in the taxonomy's "Detection approach" field are
-# listed.  Entries whose detection relies on taint analysis, group declarations,
-# or process controls (rather than a numbered WL rule) have empty arrays.
+# ── ACF → wardline rules, as built ────────────────────────────────────────────
+# Empty array = not covered: no rule fires, and no inference in the engine
+# addresses the mode.  `coverage` records the strength of the mapping.
 
 acf_to_wardline:
-  ACF-S1: ["WL-001"]
-  ACF-S2: ["WL-002"]
-  ACF-S3: ["WL-002", "WL-006"]
-  ACF-T1: []              # taint analysis / tier-flow enforcement, no WL rule
-  ACF-T2: ["WL-001"]
-  ACF-R1: ["WL-003", "WL-004", "WL-005"]
-  ACF-R2: ["WL-005"]
-  ACF-I1: []              # Group 8 / Group 11 declarations, no WL rule
-  ACF-I2: []              # framework-specific traceback detection, no WL rule
-  ACF-D1: []              # process threat — no code-level WL rule
-  ACF-D2: []              # process threat — no code-level WL rule
-  ACF-E1: []              # taint analysis / tier-flow enforcement, no WL rule
-  ACF-E2: []              # taint analysis + Group 14, no WL rule
-  ACF-S4: []              # type-system meta-failure, no WL rule
-  ACF-S5: []              # type structure avoidance, no WL rule
-  ACF-R3: []              # verification displacement, no WL rule
-  ACF-R4: []              # workflow pattern, no WL rule
-  ACF-T3: []              # lint-detectable substring matching, no WL rule
-  ACF-T4: []              # guard erosion, no WL rule
-  ACF-R5: []              # remediation-induced violation, no WL rule
-  ACF-R6: []              # workflow pattern, no WL rule
+  ACF-S1:
+    rules: []             # WL-001 (member access with fallback default) was NEVER BUILT
+    coverage: none        # the largest single gap between the paper and the tool
+  ACF-S2:
+    rules: []             # WL-002 and the type-system enforcement layer both unbuilt
+    coverage: none
+  ACF-S3:
+    rules: ["PY-WL-123"]  # reflective setattr/getattr (CWE-915) — adjacent sink rule
+    coverage: indirect    # a sink rule, not a structural-identity rule
+  ACF-T1:
+    rules: ["PY-WL-101", "PY-WL-105"]
+    coverage: covered     # the core case: trust-flow enforcement over the L3 fixed point
+  ACF-T2:
+    rules: []             # default-based coercion was WL-001's territory
+    coverage: none
+  ACF-T3:
+    rules: []
+    coverage: none
+  ACF-T4:
+    rules: []             # diff-level pattern; wardline analyses a tree, not a history
+    coverage: none
+  ACF-R1:
+    rules: ["PY-WL-103", "PY-WL-104"]
+    coverage: partial     # caught-and-continue only; untyped propagation not covered
+  ACF-R2:
+    rules: ["PY-WL-103", "PY-WL-104"]
+    coverage: partial     # designed audit-primacy/atomicity annotations unbuilt
+  ACF-R3:
+    rules: []             # test-structure analysis is out of scope
+    coverage: none
+  ACF-R4:
+    rules: []             # workflow pattern, not a code pattern
+    coverage: none
+  ACF-R5:
+    rules: []
+    coverage: indirect    # a new violation inside a fix is caught only if a rule covers it
+  ACF-R6:
+    rules: []             # requires transcript-level analysis
+    coverage: none
+  ACF-I1:
+    rules: []             # designed secret-handling / data-sensitivity groups unbuilt
+    coverage: none
+  ACF-D1:
+    rules: []             # process threat — attacked by the <=5% FP-rate gate and opt-in posture
+    coverage: not-addressable-by-rules
+  ACF-D2:
+    rules: []             # process threat
+    coverage: not-addressable-by-rules
+  ACF-E1:
+    rules: ["PY-WL-101", "PY-WL-105"]
+    coverage: covered     # same trust-flow enforcement as ACF-T1
+  ACF-E2:
+    rules: ["PY-WL-106", "PY-WL-107", "PY-WL-108", "PY-WL-112", "PY-WL-115", "PY-WL-124"]
+    coverage: partial     # sink family; authorisation-check-before-action is not modelled
+  ACF-S4:
+    rules: []             # analysis is annotation-driven, not type-driven
+    coverage: none
+  ACF-S5:
+    rules: []
+    coverage: none
 
 # ── Related entries (adjacency) ───────────────────────────────────────────────
 # From the [^related-entries] footnote in Appendix A, which documents the

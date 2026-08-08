@@ -26,6 +26,6 @@ A structured reference for practitioners working with the Agentic Code Failure (
 
 This practitioner reference is derived from the [discussion paper](https://semanticdefects.foundryside.dev/understand/paper/). For policy and executive audiences, see the [reading guide](https://semanticdefects.foundryside.dev/).
 
-Version: **0.1.0** | Status: **Draft**
+Version: **0.2.0** | Status: **Draft**
 
 This is independent work. It is not official guidance of any government body, and the views expressed are the author's own.

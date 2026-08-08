@@ -57,6 +57,7 @@ N/A — this is a process threat, not a code pattern. Detection is through proce
 - Periodic audit of suppressed findings to verify they were genuinely false positives
 - Finding caps per rule per file to prevent any single rule from flooding the queue
 - Prioritised finding presentation (critical findings first, low-severity findings batched)
+- Automated first-pass triage of findings and proposed exceptions — for example, a prompted model evaluating each flagged violation against the declared rule before it reaches a human — so that human attention is reserved for ambiguous or high-stakes cases. **Advisory only, never the authoritative gate**
 
 ## Remediation
 
@@ -70,6 +71,7 @@ As a process threat, ACF-D1 is not addressed by pattern rules. Mitigation requir
 - Prioritised finding presentation (critical findings first, low-severity findings batched)
 - Measured suppression rates as a health metric — rising suppression rates signal review degradation
 - Periodic audit of suppressed findings to verify they were genuinely false positives
+- Automated first-pass triage of findings and proposed exceptions — a prompted model evaluating each flagged violation against the declared rule before it reaches a human, so human attention is reserved for ambiguous or high-stakes cases. The division of labour is deliberate: the judge absorbs the flood, the human holds the authority. **Advisory only, never the authoritative gate** — see the [validation boundary as built]({{< relref "/appendices/case-study" >}}#postscript-the-validation-boundary-as-built)
 
 ## Related Entries
 
