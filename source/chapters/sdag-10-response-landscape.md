@@ -1,6 +1,6 @@
 ## 7. The Response Landscape
 
-*This section shifts from analysis to response — what organisations can build, adopt, and enforce. It covers process controls (§7.1), technical controls (§7.2), policy controls (§7.3), and incident response (§7.4), ordered from weakest to strongest assurance. Technical practitioners should focus on §7.2; policy readers on §7.3.*
+*This section shifts from analysis to response — what organisations can build, adopt, and enforce. It covers process controls (§7.1), technical controls (§7.2), framework-level controls (§7.3), and incident response (§7.4), ordered from weakest to strongest assurance. Technical practitioners should focus on §7.2; governance readers on §7.3.*
 
 The preceding sections establish that the highest-risk agentic failure modes are semantic and convention-conforming. To understand the gap, consider three levels of automated checking:
 
@@ -241,9 +241,9 @@ The practical implication is that investment in the declaration layer pays divid
 
 This effect can be strengthened by active projection — delivering the resolved governance context for a specific file to the agent at the point of modification. Active projection is this paper's proposal rather than a shipped capability; the companion implementation's nearest surfaces are its agent-facing tooling — an install command that writes gate instructions into the agent's context files, and a per-function dossier command that assembles resolved trust context on request. The return on converting institutional knowledge into enforceable declarations is higher than verification alone would justify, because the same declarations support both post-generation enforcement and pre-generation context injection.
 
-### 7.3 Policy controls (what does not yet exist)
+### 7.3 Framework-level controls (what does not yet exist)
 
-The technical controls above describe what organisations can build. The policy controls below describe what does not yet exist at the framework level — vocabulary, classification, and coordination mechanisms that require action beyond individual organisations. The vocabulary and classification controls can be adopted within existing frameworks; accreditation criteria and cross-agency notification mechanisms require formal guidance from ASD/ACSC.
+The technical controls above describe what organisations can build. The controls below describe what does not yet exist at the framework level — vocabulary, classification, and coordination mechanisms that require action beyond individual organisations. The vocabulary and classification controls can be adopted within existing frameworks; accreditation criteria and cross-agency notification mechanisms require formal guidance from ASD/ACSC.
 
 **Standardised vocabulary.** The taxonomy in this paper (Appendix A, introduced in §3) provides a starting point. Government cybersecurity guidance needs terminology for agentic code failure modes — "fabricated default," "authority tier conflation," "audit trail destruction through defensive patterns" — that practitioners can use in security assessments, risk registers, and accreditation documentation.
 
@@ -260,7 +260,7 @@ The technical controls above describe what organisations can build. The policy c
 
 **Extend SDLC-equivalent controls to executable logic produced outside formal development teams.** Organisations should catalogue and govern agent-generated plugins, automations, BI extensions, workflow scripts, low-code components, and similar artefacts produced by analysts, operators, and other non-developer staff (see §1.2.7). Where such artefacts affect trust boundaries, access control, audit trails, or data integrity, they should be subject to provenance, review, and validation controls proportionate to their impact — even when the producers do not consider themselves developers and the artefacts do not live in a formal version control system.
 
-This is the policy response to the governance perimeter problem: the SDLC boundary has expanded, and controls must follow it.
+This is the framework-level response to the governance perimeter problem: the SDLC boundary has expanded, and controls must follow it.
 
 ### 7.4 Incident response for systematic agent defects
 

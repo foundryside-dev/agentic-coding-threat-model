@@ -157,7 +157,7 @@ Of these, items 1–3 are foundational — the remaining gaps are difficult to a
 
 Current frameworks scope software development controls to recognised development teams and established code repositories. Agent-generated automations, integrations, and plugins produced by analysts and operators outside these channels are not addressed by any current guidance.
 
-The structural gaps listed above are not addressable through individual organisational practice alone. They require shared vocabulary, common assessment criteria, cross-organisational detection mechanisms, and agent output classification standards that sit at the whole-of-government level. Closing them is work for the bodies with the institutional mandate and cross-government visibility to develop controls of this kind.
+The structural gaps listed above are not addressable through individual organisational practice alone. They require shared vocabulary, common assessment criteria, cross-organisational detection mechanisms, and agent output classification standards that sit at the whole-of-government level. Only bodies with the institutional mandate and cross-government visibility to develop controls of this kind are positioned to close them.
 
 ### 6.7 Contracted development as the primary delivery context
 
