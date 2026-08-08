@@ -1,0 +1,38 @@
+# .weft/filigree/.gitignore — managed-by: filigree (ephemeral runtime files)
+#
+# By default the project-root .gitignore ignores .weft/, so nothing here is
+# committed. If you remove that root `.weft/` rule to track your tracker as
+# committed payload (a shared team DB, or a demo), this file keeps the
+# *ephemeral* runtime files out of every commit.
+#
+# Durable (committed when this dir is tracked): filigree.db, config.json,
+#   INSTALL_VERSION, scanners/*.toml.  Ephemeral (never committed): below.
+
+# SQLite write-ahead-log sidecars and rollback journals
+*.db-wal
+*.db-shm
+*.db-journal
+
+# Migration backups (e.g. filigree.db.pre-v26-bak)
+*.db.*-bak
+
+# Atomic-write staging temps (write_atomic / store-migration copy)
+*.tmp
+
+# Logs
+*.log
+
+# Per-instance / per-run runtime state
+ephemeral.lock
+ephemeral.pid
+ephemeral.port
+instructions.lock
+instance_id
+
+# Per-machine federation bearer (auto-minted, 0600). A secret that survives
+# *local* store migration but must NEVER be committed — mirrors the .mcp.json
+# token guard. Tracking this dir as committed payload must not leak it.
+federation_token
+
+# Generated project snapshot (regenerated on demand)
+context.md

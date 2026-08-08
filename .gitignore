@@ -28,6 +28,7 @@ __pycache__/
 *.pyc
 CLAUDE.md
 prompts/
+product/
 docs/superpowers/
 .worktrees/
 .superpowers/*
