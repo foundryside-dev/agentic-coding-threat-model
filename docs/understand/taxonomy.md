@@ -254,7 +254,7 @@ An agent tasked with fixing a known violation introduces a *different* violation
 
 The volume of static analysis findings on agent-generated code overwhelms reviewers, causing them to rubber-stamp findings without evaluation. A vicious cycle: volume → batch dismissal → real issues dismissed alongside false positives → false assurance.
 
-**Mitigation:** Finding caps per rule, prioritised presentation, measured suppression rates, periodic audit of suppressed findings.
+**Mitigation:** Finding caps per rule, prioritised presentation, measured suppression rates, periodic audit of suppressed findings. Add automated first-pass triage of findings and proposed exceptions — for example, a prompted model evaluating each flagged violation against the declared rule before it reaches a human — so that human attention is reserved for ambiguous or high-stakes cases. Advisory only, never the authoritative gate.
 
 ---
 
@@ -314,6 +314,8 @@ Agent-generated code systematically avoids creating typed data structures, using
 
 Precondition guards (assertions, defensive raises) are removed during refactoring. The assertion that looks "obviously redundant" exists to catch future code paths the agent cannot model. A maintenance-phase failure that silently reverses institutional learning.
 
+The erosion can also arrive at campaign scale through a directive rather than a refactor. In the longitudinal project, a remediation ticket's criteria marked an anti-masquerading guard for deletion — the campaign would have removed a control it existed to install — caught only because the executing session checked the ticket against its governing decision records before acting ([Appendix E.8](paper.md#e8-postscript-the-remediation-phase)).
+
 ---
 
 #### ACF-R4: Context Handover Assumption
@@ -335,6 +337,8 @@ An agent encounters evidence of a problem — a failing test, a warning, a depre
 ## Taxonomy Extension Mechanism
 
 This taxonomy is presented as a starting point, not a closed set. The generative conditions that produce these failure modes will produce others not yet observed. The provisional candidates above illustrate the expected path from observation to inclusion. Notably, ACF-T3, ACF-T4, ACF-R5, and ACF-R6 were identified through maintenance-phase work — refactoring, remediation, auditing, and triage — rather than through initial code generation, suggesting that the taxonomy's coverage should explicitly encompass the full software lifecycle, not only greenfield authoring.
+
+**A candidate arriving through this mechanism: stale mandate execution.** An agent faithfully executes a work instruction that has been silently superseded or withdrawn by a governance artefact — an architecture decision record, a policy change — that the instruction does not reference. The defect is not in the code the agent writes; it is that the agent writes the wrong code correctly. The hazard grows with agent compliance, and statelessness compounds it: every session re-trusts the stale instruction afresh, indefinitely. It is distinct from the existing entries — no training-distribution pattern is being reached for, the context is present and correct (the *instruction* is wrong), and nothing is dropped at a handover as in ACF-R4. The mitigation is machine-readable governance state the task frame is forced to consult: work instructions that cite their governing decision records, and tooling that fails the task when a cited record has been superseded. [Appendix E.8](paper.md#e8-postscript-the-remediation-phase) documents the observed near-miss. Put forward as a workflow-pattern candidate in the Repudiation family, not as a settled entry.
 
 **Criteria for new entries.** A candidate ACF entry should meet four conditions: (1) a reproducible code-level or process-level pattern, with at least one worked example; (2) a STRIDE mapping that identifies the threat category; (3) a risk rating using the scale defined in the appendix; and (4) an assessment of existing detection capability. Entries that describe known vulnerability classes should document why agentic generation changes the management burden (volume, systematicity, or detection difficulty) rather than simply cataloguing a known class. The naming convention follows **ACF-{category}{number}** where categories map to STRIDE: S(poofing), T(ampering), R(epudiation), I(nformation Disclosure), D(enial of Service), E(levation of Privilege).
 

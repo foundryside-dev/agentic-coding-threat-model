@@ -20,7 +20,7 @@ For a quick overview of all documents, see the [home page](../index.md).
 | **30 minutes** | [Governing AI-Generated Code](../understand/index.md) in full (~13 pages) | The complete argument and response landscape — enough to brief others |
 | **1 hour** | Governing AI-Generated Code + [Practical Guide](../respond/practical-guide.md) | Actionable next steps — review techniques and how to apply them |
 | **Half day** | Discussion paper [§1–6](../understand/paper.md#1-introduction-and-scope), [App A](../understand/taxonomy.md) (taxonomy), [App D](../understand/paper.md#appendix-d-case-study-1-controlled-generation-of-a-government-assistance-application) (controlled generation case study), [App E](../understand/paper.md#appendix-e-case-study-2-agentic-failure-in-practice) (longitudinal case study) | Deep technical understanding of threat landscape and evidence base |
-| **Full day** | [Full discussion paper](../understand/paper.md) (~200 pages) | Complete command of the analysis |
+| **Full day** | [Full discussion paper](../understand/paper.md) (~200 pages) + [Wardline specification](../wardline/specification.md) | Complete command of the analysis and the as-built semantic enforcement tooling |
 
 ---
 
@@ -173,6 +173,8 @@ Read [Governing AI-Generated Code](../understand/index.md) §1 ("The one-paragra
 
 3. [ACF Taxonomy](../understand/taxonomy.md) — the detailed failure mode entries with code examples and detection approaches.
 4. Discussion paper [§2](../understand/paper.md#2-the-threat-is-not-what-you-think) (the threat), [§4](../understand/paper.md#4-the-review-process-as-attack-surface) (review as attack surface), [App D](../understand/paper.md#appendix-d-case-study-1-controlled-generation-of-a-government-assistance-application) (simulation), [App E](../understand/paper.md#appendix-e-case-study-2-agentic-failure-in-practice) (annotated agent transcript — the most instructive section for practitioners).
+
+**For semantic enforcement tooling:** the [Wardline specification](../wardline/specification.md) — an as-built specification of a shipped semantic trust-boundary scanner (trust lattice §4, declarations and caller-granted trust §5, the rule catalogue §6, gates and suppression §7) — and the [Python reference](../wardline/python-binding.md) for CLI, configuration, and suppression formats.
 
 **After reading:** You should be able to identify the highest-risk code paths in your project, apply the five review questions, and evaluate whether detection tooling (custom rules or semantic enforcement) is warranted.
 

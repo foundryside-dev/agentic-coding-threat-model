@@ -125,6 +125,21 @@ The project operates under explicit architectural rules: a tiered authority mode
 
 The rules are enforced in CI by a project-specific AST pattern-matching tool with an allowlist-based exception regime. The enforcement model is not advisory — it is a gate. A pattern flagged by the enforcer either gets fixed by the agent or requires a human-authored exception with a rationale, an ownership tag, and an expiry date. Legitimate uses of otherwise-restricted patterns go through; unconscious pattern completion from training data does not.
 
+### The validation boundary as built
+
+*Postscript: the same project approximately five months after the observations above. Full account: [§8.7](../understand/paper.md#87-case-study-postscript-the-validation-boundary-as-built) in the discussion paper.*
+
+The single pattern-matching gate has since grown into a **four-layer validation boundary**. Layer 1 is a semantic taint gate over trust boundaries declared in code, tracking data flow between modules rather than matching patterns — and failing red if it recognises no boundaries at all, so that "checked and clean" stays structurally distinguishable from "didn't look." Layer 2 is a tier-model lint suite in which every suppression is a judged exception carrying owner, reason, and expiry, sealed with a cryptographic signature only the human operator can apply; agents can stage exception candidates but cannot sign them, and the signing step re-derives each finding from the live tree so a stale claim fails at signature time. Layer 3 pins content digests over what pipeline outputs *mean* — semantic drift fails CI until a human consciously rotates the oracle and records why. Layer 4 encodes write-boundary invariants in code and verifies them against the real production database engine rather than the permissive one used in local development.
+
+Between the agent's proposed exception and the operator's signature sits an **automated judge**: a prompted model that evaluates each flagged finding against the declared rule and returns an accept/block verdict. It absorbs the finding flood (ACF-D1) so that human attention lands only on ambiguous or high-stakes cases — but it signs nothing. The division of labour is the point: agent self-checking is a load-bearing *filter* and an unacceptable *authority*.
+
+!!! note "The honest ledger"
+    Two of those layers exist because the gates' own operators were fooled first. One lint gate ran in CI for months in a configuration that loaded **zero rules and exited green** — a result that would have certified any tree — and two acceptance rounds were signed off against it before the hole was found. Its first real run produced a baseline of several hundred findings. At the time of writing the tier-model gate is *deliberately red*: a substantial backlog awaits judged signature, so unauthorised merges stay blocked while the signing debt stays visible, rather than a green gate purchased by weakening the rules.
+
+    The defence is not that the codebase is clean — it is not. The defence is that every gate fails closed, distinguishes "checked and clean" from "didn't look," and requires a recorded human decision to overrule. That is what separates a codebase full of *known* semantic findings from one full of unknown ones.
+
+The same single-project limitations apply: one codebase, one operator, machinery too young for outcome statistics. The account is offered as evidence that the control class is implementable — and of the failure modes an implementer should expect on the way — not as evidence that it is sufficient.
+
 ### What detection observes
 
 In steady-state development, a combination of rigorous review and the enforcement tool regularly catches and blocks semantic boundary violations that would otherwise pass conventional tooling — none entered the codebase. The detection rate is approximately one to two such patterns per day across approximately 25–30 commits per day (the majority agent-generated). This rate occurs *despite* the agent being explicitly prompted against these patterns in project-level instructions — the patterns are deeply embedded in training data and override project-level instructions under context pressure.
@@ -272,7 +287,7 @@ Two practical tests would meaningfully challenge the paper's thesis:
 - **A measurement period of sufficient duration** — weeks rather than days, reporting both the absolute violation count and a denominator (violations per N agent-generated functions, per K lines changed, or per M commits) to enable meaningful comparison.
 - **Controlled comparison where feasible** — comparing violation rates in agent-generated code against a baseline of human-authored code in the same codebase under the same detection rules, to distinguish agent-specific failure patterns from general coding errors.
 
-Even a partial replication — deploying detection rules on one agent-assisted project for 30 days and reporting the violation rate with denominator context — would materially advance the evidence base beyond the paper's single-project observation. See the [full paper](../understand/paper.md#87-operational-tests-and-replication-protocol) for the detailed replication protocol.
+Even a partial replication — deploying detection rules on one agent-assisted project for 30 days and reporting the violation rate with denominator context — would materially advance the evidence base beyond the paper's single-project observation. See the [full paper](../understand/paper.md#88-operational-tests-and-replication-protocol) for the detailed replication protocol.
 
 ---
 

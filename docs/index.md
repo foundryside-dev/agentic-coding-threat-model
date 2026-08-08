@@ -12,7 +12,7 @@ hide:
 # Semantic Defects in AI-Generated Code
 
 <p class="hero-subtitle">A threat model and assurance framework for high-reliability systems that use AI to generate code</p>
-<p class="hero-version">v0.1.0 — Draft for Comment — 24 March 2026</p>
+<p class="hero-version">v0.2.0 — Draft for Comment — 8 August 2026</p>
 
 <div class="hero-actions" markdown>
 
@@ -34,7 +34,7 @@ AI coding tools are in active use across organisations and their contracted supp
 - **For practitioners** — [Reviewing AI-Generated Code: A Practical Guide](respond/practical-guide.md) gives hands-on review guidance for staff who use AI to write code but do not have CI pipelines or developer tooling.
 - **For assessment and governance** — the [CISO Assessment](assess/ciso-assessment.md) and [Assessor Checklist](assess/irap-checklist.md) evaluate organisational exposure against the failure taxonomy.
 
-The [Full Discussion Paper](understand/paper.md) (~200 pages) is the complete technical analysis underpinning both paths.
+The [Full Discussion Paper](understand/paper.md) (~200 pages) is the complete technical analysis underpinning both paths. The [Wardline Companion](wardline/index.md) is the as-built specification of a shipped semantic enforcement tool — what the missing verification layer looks like when it is actually built.
 
 ---
 
@@ -95,3 +95,4 @@ For detailed reading paths with time estimates and depth options, see the [Readi
 | [**Governing AI-Generated Code**](understand/index.md) | ~13 | Everyone — entry point for all other reading | [:material-file-pdf-box:](pdf/governing-ai-generated-code.pdf) |
 | [**Practical Guide**](respond/practical-guide.md) | ~23 | Staff using AI to write code | [:material-file-pdf-box:](pdf/reviewing-ai-generated-code.pdf) |
 | [**Discussion Paper**](understand/paper.md) | ~200 | Technical leads, assessors, security architects | [:material-file-pdf-box:](pdf/threat-model-discussion-paper-community.pdf) |
+| [**Wardline Companion**](wardline/index.md) | ~86 | Tool implementers, assessors, pilot leads | [:material-file-pdf-box:](pdf/wardline-companion-community.pdf) |

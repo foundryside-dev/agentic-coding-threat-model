@@ -13,6 +13,7 @@ The project provides:
 - A **taxonomy of failure modes** (ACF) mapped to STRIDE categories
 - **Assessment tools** for CISOs, security assessors, and technical leads
 - A **practical review guide** for code authors working without CI pipelines
+- The **Wardline as-built specification** — a semantic trust-boundary enforcement tool ([wardline on PyPI](https://pypi.org/project/wardline/)), specified as actually built and honestly annotated with what was designed but not built
 
 ## Start here
 
@@ -22,7 +23,7 @@ The project provides:
 
 ## Status
 
-v0.1.0 — Draft for Comment
+v0.2.0 — Draft for Comment
 
 ## Local development
 

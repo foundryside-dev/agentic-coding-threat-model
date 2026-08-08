@@ -4,108 +4,69 @@ tags:
   - specification
 ---
 
-# Wardline: A Semantic Enforcement Framework
+# Wardline: Semantic Trust-Boundary Enforcement
 
 [:material-file-pdf-box: Download PDF](../pdf/wardline-companion-community.pdf){ .md-button }
 
 ## What this is
 
-The Wardline companion specification describes a proposed standard at draft stage, defining criteria that enforcement tools would need to satisfy — not a tool or product itself. Various vendors and open-source projects could implement tools that conform to its requirements, in the same way that SAST vendors build tools that implement CWE detection rules. It is one possible technical response — not the only one — and is at Design Draft status (v0.2.0). The framework makes institutional knowledge machine-readable, so that enforcement tools can detect code that is syntactically correct but semantically wrong in its declared context. This section provides an overview; the [full specification](specification.md) contains the normative content.
+Wardline is a static analyser that reads the trust boundaries an application declares about itself and checks whether the code honours them. It is a shipped tool, not a proposal: `wardline` on PyPI, repository `foundryside-dev/wardline`, pure Python, `requires-python >= 3.12`, zero-dependency base package. This section documents **v1.5.0** as built.
 
-A wardline is the set of declarations an application makes about how it classifies and protects the semantic boundaries of its data and code paths. It declares:
+A wardline is the set of declarations an application makes about where its trust boundaries are — which functions take untrusted data in, which functions raise trust by validating it, and which functions are entitled to assume they are working on trusted data. Everything else follows from those declarations: the trust lattice is what a declaration assigns, the rules are what a declaration makes checkable, and the gate is what a declaration makes enforceable.
 
-- Which data belongs to which authority tier
-- Which code paths must fail in which ways
-- Which patterns are prohibited in which contexts
-- What governance surrounds exceptions to those rules
-- Where serialised artefacts may be restored to a tier, and on what evidence (restoration boundaries)
+The declarations live in the source, on the functions they describe, as three decorators. **There is no manifest.** The tool requires no project-level policy file to scan a codebase; configuration under `weft.toml [wardline]` is optional and, where it names trust-extending packs, is subordinate to what the caller grants at the command line. Because the declarations sit in the source, a wardline is not a document about a codebase — it is a property of one. It cannot drift from the code it describes without the drift being a code change, visible in the same diff and reviewed by the same reviewer.
 
-An application that has declared a wardline has made its institutional knowledge machine-readable. An application without one has that knowledge in prose, in people's heads, or nowhere.
+A wardline declares four things, all of them local to a function:
 
-The wardline is the *classification*, not the enforcement tool. A wardline declares that deserialised audit records carry Tier 1 authority and that accessing their fields with fallback defaults is prohibited. An enforcement tool reads that declaration and produces findings when the codebase violates it. The relationship is analogous to a security classification guide and the systems that enforce it: the guide defines the policy; the systems implement it. Replacing the enforcement tool does not change the classification. Changing the classification changes what every enforcement tool must check.
+- that a function's return is raw and untrusted, because the data crosses into the system there;
+- that a function validates, and what trust level its output has earned;
+- that a function is entitled to assume trusted data, and at what level;
+- by omission, that a function is in the developer-freedom zone and is not being asserted about at all.
 
-This distinction matters because institutional knowledge outlives any particular toolchain. A wardline expressed as a machine-readable manifest can be consumed by static analysers, type checkers, runtime enforcement layers, prompted review systems, or assessment tooling — serially or in parallel, in any language. The manifest is the stable artefact. The tools are disposable.
+It does not declare what the data *means*. The implemented model is narrow and correspondingly defensible: it decides whether a function's actual trust matches its declared trust, and whether untrusted data reaches a dangerous sink. It cannot decide whether a validator checks the *right* predicate.
 
-A wardline is therefore a normative document: it describes what the application *commits to*, not what it currently achieves. The gap between declaration and enforcement is measurable, auditable, and — critically — visible to assessors who have no access to the development team's tacit knowledge.
+The declarations themselves come from a tiny marker package (`weft-markers`) whose runtime behaviour is to do nothing. They survive uninstalling wardline. What they cost the application is three import lines; what they buy is that the institutional knowledge of where the trust boundaries are stops living in reviewers' heads.
 
 ## The problem it solves
 
-There is a structural gap between what automated tooling checks and what high-stakes code requires. The standard assurance stack — linters, type checkers, SAST, DAST, unit tests, conventional peer review — verifies *syntactic* and *conventional* correctness: Does the code parse? Does it conform to style rules? Are types consistent? Do tests pass? These checks are necessary but insufficient. They cannot determine whether a `.get()` default is institutionally appropriate, whether an exception handler preserves the audit trail, or whether data crossing a trust boundary has been validated.
+There is a structural gap between what automated tooling checks and what high-stakes code requires. The standard assurance stack — linters, type checkers, SAST, DAST, unit tests, conventional peer review — verifies *syntactic* and *conventional* correctness. It cannot determine whether a fallback default is institutionally appropriate, whether an exception handler preserves the audit trail, or whether data crossing a trust boundary has actually been validated on the way through.
 
-Agent-generated code exploits this gap systematically. The parent paper's case study presents empirical evidence of approximately one to two such violations detected per day on a single project under specific conditions (one developer, ~80,000-line codebase, purpose-built enforcement tooling), all caught before entering the codebase but none detectable by the standard assurance stack. The rate is a detection measure, not a defect accumulation rate. Agents produce code that follows established good practice — defensive programming, graceful error handling, sensible defaults — applied without contextual judgement. The patterns are individually correct and collectively dangerous. A `.get("security_classification", "OFFICIAL")` is syntactically identical to `.get("city", "Sydney")`. The first silently downgrades a document's security classification; the second provides a location default that may be harmless in many contexts. No tool in the standard assurance stack distinguishes them, because the distinction is *semantic*: it depends on what the field means in the application's institutional context, not on how the code is structured. Without a wardline, both patterns look identical to tooling. With a wardline, the distinction becomes enforceable — the framework makes it possible to declare which contexts prohibit fallback defaults and which permit them.
+Agent-generated code exploits this gap systematically. Agents produce code that follows established good practice — defensive programming, graceful error handling, sensible defaults — applied without contextual judgement. A `.get("security_classification", "OFFICIAL")` is syntactically identical to `.get("city", "Sydney")`. The first silently downgrades a document's classification; the second supplies a harmless location default. No tool in the standard assurance stack distinguishes them, because the distinction is *semantic*.
 
-The wardline makes the invisible visible. By declaring that a particular data path carries Tier 1 authority and that fallback defaults are prohibited in that context, the application converts tacit institutional knowledge into a machine-readable constraint. The enforcement tool no longer needs to infer context — the wardline supplies it.
+A wardline closes part of that gap by supplying the context the tool cannot infer. Once a function declares that it produces trusted data, the analyser has something to check against — whether the data actually reaching that function's return has been through a validating boundary, or whether it arrived raw from outside and was simply relabelled. The declaration is the missing premise.
 
-**What is and is not novel here.** The individual pattern rules (WL-001 through WL-006) are expressible as custom rules in existing SAST frameworks — Semgrep, CodeQL, Error Prone, or equivalent. Any team with SAST experience could write these rules. The contribution is not the detection primitives but the governance topology that surrounds them: the severity matrix that varies enforcement by declared semantic context, the exceptionability model that distinguishes project invariants from governable overrides, the taint lattice that tracks data authority across boundaries, the fingerprint baseline that makes governance erosion visible, and the institutional integration that connects enforcement to organisational policy. Well-understood SAST capability, freshly composed into a governance-aware framework — that is the claim.
+**Wardline is silent until you opt in.** Undecorated code resolves to the developer-freedom zone and the tier-modulated severity model suppresses findings on it. A scan over a large untouched codebase produces no policy findings at all. That buys adoption without a suppression bankruptcy on day one — and it costs one thing, severely: a project that declares nothing gets a green gate that is enforcing nothing. The compensating control is the inertness trip (`--fail-on-inert`), which turns "recognised no trust boundaries" into a gate failure that no suppression can clear.
 
-**Why now.** The emergence of a semantic boundary layer fits a longer progression in software abstraction: machine operations gave way to source code (compilers), source code gave way to frameworks and modules (reuse), frameworks gave way to infrastructure-as-code (deployment automation). Each step moved human effort into a layer where leverage is greater, enabled by the layer below becoming cheap enough to automate. The next layer is policy and boundary as code — machine-readable encodings of trust semantics, data classification, boundary contracts, failure posture, evidence requirements, and governance rules. This layer is emerging now because AI-assisted development is making implementation cheap enough that the bottleneck shifts from code production to semantic intent. Once implementation becomes a compilation target, the scarce thing is no longer code production. It is semantic intent, risk posture, and institutional constraint. A wardline is an attempt to encode that scarce layer.
+## Designed, then built
 
-## Core concepts
+This section is an **as-built specification**, and the difference between what was designed and what exists is part of its subject matter rather than an embarrassment to be tidied away.
 
-### Four-tier authority model
+A designed specification was written in March 2026, before a line of the tool existed. It reasoned outward from a four-tier authority model: tiers, then an eight-state enforcement machine, then eight pattern rules, then a governed exception register with reviewer identity and temporal separation, then conformance profiles for a multi-tool ecosystem that had no tools in it — plus a manifest format, a cross-language taint contract, a type-system enforcement layer, a runtime structural layer, and Python and Java bindings. It was, in the author's own later assessment, internally coherent and externally unbuilt.
 
-The authority tier model classifies data by provenance — what guarantees the system is entitled to assume about each value. Four tiers define a coding posture gradient:
+What was built began as a deliberate retreat. Version 0.1.0 shipped on 30 May 2026 and was small: the taint engine and trust lattice, decorator-based trust markers, four rules, JSONL and SARIF output, baselines and waivers with expiry, and an opt-in LLM triage judge. Fourteen further releases over nine weeks took it to v1.5.0 — four rules became twenty-eight, and the tool acquired an MCP server, an agent-install command, a Rust preview frontend, trust-grammar packs, attestation and rekeying, and a steady progression of enforcement-honesty controls. **The whole implementation is about ten weeks old**, and maturity claims should be read against that.
 
-| Tier | Classification | Coding posture |
-|------|---------------|----------------|
-| **Tier 1** | Authoritative internal data (audit records, decision products, fact records) | Offensive — assume invariants, halt on breach |
-| **Tier 2** | Semantically validated data (structure and values verified for every intended use within the declared bounded context) | Confident — trust field values for domain operations |
-| **Tier 3** | Shape-validated data (fields present, types correct, values unchecked) | Guarded — direct field access safe, validate before domain use |
-| **Tier 4** | Raw external data (unvalidated, potentially malformed or malicious) | Sceptical — treat as hostile, validate structure first |
+Some of the design survived intact: the eight-state lattice is the designed state machine, renamed and shipped. Some was implemented, measured, and *falsified* — the designed join algebra ran in production, produced false positives on correct code, and was replaced by a simpler operator, with a dated audit and an architecture decision record as the account. And some did not survive at all: the governed exception register, the type-system and runtime enforcement layers, the trusted restoration boundaries, the conformance profiles, and the flagship `.get()`-default rule the parent paper leads with. Those are not quietly dropped — they are inventoried, with their original intent recorded, in the specification's roadmap of the unbuilt.
 
-The tier a value enters at determines what validation must promote it. Shape validation (T4 to T3) requires knowledge of the data's *structure*. Semantic validation (T3 to T2) requires knowledge of the data's *usage across the declared bounded context*. Trusted construction (T2 to T1) requires knowledge of the data's *institutional meaning*. Each step is a wider knowledge claim than the last.
+The pattern is worth one line: **the designed specification was a good threat model and a poor implementation plan.** Its threat identification survived almost entirely; its mechanism design survived almost nowhere. In every case where a threat was answered, the built answer was a *mechanical* control where the specification had proposed a *procedural* one.
 
-The enforcement specification (§5) defines how tier classifications are tracked and validated: trust classification and validation status, transition semantics at boundary contracts (named, stable semantic identifiers declaring what data crosses a boundary and at what tier), trusted restoration boundaries for serialised artefacts, cross-language taint propagation, and third-party in-process dependency taint. A **boundary contract** survives refactoring — the contract is stable; the function-level binding updates. A **normalisation boundary** collapses mixed-taint inputs into a new Tier 2 artefact — semantically a new construction, not a passthrough.
-
-### Pattern rules
-
-Eight rules detect specific failure modes. Six are **pattern rules** (WL-001 through WL-006) that detect syntactic proxies for semantic violations — e.g., member access with fallback defaults, existence-checking as a structural gate, broad exception catching, silent exception handling, audit writes inside broad handlers, and runtime type-checking of internal data. Two are **structural verification rules** (WL-007 and WL-008) that enforce invariants on declared boundary functions — e.g., that every validation boundary has a rejection path and that semantic validation is preceded by shape validation.
-
-Each rule's severity varies by context. A `.get()` with a default is an unconditional error on audit-trail data (fabricating evidence of a field that may be absent is an integrity failure) but a governable error on external data (where the default may be institutionally approved). The severity matrix encodes these context-dependent judgements across all eight taint states.
-
-### Enforcement layers
-
-Three orthogonal enforcement surfaces catch different classes of violation:
-
-- **Static analysis** (CI/commit time) — detects pattern rule violations and traces taint flow between declared boundaries
-- **Type system** (development/compile time) — makes tier mismatches visible in function signatures so that passing raw data where validated data is expected produces a type error
-- **Runtime structural** (definition/access time) — makes fabricated defaults on authoritative fields structurally impossible and prevents bypass through inheritance
-
-Each layer's blind spots are another layer's coverage area. A single tool implementing one layer still gains value; the combination closes residual risk surfaces that any single layer leaves open.
-
-### Governance model
-
-A wardline without governance is an honour system. The governance model defines how exceptions to wardline declarations are managed: who may authorise overrides, what evidence trail they leave, and how governance erosion is made visible. Key mechanisms include protected-file review for manifest changes, temporal separation between policy changes and code changes, an annotation fingerprint baseline that detects silent erosion, and a three-state control law model (normal, alternate, direct) for enforcement availability.
-
-## Non-goals
-
-The following are explicitly outside the scope of this framework:
-
-1. **Wardline does not prove semantic correctness in full.** It detects syntactic proxies for semantic violations in declared contexts (structural signals that correlate with semantic errors, not the semantic errors themselves).
-2. **Wardline does not replace human judgement.** It structures what judgement must address. The governance model defines the decision points; the framework makes them visible but does not resolve them.
-3. **Wardline does not independently establish provenance truth across storage boundaries.** The framework can enforce structural checks at restoration points, but the ultimate provenance claim rests on institutional trust and governance assurance, not technical proof.
-4. **Wardline does not eliminate the need for ordinary assurance controls.** It supplements them. The standard assurance stack (linters, type checkers, SAST, DAST, unit tests, peer review) remains necessary; the wardline adds the semantic-boundary layer that the standard stack cannot address.
-5. **Wardline does not guarantee complete coverage of all risky code paths.** Coverage depends on annotation investment, and the coverage boundary is made visible through the annotation fingerprint baseline. Unannotated code is outside the enforcement perimeter by definition.
-6. **Wardline does not replace software design.** It constrains and structures the design search space. A wardline manifest captures data-flow boundaries, validation requirements, restoration semantics, failure posture, exception models, and audit obligations. It does not capture performance trade-offs, library choices, concurrency models, deployment constraints, or operational assumptions. These remain engineering decisions that the manifest neither encodes nor eliminates.
+**No Java binding.** There is no Java implementation, there never was, and none is planned. Rust is a *scanned target language* with a two-rule preview frontend, not a binding.
 
 ## Document structure
 
-The wardline companion specification comprises two parts:
-
-- **[Part I: Framework Specification](specification.md)** — the normative, language-agnostic specification covering the authority tier model, enforcement specification, annotation vocabulary, pattern rules, enforcement layers, governance model, verification properties, conformance criteria, and manifest format.
-- **[Part II-A: Python Binding](python-binding.md)** — Python-specific implementation reference covering the interface contract, annotation vocabulary, type system and runtime enforcement, regime composition, residual risks, and adoption strategy.
-- **[Part II-B: Java Binding](java-binding.md)** — Java-specific implementation reference covering annotations, the Checker Framework integration, Error Prone rules, regime composition, and adoption strategy.
+- **[Specification (as built)](specification.md)** — Part I: the trust lattice and its operators, declarations and caller-granted trust, the twenty-eight-rule catalogue and tier-modulated severity, gates, suppression channels and the judge, verification properties, residual risks, the roadmap of the unbuilt, and the language frontend registry.
+- **[Python reference](python-binding.md)** — Part II: installation, the three decorators, `weft.toml` configuration, the command surface, the three suppression file formats, output formats, a worked example, and CI integration.
+- **[PDF](../pdf/wardline-companion-community.pdf)** — the complete companion document, both parts, in one file.
 
 ## Who should read what
 
 | Audience | Recommended path |
 |----------|-----------------|
-| **Tool implementers** (building a scanner, linter plugin, or type checker plugin) | [Specification](specification.md) §1–3 (concepts), §4 (tier model), §5 (enforcement specification), §6–7 (annotations, pattern rules), §8 (enforcement layers), §14 (conformance). Then Part II interface contract ([Python](python-binding.md) §A.3 or [Java](java-binding.md) §B.3), then annotation vocabulary (§A.4/B.4). |
-| **Security assessors** (IRAP or equivalent) | [Specification](specification.md) §1–3 (scope), §4 (tier model), §10 (verification properties and golden corpus), §14 (conformance criteria and profiles). Then Part II interface contract ([Python](python-binding.md) §A.3 or [Java](java-binding.md) §B.3), regime composition (§A.6/B.6), residual risks (§A.7/B.7). |
-| **Adopters** (deploying wardline on a project) | [Specification](specification.md) §1–4 (what it is, why, tier model), §9 (governance model). Then Part II adoption strategy ([Python](python-binding.md) §A.9 or [Java](java-binding.md) §B.9), annotation vocabulary (§A.4/B.4). |
-| **Governance leads** (managing wardline policy and exceptions) | [Specification](specification.md) §9 (governance model), §13 (manifest and exception register), §14.1 (conformance model). Then Part II residual risks ([Python](python-binding.md) §A.7 or [Java](java-binding.md) §B.7), error handling and control law (§A.10/B.10). |
-| **Citizen programmers** (reviewing or writing code in a wardline-annotated codebase) | The [Practical Guide for Code Authors](../respond/practical-guide.md) — a separate companion that translates the annotation vocabulary and pattern rules into five review questions, worked code examples, and hot-path identification for non-specialists. This guide is not part of the formal specification. |
-| **Upstream library maintainers** (maintaining a library consumed by wardline-governed applications) | [Specification](specification.md) §5.5 (how your library's output is treated — no changes to your code required), §6 Groups 9–15 (supplementary contract annotations suitable for voluntary upstream adoption), §12 residual risk 14 (upstream advisory mechanism — how to publish a `wardline-upstream.yaml`), §13.1.2 (the `dependency_taint` declaration format agencies will use for your library). |
+| **Adopters** (putting wardline on a project) | [§1](specification.md#1-what-a-wardline-is) (what it is), [§2](specification.md#2-the-problem-a-wardline-solves) (the problem), [§3](specification.md#3-non-goals) (non-goals — read this before adopting), [§5](specification.md#5-declarations-and-trust-grants) (declarations and trust grants), [§7](specification.md#7-gates-suppression-and-the-judge) (gates and suppression), then the [Python reference](python-binding.md) for install, decorators, configuration and CLI. |
+| **Reviewers and assessors** (evaluating a wardline deployment) | [§3](specification.md#3-non-goals) (non-goals), [§4](specification.md#4-the-trust-lattice) (the trust lattice), [§6](specification.md#6-rules-and-severity) (rules and severity), [§7](specification.md#7-gates-suppression-and-the-judge) (gate, suppression channels, the "no governance" design position), [§8](specification.md#8-verification-properties) (verification properties), [§9](specification.md#9-residual-risks) (residual risks). |
+| **Tool and frontend implementers** | [§4](specification.md#4-the-trust-lattice) (lattice, operators, reachability invariant), [§6](specification.md#6-rules-and-severity) (rule catalogue and severity model), [§11](specification.md#11-language-frontends) (frontend registry and how a new language plugs in). |
+| **Readers of the parent paper** (arriving with four-tier authority vocabulary) | [§4.5](specification.md#45-interpretation-for-readers-of-the-parent-paper) maps the four tiers onto the implemented lattice states. Read that first, then [§6](specification.md#6-rules-and-severity). |
+| **Anyone deciding whether to trust the document** | [§8](specification.md#8-verification-properties) (how the implementation's claims are verified: labelled corpus, false-positive rate gate, sentinels, byte-identity goldens, self-hosting CI) and [§10](specification.md#10-roadmap-the-unbuilt) (what was designed and never built). |
+| **Citizen programmers** (reviewing or writing code without developer tooling) | The [Practical Guide for Code Authors](../respond/practical-guide.md) — a separate companion that translates the ideas into five review questions, worked code examples, and hot-path identification for non-specialists. It is not part of the specification. |
 
 ---
 
