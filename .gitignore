@@ -42,6 +42,7 @@ reference-site/resources/
 reference-site/data/
 
 # Filigree issue tracker
-.weft/
-.filigree/
+.weft
+.filigree
 
+.weft/filigree/filigree.db
