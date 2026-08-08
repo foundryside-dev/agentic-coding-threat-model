@@ -90,7 +90,7 @@ graph LR
 
 **Diagram description (accessibility):** A stock-flow diagram showing generation velocity as the inflow into a stock of code awaiting review, with review throughput as the outflow. When the inflow exceeds the outflow, the stock grows — the review backlog accumulates.
 
-When inflow exceeds outflow, the review backlog grows. Three interventions differ dramatically in leverage:
+When inflow exceeds outflow, the review backlog grows. Three interventions differ markedly in leverage:
 
 | Intervention | Stock-flow target | Leverage | Paper's assessment |
 |-------------|-------------------|----------|--------------------|

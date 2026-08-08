@@ -405,7 +405,7 @@ This exhibits the "closed verification loop" described in §9.9 of the parent pa
 
 Every `record_audit_event()` call sits outside any exception handler that would catch a database write failure. If the SQLite write fails (disk full, permission error, locked database), the exception propagates as a generic `Exception` — the caller sees a crash but cannot distinguish "audit write failed" from "anything else went wrong."
 
-The insidious case is in the verify flow. At `main.py:191-192`:
+The harder case to catch is in the verify flow. At `main.py:191-192`:
 
 ```python
 update_application_status(application_id, status="otp_verified", verified=True)  # commit A
@@ -564,7 +564,7 @@ It then produced code that violates that policy in multiple places — not becau
 
 #### D.5.3 The defaults are the threat
 
-The three Critical findings (F1, F2, F3) share a common mechanism: `os.getenv("KEY", dangerous_default)`. Each default is individually reasonable for development convenience. Their compound effect in a deployment that fails to set all three environment variables is total security bypass.
+The three Critical findings (F1, F2, F3) share a common mechanism: `os.getenv("KEY", dangerous_default)`. Each default is individually reasonable for development convenience. Their compound effect in a deployment that fails to set all three environment variables is a complete bypass of the system's security controls.
 
 This is the paper's §2.3 argument at system scale. The `.get()` with a default is not merely a local code-level pattern — it is a *deployment-level* failure mode. The application's security posture is determined not by the controls it implements but by whether environment variables are correctly set in every deployment target. The controls are contingent on configuration that the application does not validate.
 
@@ -598,7 +598,7 @@ This is the §4.2 habituation effect operating within a single review: the revie
 
 #### D.5.7 The two-pass review itself demonstrates the review-capacity argument
 
-That the primary evaluation — a targeted ACF taxonomy audit — missed 7 findings that a second reviewer caught is itself evidence for the paper's argument. F14 (audit event failure as ACF-R1 form b) is a particularly sharp miss: the primary evaluator identified ACF-R1 form (a) in two places but did not check whether the *absence* of exception handling around audit writes constituted the complementary form (b). F16 (enablement response not checked) and F17 (data layer forcing non-atomicity) were structurally present in the code the primary evaluator read. The evaluator identified the *consequences* (F5's non-atomic flow) without identifying the *structural cause* (the `get_conn()` auto-commit design that makes atomicity impossible without refactoring).
+That the primary evaluation — a targeted ACF taxonomy audit — missed 7 findings that a second reviewer caught is itself evidence for the paper's argument. F14 (audit event failure as ACF-R1 form b) is a notable miss: the primary evaluator identified ACF-R1 form (a) in two places but did not check whether the *absence* of exception handling around audit writes constituted the complementary form (b). F16 (enablement response not checked) and F17 (data layer forcing non-atomicity) were structurally present in the code the primary evaluator read. The evaluator identified the *consequences* (F5's non-atomic flow) without identifying the *structural cause* (the `get_conn()` auto-commit design that makes atomicity impossible without refactoring).
 
 This is the "cognitive range" limitation from §7.2 of the parent paper: the primary evaluator was looking for ACF patterns and found them — but did not simultaneously maintain the data-layer architecture perspective that would have surfaced F17, the state machine perspective that would have surfaced F18, or the credential-handling perspective that would have surfaced F19. Each analytical frame catches different classes of issue; no single pass catches them all.
 
@@ -652,9 +652,9 @@ This exercise has several limitations that should inform how the findings are in
 
 ### D.8 Conclusion
 
-This exercise confirms the parent paper's central observation through a controlled greenfield generation: an AI coding agent, given an explicit high-stakes framing and demonstrating genuine security knowledge, produces code that follows security conventions while containing semantic failures that are not targeted by the standard assurance stack. The agent implemented CSRF protection, constant-time comparison, OTP hashing, rate limiting, and audit logging — and shipped a default secret key that renders all of them meaningless. The ceremonies are present. The security is not.
+This exercise supports the parent paper's central observation through a controlled greenfield generation: an AI coding agent, given an explicit high-stakes framing and demonstrating genuine security knowledge, produces code that follows security conventions while containing semantic failures that are not targeted by the standard assurance stack. The agent implemented CSRF protection, constant-time comparison, OTP hashing, rate limiting, and audit logging — and shipped a default secret key that renders all of them meaningless. The ceremonies are present. The security is not.
 
-The findings validate the ACF taxonomy's coverage: across two evaluation passes, 20 findings were identified in approximately 800 lines of code, mapping to entries across 5 of the 6 STRIDE categories. The 3 Critical findings all map to ACF-S1 — the most common failure mode in the taxonomy. The compounding effect (§3.3) is demonstrated concretely: three individually reasonable defaults combine into total security bypass. The detection gap (§6.5) is confirmed: 16 of 20 findings have no detection by any standard tool — including all 3 Critical-rated entries.
+The findings validate the ACF taxonomy's coverage: across two evaluation passes, 20 findings were identified in approximately 800 lines of code, mapping to entries across 5 of the 6 STRIDE categories. The 3 Critical findings all map to ACF-S1 — the most common failure mode in the taxonomy. The compounding effect (§3.3) is demonstrated concretely: three individually reasonable defaults combine to bypass the system's security controls. The detection gap (§6.5) is confirmed: 16 of 20 findings have no detection by any standard tool — including all 3 Critical-rated entries.
 
 The two-pass evaluation structure itself produced a finding. The primary evaluator — an AI agent specifically prompted to apply the ACF taxonomy — missed 7 findings that a second reviewer caught, including ACF-R1 form (b) (the complementary form of a failure mode the primary evaluator had already identified in form (a)), a bearer credential written to the audit trail in plaintext, and the structural cause of a non-atomicity problem whose consequences the primary evaluator had correctly described.
 
@@ -664,7 +664,7 @@ The most important observation is not the specific findings but their *invisibil
 
 The exercise also validates the paper's proposed response. The §7.1 review questions — particularly Q1 ("Does missing data crash or default?") and Q5 ("If this code is wrong, how would I find out?") — would surface the Critical findings. The §7.2 Stage 1 detection rules — particularly rules 1 (broad `except` on audit paths), 2 (unvalidated external data entering internal stores), and 3 (default values on designated high-stakes fields) — would flag the majority of High findings. The validation boundary model (§5.3) would catch F4 and F16 (unvalidated external responses). None of these checks exist in the standard assurance stack. All of them are buildable with current tooling.
 
-The agent built a system that looks secure. The paper's framework reveals that it is not. That gap — between appearance and reality, not targeted by existing tools, produced by an agent that explicitly understood the security context — is the gap this paper exists to close.
+The agent built a system that looks secure. The paper's framework reveals that it is not. That gap — between appearance and reality, not targeted by existing tools, produced by an agent that explicitly understood the security context — is the gap this paper addresses.
 
 ---
 

@@ -60,7 +60,7 @@ class UniversalImpersonator:
     def __getattr__(self, name):
         return True  # "Yes, I have that. And everything else."
 
-# This object passes EVERY hasattr check in the entire codebase.
+# This object passes every hasattr check in the entire codebase.
 # An isinstance check is immune to this.
 ```
 

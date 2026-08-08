@@ -22,7 +22,7 @@ This asymmetry matters most for changes known to be agent-generated via provenan
 
 When agents generate code that consistently passes tests and follows conventions, reviewers develop trust in the agent's output. This trust is not earned — it is a cognitive shortcut driven by volume pressure. In human factors engineering, this phenomenon is known as **automation bias**: the tendency to over-rely on automated systems and under-scrutinise their output.[^parasuraman-2010]
 
-The effect is measurable. Perry et al. found that developers with AI coding access produced less secure code while simultaneously *rating it more secure* — a textbook automation bias outcome.[^perry-method] The METR randomised controlled trial found a parallel perception-reality gap: experienced developers predicted AI would speed them up by 24%, believed after using it that they were 20% faster, but were measured as 19% slower.[^metr-method]
+The effect is measurable. Perry et al. found that developers with AI coding access produced less secure code while simultaneously *rating it more secure* — an outcome consistent with automation bias.[^perry-method] The METR randomised controlled trial found a parallel perception-reality gap: experienced developers predicted AI would speed them up by 24%, believed after using it that they were 20% faster, but were measured as 19% slower.[^metr-method]
 
 The reviewer's mental model shifts from "verify this code is correct" to "check this code isn't obviously wrong." The difference materially affects assurance: the first is an active search for defects; the second is a passive scan that catches only gross errors.
 
@@ -32,7 +32,7 @@ Case study observation (§8) confirms the mechanism in compliance-constrained en
 
 This is the "Shifting the Burden" systems archetype[^systems-archetype]: the agent's consistent surface-quality output becomes the symptomatic fix that weakens the fundamental solution (thorough human review). The more the agent produces acceptable-looking code, the less carefully humans review it, and the more dependent the process becomes on the agent being correct — which is exactly the assumption the review process exists to check.
 
-The volume problem is real, but the sharper thesis is this: **the decisive failures are often not visible to unaided review at all, because the relevant property is semantic and institutional rather than syntactic.**
+The volume problem is real, but the sharper thesis is this: the decisive failures are often not visible to unaided review at all, because the relevant property is semantic and institutional rather than syntactic.
 
 A reviewer who examines the `.get()` example from §2.3 with unlimited time and full attention may still approve it — because recognising the wrongness requires knowing that this system now handles PROTECTED material and that the upstream schema permits missing classification values, neither of which is visible in the diff. The response is not "review harder" but "check differently": express the system's security-relevant distinctions in a form that tooling can enforce, so that the distinction between "legitimate fallback" and "fabricated classification" is resolved before a human ever sees the diff. §7 develops this response across process controls (§7.1), technical controls (§7.2), and policy controls (§7.3).
 
@@ -53,7 +53,7 @@ This means the traditional "warn first, enforce later" adoption strategy for sec
 
 **Tool-on-tool conflict.** A further complication arises when semantic enforcement tools conflict with standard linters. Appendix E documents an incident in which a tier-model enforcer flagged `.get()` on a typed internal data structure, but ruff's SIM401 rule demanded `.get()` back — contradictory instructions from two tools. The agent resolved the conflict by broadening the exception boundary (adding a permanent allowlist entry), which preserved the bug.
 
-This is not an edge case — any organisation deploying semantic enforcement alongside standard linters will face tool-on-tool conflicts, and agents will resolve them by the path of least resistance: the configuration that satisfies both tools, which is often the configuration that silences the semantic finding.
+This is unlikely to be an isolated case — any organisation deploying semantic enforcement alongside standard linters can expect tool-on-tool conflicts, and agents may resolve them by the path of least resistance: the configuration that satisfies both tools, which is often the configuration that silences the semantic finding.
 
 Organisations deploying semantic enforcement should define a tool-precedence hierarchy that explicitly prioritises semantic enforcement over conventional linting where they conflict, and should require human review of agent-authored allowlist entries.[^tool-precedence]
 

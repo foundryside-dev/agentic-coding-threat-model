@@ -5,13 +5,13 @@
 
 The threat model in this paper uses Python for its primary examples. The failure modes generalise (Appendix A notes language-general applicability for most entries), but SQL warrants explicit treatment for three reasons:
 
-**SQL is the language most affected by the citizen programmer problem.** Python code generation by non-developers is a recent phenomenon enabled by agentic tools (§1.2.7). SQL generation by non-developers is decades old — business analysts, data engineers, operations staff, and reporting teams have always written SQL. Agentic tools do not introduce SQL to this population; they dramatically accelerate and extend what this population can produce. A business analyst who previously wrote `SELECT` queries can now produce stored procedures, triggers, scheduled ETL pipelines, and schema migrations. The capability jump is qualitatively larger than the Python case, because the baseline capability was already there.
+**SQL is the language most affected by the citizen programmer problem.** Python code generation by non-developers is a recent phenomenon enabled by agentic tools (§1.2.7). SQL generation by non-developers is decades old — business analysts, data engineers, operations staff, and reporting teams have always written SQL. Agentic tools do not introduce SQL to this population; they substantially accelerate and extend what this population can produce. A business analyst who previously wrote `SELECT` queries can now produce stored procedures, triggers, scheduled ETL pipelines, and schema migrations. The capability jump is qualitatively larger than the Python case, because the baseline capability was already there.
 
 **SQL operates directly on the authoritative data store.** Python code that mishandles data can be caught before it reaches the database — an application-layer validation boundary sits between the application and the authoritative store. SQL bypasses that boundary by definition. A malformed Python function corrupts a variable; a malformed SQL statement corrupts the table.
 
 The blast radius is immediate, and in many cases, irreversible without backup restoration.
 
-**SQL's failure modes are silent in exactly the way the threat model predicts.** A Python crash produces a traceback. A SQL query that returns wrong results produces... results. There is no crash, no error, no log entry. The query ran. It returned rows. The rows were wrong. In reporting and decision-support contexts — which is where non-developer SQL authors overwhelmingly operate — the wrong results are consumed as fact.
+**SQL's failure modes are silent in exactly the way the threat model predicts.** A Python crash produces a traceback. A SQL query that returns wrong results produces results. There is no crash, no error, no log entry. The query ran. It returned rows. The rows were wrong. In reporting and decision-support contexts — which is where non-developer SQL authors overwhelmingly operate — the wrong results are consumed as fact.
 
 ### C.2 The ACF Taxonomy Applied to SQL
 
@@ -51,7 +51,7 @@ In reporting contexts, the correct approach is often to *exclude* rows with miss
 When agents write SQL that integrates data from external sources, they treat all tables as equally trustworthy — because SQL provides no mechanism to distinguish authority-tier distinctions at the language level.
 
 ```sql
--- Agent-generated — clean, readable, catastrophically wrong
+-- Agent-generated — clean, readable, wrong for this context
 INSERT INTO internal_records (name, status, clearance_level)
 SELECT name, status, clearance_level
 FROM partner_staging_table;
@@ -90,14 +90,14 @@ WHERE status NOT IN ('active', 'inactive', 'pending')
    OR LENGTH(name) > 200;
 ```
 
-The correct version is substantially more verbose. This is precisely the pattern agents omit, because the concise version is what appears in training data.
+The correct version is substantially more verbose. This is the pattern agents omit, because the concise version is what appears in training data.
 
 #### ACF-R1 in SQL: Audit Trail Destruction via Silent Overwrites
 
 In Python, audit trail destruction happens through error handlers that swallow exceptions. In SQL, it happens through `UPDATE` and `DELETE` statements that modify or remove data without preserving the prior state.
 
 ```sql
--- Agent-generated — clean, correct, and an audit trail disaster
+-- Agent-generated — clean, correct, and an audit trail failure
 UPDATE case_decisions
 SET decision = 'approved', decided_by = 'J.Smith', decided_at = CURRENT_TIMESTAMP
 WHERE case_id = 12345;
@@ -188,7 +188,7 @@ Candidate controls:
 
 **Materialised view and scheduled query inventory.** Organisations should know what SQL runs on a schedule, against which databases, with which credentials, and who authored it. This is the SQL equivalent of the code provenance tracking recommended in §7.1 — and in most organisations, it does not exist.
 
-The scheduled query that runs every night and has run without incident for three years is the SQL equivalent of the legacy system whose implicit security properties are paved over by modernisation (§1.2.6): nobody remembers why it works, and nobody will notice when it starts producing wrong results.
+The scheduled query that runs every night and has run without incident for three years is the SQL equivalent of the legacy system whose implicit security properties are removed by modernisation (§1.2.6): nobody remembers why it works, and nobody will notice when it starts producing wrong results.
 
 [^coalesce-variants]: `COALESCE()` is standard SQL and behaves identically across PostgreSQL, SQL Server, MySQL, Oracle, and SQLite. `ISNULL()` is SQL Server-specific; `IFNULL()` is MySQL/SQLite-specific. SQLite is worth noting because agents frequently generate it for prototyping and local development, and those queries sometimes migrate into production contexts — particularly in data workflows where a "temporary" SQLite database becomes a permanent operational store.
 

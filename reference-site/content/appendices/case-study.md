@@ -6,7 +6,7 @@ acf_tags: ["ACF-S1", "ACF-S2", "ACF-R1", "ACF-R2", "ACF-T1", "ACF-T2", "ACF-E1",
 
 This page consolidates the case study evidence: a controlled simulation producing a complete application with 20 semantic defects, a longitudinal observation of agentic development under compliance constraints, and the full annotated transcript of three concrete incidents spanning code-level, design-level, and specification-level failure surfaces.
 
-*This section presents two evidence bases for the paper's central claim: that AI-generated semantic defects look like correct code and pass every check in the standard assurance stack. The first is a simulation — a complete application prototyped by an agent, where you can read every line and see what the agent produced. The second is six months of longitudinal observation on a live compliance-constrained project, where you can see what detection looks like when it exists. Together, they demonstrate that the problem is not the defect rate. The problem is that you will not see the defects at all — not because you are a poor reviewer, but because they look exactly like the code you have been trained to approve.*
+*This section presents two evidence bases for the paper's central claim: that AI-generated semantic defects look like correct code and pass every check in the standard assurance stack. The first is a simulation — a complete application prototyped by an agent, where you can read every line and see what the agent produced. The second is six months of longitudinal observation on a live compliance-constrained project, where you can see what detection looks like when it exists. Together, they suggest that the problem is not the defect rate. The problem is that the defects are unlikely to be seen at all — not because the reviewer is negligent, but because they look like the code reviewers have been trained to approve.*
 
 **De-identification.** Both case studies are drawn from real projects. Specific implementation details have been generalised. The simulation uses a purpose-built demonstration application; the longitudinal observation presents a composite, de-identified account from a compliance-constrained environment. The system and tooling described in the longitudinal study are de-identified here to keep the focus on the generalisable threat model.
 
@@ -116,7 +116,7 @@ The application contains **20 semantic defects** mapped to ACF taxonomy entries 
 
 ### The three-default compound
 
-The centrepiece finding is three `os.getenv()` calls with development-convenient defaults that compound into total security bypass:
+The central finding is three `os.getenv()` calls with development-convenient defaults that together bypass the system's security controls:
 
 ```python
 # config.py — three lines that look like standard development practice
@@ -396,7 +396,7 @@ This exhibits the "closed verification loop": the same agent wrote the code, the
 
 Every `record_audit_event()` call sits outside any exception handler that would catch a database write failure. If the SQLite write fails (disk full, permission error, locked database), the exception propagates as a generic `Exception` — the caller sees a crash but cannot distinguish "audit write failed" from "anything else went wrong."
 
-The insidious case is in the verify flow. At `main.py:191-192`:
+The harder case to catch is in the verify flow. At `main.py:191-192`:
 
 ```python
 update_application_status(application_id, status="otp_verified", verified=True)  # commit A
@@ -541,7 +541,7 @@ It then produced code that violates that policy in multiple places — not becau
 
 #### The defaults are the threat
 
-The three Critical findings (F1, F2, F3) share a common mechanism: `os.getenv("KEY", dangerous_default)`. Each default is individually reasonable for development convenience. Their compound effect in a deployment that fails to set all three environment variables is total security bypass.
+The three Critical findings (F1, F2, F3) share a common mechanism: `os.getenv("KEY", dangerous_default)`. Each default is individually reasonable for development convenience. Their compound effect in a deployment that fails to set all three environment variables is a complete bypass of the system's security controls.
 
 The `.get()` with a default is not merely a local code-level pattern — it is a *deployment-level* failure mode. The application's security posture is determined not by the controls it implements but by whether environment variables are correctly set in every deployment target. The controls are contingent on configuration that the application does not validate.
 
@@ -575,7 +575,7 @@ This is the habituation effect operating within a single review: the reviewer's 
 
 #### The two-pass review demonstrates the review-capacity argument
 
-That the primary evaluation — a targeted ACF taxonomy audit — missed 7 findings that a second reviewer caught is itself evidence for the paper's argument. F14 (audit event failure as ACF-R1 form b) is a particularly sharp miss: the primary evaluator identified ACF-R1 form (a) in two places but did not check whether the *absence* of exception handling around audit writes constituted the complementary form (b). F16 (enablement response not checked) and F17 (data layer forcing non-atomicity) were structurally present in the code the primary evaluator read. The evaluator identified the *consequences* (F5's non-atomic flow) without identifying the *structural cause* (the `get_conn()` auto-commit design that makes atomicity impossible without refactoring).
+That the primary evaluation — a targeted ACF taxonomy audit — missed 7 findings that a second reviewer caught is itself evidence for the paper's argument. F14 (audit event failure as ACF-R1 form b) is a notable miss: the primary evaluator identified ACF-R1 form (a) in two places but did not check whether the *absence* of exception handling around audit writes constituted the complementary form (b). F16 (enablement response not checked) and F17 (data layer forcing non-atomicity) were structurally present in the code the primary evaluator read. The evaluator identified the *consequences* (F5's non-atomic flow) without identifying the *structural cause* (the `get_conn()` auto-commit design that makes atomicity impossible without refactoring).
 
 This is the "cognitive range" limitation: the primary evaluator was looking for ACF patterns and found them — but did not simultaneously maintain the data-layer architecture perspective that would have surfaced F17, the state machine perspective that would have surfaced F18, or the credential-handling perspective that would have surfaced F19. Each analytical frame catches different classes of issue; no single pass catches them all.
 
@@ -625,7 +625,7 @@ This exercise has several limitations that should inform how the findings are in
 
 This exercise confirms the paper's central observation through a controlled greenfield generation: an AI coding agent, given an explicit high-stakes framing and demonstrating genuine security knowledge, produces code that follows security conventions while containing semantic failures that are not targeted by the standard assurance stack. The agent implemented CSRF protection, constant-time comparison, OTP hashing, rate limiting, and audit logging — and shipped a default secret key that renders all of them meaningless. The ceremonies are present. The security is not.
 
-The findings validate the ACF taxonomy's coverage: across two evaluation passes, 20 findings were identified in approximately 800 lines of code, mapping to entries across 5 of the 6 STRIDE categories. The 3 Critical findings all map to [ACF-S1]({{< relref "/acf/s1-competence-spoofing" >}}) — the most common failure mode in the taxonomy. The compounding effect is demonstrated concretely: three individually reasonable defaults combine into total security bypass. The detection gap is confirmed: 16 of 20 findings have no detection by any standard tool — including all 3 Critical-rated entries.
+The findings validate the ACF taxonomy's coverage: across two evaluation passes, 20 findings were identified in approximately 800 lines of code, mapping to entries across 5 of the 6 STRIDE categories. The 3 Critical findings all map to [ACF-S1]({{< relref "/acf/s1-competence-spoofing" >}}) — the most common failure mode in the taxonomy. The compounding effect is demonstrated concretely: three individually reasonable defaults combine to bypass the system's security controls. The detection gap is confirmed: 16 of 20 findings have no detection by any standard tool — including all 3 Critical-rated entries.
 
 The two-pass evaluation structure itself produced a finding. The primary evaluator — an AI agent specifically prompted to apply the ACF taxonomy — missed 7 findings that a second reviewer caught, including ACF-R1 form (b) (the complementary form of a failure mode the primary evaluator had already identified in form (a)), a bearer credential written to the audit trail in plaintext, and the structural cause of a non-atomicity problem whose consequences the primary evaluator had correctly described.
 
@@ -635,7 +635,7 @@ The most important observation is not the specific findings but their *invisibil
 
 The exercise also validates the paper's proposed response. The review questions — particularly Q1 ("Does missing data crash or default?") and Q5 ("If this code is wrong, how would I find out?") — would surface the Critical findings. The Stage 1 detection rules — particularly rules 1 (broad `except` on audit paths), 2 (unvalidated external data entering internal stores), and 3 (default values on designated high-stakes fields) — would flag the majority of High findings. The validation boundary model would catch F4 and F16 (unvalidated external responses). None of these checks exist in the standard assurance stack. All of them are buildable with current tooling.
 
-The agent built a system that looks secure. The paper's framework reveals that it is not. That gap — between appearance and reality, not targeted by existing tools, produced by an agent that explicitly understood the security context — is the gap this paper exists to close.
+The agent built a system that looks secure. The paper's framework reveals that it is not. That gap — between appearance and reality, not targeted by existing tools, produced by an agent that explicitly understood the security context — is the gap this paper addresses.
 
 *This appendix was prepared by applying the ACF taxonomy and authority-tier model to a codebase generated in a single session by an AI coding agent. The primary evaluation was conducted by a separate AI coding agent; the second-pass review was conducted by a prompted editorial reviewer. The operator directed the generation, evaluation, and editorial review. The generating and evaluating agents were from different vendors. The findings should be read as a single-case validation exercise, not as a population-level study — see methodological limitations above.*
 
@@ -655,7 +655,7 @@ The rules are enforced in CI by a project-specific AST pattern-matching tool wit
 
 ### What detection observes
 
-In steady-state development, a combination of rigorous review and the enforcement tool regularly catches and blocks semantic boundary violations that would otherwise pass conventional tooling — **none entered the codebase**. Each flags a pattern from the [ACF taxonomy]({{< relref "/acf" >}}) (primarily [ACF-S1]({{< relref "/acf/s1-competence-spoofing" >}}) and [ACF-R1]({{< relref "/acf/r1-audit-trail-destruction" >}}), with limited intra-function proxy detection of [ACF-T1]({{< relref "/acf/t1-authority-tier-conflation" >}})) that the generating agent introduced. Under specific conditions, the detection rate is approximately one to two such patterns per day across approximately 25–30 commits per day (the majority agent-generated).
+In steady-state development, a combination of rigorous review and the enforcement tool regularly catches and blocks semantic boundary violations that would otherwise pass conventional tooling — none entered the codebase. Each flags a pattern from the [ACF taxonomy]({{< relref "/acf" >}}) (primarily [ACF-S1]({{< relref "/acf/s1-competence-spoofing" >}}) and [ACF-R1]({{< relref "/acf/r1-audit-trail-destruction" >}}), with limited intra-function proxy detection of [ACF-T1]({{< relref "/acf/t1-authority-tier-conflation" >}})) that the generating agent introduced. Under specific conditions, the detection rate is approximately one to two such patterns per day across approximately 25–30 commits per day (the majority agent-generated).
 
 The figure is an estimate from a single project. Actual rates will vary with project complexity, codebase size, language, domain, development arrangements, the balance of planned versus ad hoc work, and tooling. This rate occurs despite the agent being explicitly prompted against these patterns in its project-level instructions — the codebase documentation prohibits `.get()` on typed objects, bare `except`, and silent error swallowing; the agent's system prompt reinforces these rules. The agent still produces the violations because the patterns are deeply embedded in training data and override project-level instructions under context pressure. Without specific prompting, the rate is substantially higher.
 
@@ -699,7 +699,7 @@ The question for organisations without enforcement is not whether these patterns
 
 ### The redirection insight
 
-The team's experience reveals that automated semantic enforcement does not *add* tedium — it **redirects existing tedium** toward higher-value activities.
+The team's experience suggests that automated semantic enforcement does not *add* tedium — it **redirects existing tedium** toward higher-value activities.
 
 Without automated enforcement, humans manually review every agent output for trust boundary violations. This is:
 
@@ -742,11 +742,11 @@ Teams working at agentic velocity need continuous awareness of enforcement state
 
 This awareness must be team-wide. The current control law — normal, degraded, or offline — is not a background infrastructure metric but operational context that determines what work is reasonable to undertake. Under direct law (no machine enforcement active), high-risk changes such as security-sensitive code, trust-boundary crossings, and authority-tier logic should not proceed, because the controls that would catch semantic violations in those areas are the ones that are offline.
 
-The lesson from these case studies is that **agentic development is viable precisely because the agent will execute governance that humans under pressure quietly defer — but it requires governance designed for the agent's actual failure modes, not the human's.** Agent governance must be environmental (CI gates, not documentation), boundary-enforced (pre-commit, not post-review), and stateless (every session is the first session). Organisations that apply human-shaped governance to agents will get the agent's compliance without catching the agent's mistakes.
+The lesson from these case studies is that agentic development is viable in part because the agent will execute governance that humans under pressure quietly defer — but it requires governance designed for the agent's actual failure modes, not the human's. Agent governance must be environmental (CI gates, not documentation), boundary-enforced (pre-commit, not post-review), and stateless (every session is the first session). Organisations that apply human-shaped governance to agents will get the agent's compliance without catching the agent's mistakes.
 
 ### The productivity picture
 
-**Where agents excel:** Mechanical refactoring (renaming, restructuring, pattern application across files) is handled almost entirely by agents. Boilerplate generation (new plugins, test scaffolding, configuration structures) is dramatically accelerated. Bug investigation and test writing benefit from agents' ability to rapidly explore code paths. The pattern is clear: **agents excel at tasks where correctness is structurally verifiable** (tests pass, types check, linter is clean) and struggle where **correctness requires institutional knowledge** (trust boundary maintenance, audit trail completeness, appropriate error handling in compliance contexts). The annotated transcripts add an important nuance: agents can be highly effective investigative instruments once directed, but they do not reliably initiate the semantic question that matters.
+**Where agents perform well:** Mechanical refactoring (renaming, restructuring, pattern application across files) is handled almost entirely by agents. Boilerplate generation (new plugins, test scaffolding, configuration structures) is substantially accelerated. Bug investigation and test writing benefit from agents' ability to rapidly explore code paths. The pattern is consistent: **agents perform well at tasks where correctness is structurally verifiable** (tests pass, types check, linter is clean) and struggle where **correctness requires institutional knowledge** (trust boundary maintenance, audit trail completeness, appropriate error handling in compliance contexts). The annotated transcripts add an important nuance: agents can be highly effective investigative instruments once directed, but they do not reliably initiate the semantic question that matters.
 
 **The compliance tax.** Governance controls impose a real overhead — the project's retrospective estimate places it at 15–25% of total development time (an informed estimate based on commit-message tagging, not formal time tracking). The distribution is uneven: on large changes, compliance overhead is trivially small relative to the work. On small changes — a one-line bug fix — the agent spends 30 seconds on the fix and 60 seconds grappling with the CI pipeline, rediscovering the enforcement workflow it has never seen in training data. This skew toward small-change cases is where the bulk of the overhead concentrates.
 
@@ -1097,7 +1097,7 @@ And arrived at the precise answer:
 >
 > That message says nothing about field normalization. The operator is left debugging a 'security error' in their gate expression when the actual problem is that the source delivered `Customer-ID` instead of `customer_id`."
 
-#### Phase 7: The operator reframes, and the agent finally gets it right (3 minutes)
+#### Phase 7: The operator reframes, and the agent reaches the correct design (3 minutes)
 
 The operator continued pressing:
 
@@ -1107,7 +1107,7 @@ The agent reversed its framing:
 
 > "You're right — I was thinking about this from the wrong direction. [...] If the source hands off 'Customer-ID' instead of 'customer_id', the operator's `row.customer_id` gate condition fails — and the bug is in the source, not the gate config. The source broke its contract to deliver normalized field names."
 
-The operator then asked the clarifying question that should never have been necessary:
+The operator then asked the clarifying question directly:
 
 > **Operator:** ok, well, the policy is that it's mandatory, isn't it?
 
@@ -1173,7 +1173,7 @@ Of the combined finding set across both specifications and both review rounds, 8
 
 **[ACF-S1]({{< relref "/acf/s1-competence-spoofing" >}}) (Fabricated Default) — three instances.** The most common ACF pattern in the finding set. (1) The RAG specification defined an `on_no_results: continue` option for multi-source retrieval that would report "success" when one retrieval source silently failed — downstream consumers would treat incomplete context as complete. (2) The data platform specification's credential validator checked `is None` but not empty string — a mis-resolved environment variable (common in container deployments) would pass as valid credentials, spoofing a successful validation. (3) The RAG specification used `.get()` with a default on a `provider_config` dictionary that had already been validated by a Pydantic model — the canonical defensive anti-pattern, applied to data whose structural guarantees made the fallback both redundant and misleading. Multiple reviewers flagged this last pattern independently.
 
-**[ACF-S2]({{< relref "/acf/s2-hallucinated-field-access" >}}) (Spurious Field Access) — one instance.** The data platform specification referenced `get_token(force_refresh=True)` on a cloud identity credential object. The `force_refresh` keyword argument does not exist in the credential library's API. The agent invented a plausible API based on what such an API *should* look like, and the specification was internally consistent around the spurious parameter — downstream logic depended on the forced refresh succeeding. This is textbook ACF-S2: the agent's model of the code is wrong, but the wrongness is locally coherent.
+**[ACF-S2]({{< relref "/acf/s2-hallucinated-field-access" >}}) (Spurious Field Access) — one instance.** The data platform specification referenced `get_token(force_refresh=True)` on a cloud identity credential object. The `force_refresh` keyword argument does not exist in the credential library's API. The agent invented a plausible API based on what such an API *should* look like, and the specification was internally consistent around the spurious parameter — downstream logic depended on the forced refresh succeeding. This is the canonical ACF-S2 pattern: the agent's model of the code is wrong, but the wrongness is locally coherent.
 
 **[ACF-T1]({{< relref "/acf/t1-authority-tier-conflation" >}}) (Authority Tier Conflation) + [ACF-E1]({{< relref "/acf/e1-implicit-privilege-grant" >}}) (Implicit Privilege Grant) — one instance.** The RAG specification accepted a user-supplied search service endpoint URL as an unvalidated string with no URL validation against the project's security utilities. The endpoint could target cloud metadata services (169.254.169.254) or internal network resources — a server-side request forgery vulnerability. Both Critical-rated ACF entries were present in a single finding: Tier 4 configuration data flows directly to an internal HTTP client (T1), implicitly granting the configuration author network-level authority (E1). Had the specification been implemented without review, the vulnerability would have been structural — baked into the provider's constructor, passing tests (the endpoint "works"), and invisible to conventional SAST.
 

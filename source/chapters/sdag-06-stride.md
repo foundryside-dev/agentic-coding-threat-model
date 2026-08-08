@@ -212,7 +212,7 @@ It indexes observable artefacts rather than generative causes, since artefacts a
 
 ### 3.3 The compounding effect
 
-These six threat categories do not operate independently. In practice, they compound — and the compounding produces a structural failure condition: agents generate a flood of code that follows established good practice, arriving at review boundaries faster than human assurance processes can absorb it, in precisely the systems that have the least tolerance for those failure modes.
+These six threat categories do not operate independently. In practice, they compound — and the compounding produces a structural failure condition: agents generate a flood of code that follows established good practice, arriving at review boundaries faster than human assurance processes can absorb it, in the systems that have the least tolerance for those failure modes.
 
 One illustrative scenario:
 

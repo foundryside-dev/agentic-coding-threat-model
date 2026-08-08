@@ -248,14 +248,14 @@ This fabricates a classification for documents where the classification is missi
 **`INSERT ... SELECT` as authority tier conflation (ACF-T1).** When agents write SQL integrating data from external sources, they treat all tables as equally trustworthy:
 
 ```sql
--- Agent-generated — clean, readable, catastrophically wrong
+-- Agent-generated — clean, readable, wrong for this context
 INSERT INTO internal_records (name, status, clearance_level)
 SELECT name, status, clearance_level
 FROM partner_staging_table;
 -- No validation. External data enters the authoritative store directly.
 ```
 
-The SQL case is more dangerous than the Python equivalent because `INSERT ... SELECT` is a single statement that reads from one authority tier and writes to another with no syntactic position where a validation step can be expressed. The correct version requires domain validation, allowlists, boundary checks, and a quarantine log for rejected rows — substantially more verbose, which is precisely the pattern agents omit.
+The SQL case is more dangerous than the Python equivalent because `INSERT ... SELECT` is a single statement that reads from one authority tier and writes to another with no syntactic position where a validation step can be expressed. The correct version requires domain validation, allowlists, boundary checks, and a quarantine log for rejected rows — substantially more verbose, which is the pattern agents omit.
 
 **Database-level enforcement** (`CHECK` constraints, foreign keys, `NOT NULL`, domain types) is the strongest control for SQL because it is environmental — the database rejects invalid data regardless of how the SQL was generated. Organisations should audit whether their database schemas enforce the same trust boundary rules that their application code does.
 

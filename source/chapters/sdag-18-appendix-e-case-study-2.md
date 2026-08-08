@@ -339,7 +339,7 @@ And arrived at the precise answer:
 >
 > That message says nothing about field normalization. The operator is left debugging a 'security error' in their gate expression when the actual problem is that the source delivered `Customer-ID` instead of `customer_id`."
 
-#### Phase 7: The operator reframes, and the agent finally gets it right (3 minutes)
+#### Phase 7: The operator reframes, and the agent reaches the correct design (3 minutes)
 
 The operator continued pressing:
 
@@ -349,7 +349,7 @@ The agent reversed its framing:
 
 > "You're right — I was thinking about this from the wrong direction. [...] If the source hands off 'Customer-ID' instead of 'customer_id', the operator's `row.customer_id` gate condition fails — and the bug is in the source, not the gate config. The source broke its contract to deliver normalized field names."
 
-The operator then asked the clarifying question that should never have been necessary:
+The operator then asked the clarifying question directly:
 
 > **Operator:** ok, well, the policy is that it's mandatory, isn't it?
 
@@ -429,7 +429,7 @@ Of the combined finding set across both specifications and both review rounds, 8
 
 **ACF-S1 (Fabricated Default) — three instances.** The most common ACF pattern in the finding set. (1) The RAG specification defined an `on_no_results: continue` option for multi-source retrieval that would report "success" when one retrieval source silently failed — downstream consumers would treat incomplete context as complete. (2) The data platform specification's credential validator checked `is None` but not empty string — a mis-resolved environment variable (common in container deployments) would pass as valid credentials, spoofing a successful validation. (3) The RAG specification used `.get()` with a default on a `provider_config` dictionary that had already been validated by a Pydantic model — the canonical defensive anti-pattern from §2.3, applied to data whose structural guarantees made the fallback both redundant and misleading. Multiple reviewers flagged this last pattern independently.
 
-**ACF-S2 (Spurious Field Access) — one instance.** The data platform specification referenced `get_token(force_refresh=True)` on a cloud identity credential object. The `force_refresh` keyword argument does not exist in the credential library's API. The agent invented a plausible API based on what such an API *should* look like, and the specification was internally consistent around the spurious parameter — downstream logic depended on the forced refresh succeeding. This is textbook ACF-S2: the agent's model of the code is wrong, but the wrongness is locally coherent.
+**ACF-S2 (Spurious Field Access) — one instance.** The data platform specification referenced `get_token(force_refresh=True)` on a cloud identity credential object. The `force_refresh` keyword argument does not exist in the credential library's API. The agent invented a plausible API based on what such an API *should* look like, and the specification was internally consistent around the spurious parameter — downstream logic depended on the forced refresh succeeding. This is the canonical ACF-S2 pattern: the agent's model of the code is wrong, but the wrongness is locally coherent.
 
 **ACF-T1 (Authority Tier Conflation) + ACF-E1 (Implicit Privilege Grant) — one instance.** The RAG specification accepted a user-supplied search service endpoint URL as an unvalidated string with no URL validation against the project's security utilities. The endpoint could target cloud metadata services (169.254.169.254) or internal network resources — a server-side request forgery vulnerability. Both Critical-rated ACF entries were present in a single finding: Tier 4 configuration data flows directly to an internal HTTP client (T1), implicitly granting the configuration author network-level authority (E1). Had the specification been implemented without review, the vulnerability would have been structural — baked into the provider's constructor, passing tests (the endpoint "works"), and invisible to conventional SAST.
 

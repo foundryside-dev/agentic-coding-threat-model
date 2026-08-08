@@ -8,7 +8,7 @@ This appendix outlines a plausible second-order systemic risk arising from the m
 
 Model diversity is the natural mitigation to monoculture risk (§2.4), but it should not be assumed to buy independence. Three layers of systemic exposure are worth separating: pure monoculture, overlapping training-distribution bias across different models, and cross-model defect chaining. The first is straightforward. The second is strongly plausible: even different models trained on similar public corpora may reproduce the same bad patterns, because those patterns represent the statistical majority of their training data. The third — one model's characteristic defect creating the conditions under which another model's distinct defect becomes dangerous — is the least established and the most speculative.
 
-Fine-tuning multiple variants on local code may be directionally helpful, but fine-tuning is an adaptation of a base model, not an exorcism of its deep training-distribution habits.
+Fine-tuning multiple variants on local code may be directionally helpful, but fine-tuning is an adaptation of a base model, not a removal of its deep training-distribution habits.
 
 Variant diversity can only decorrelate errors that originate in the portion of training that differs between variants. The dominant failure mode this paper describes — context-inappropriate defensive code on high-stakes paths — lives in the shared trunk, not the branches. For the risks discussed here, the relevant question is lineage independence, not variant count — and agencies should not assume that fine-tuned variants of the same base model provide meaningful independence.
 

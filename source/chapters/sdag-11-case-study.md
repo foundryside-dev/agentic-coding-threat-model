@@ -1,6 +1,6 @@
 ## 8. Case Studies: What the Invisibility Problem Looks Like in Practice
 
-*This section presents two evidence bases for the paper's central claim: that AI-generated semantic defects look like correct code and pass every check in the standard assurance stack. The first is a simulation — a complete application prototyped by an agent, where you can read every line and see what the agent produced. The second is six months of longitudinal observation on a live compliance-constrained project, where you can see what detection looks like when it exists. Together, they demonstrate that the problem is not the defect rate. The problem is that you will not see the defects at all — not because you are a poor reviewer, but because they look exactly like the code you have been trained to approve.*
+*This section presents two evidence bases for the paper's central claim: that AI-generated semantic defects look like correct code and pass every check in the standard assurance stack. The first is a simulation — a complete application prototyped by an agent, where you can read every line and see what the agent produced. The second is six months of longitudinal observation on a live compliance-constrained project, where you can see what detection looks like when it exists. Together, they suggest that the problem is not the defect rate. The problem is that the defects are unlikely to be seen at all — not because the reviewer is negligent, but because they look like the code reviewers have been trained to approve.*
 
 **De-identification.** Both case studies are drawn from real projects. Specific implementation details have been generalised. The simulation (§8.2) uses a purpose-built demonstration application; the longitudinal observation (§8.3) presents a composite, de-identified account from a compliance-constrained environment. The system and tooling described in the longitudinal study are de-identified here to keep the focus on the generalisable threat model.
 
@@ -26,7 +26,7 @@ The application contains 20 semantic defects mapped to ACF taxonomy entries acro
 
 #### The three-default compound
 
-The centrepiece finding is three `os.getenv()` calls with development-convenient defaults that compound into total security bypass:
+The central finding is three `os.getenv()` calls with development-convenient defaults that together bypass the system's security controls:
 
 ```python
 # config.py — three lines that look like standard development practice
@@ -78,7 +78,7 @@ The rules are enforced in CI by a project-specific AST pattern-matching tool wit
 
 #### What detection observes
 
-In steady-state development, a combination of rigorous review and the enforcement tool regularly catches and blocks semantic boundary violations that would otherwise pass conventional tooling — **none entered the codebase**. Each flags a pattern from the ACF taxonomy (primarily ACF-S1 and ACF-R1, with limited intra-function proxy detection of ACF-T1) that the generating agent introduced. Under specific conditions[^rate-caveats], the detection rate is approximately one to two such patterns per day across approximately 25–30 commits per day (the majority agent-generated).[^prompted-against]
+In steady-state development, a combination of rigorous review and the enforcement tool regularly catches and blocks semantic boundary violations that would otherwise pass conventional tooling — none entered the codebase. Each flags a pattern from the ACF taxonomy (primarily ACF-S1 and ACF-R1, with limited intra-function proxy detection of ACF-T1) that the generating agent introduced. Under specific conditions[^rate-caveats], the detection rate is approximately one to two such patterns per day across approximately 25–30 commits per day (the majority agent-generated).[^prompted-against]
 
 The figure is an estimate from a single project. Actual rates will vary with project complexity, codebase size, language, domain, development arrangements, the balance of planned versus ad hoc work, and tooling. This rate occurs despite the agent being explicitly prompted against these patterns in its project-level instructions — the codebase documentation prohibits `.get()` on typed objects, bare `except`, and silent error swallowing; the agent's system prompt reinforces these rules. The agent still produces the violations because the patterns are deeply embedded in training data and override project-level instructions under context pressure. Without specific prompting, the rate is substantially higher.[^prompted-against]
 
@@ -129,7 +129,7 @@ The simulation (§8.2) and the longitudinal observation (§8.3) were conducted o
 
 The longitudinal project reports substantial productivity gains from agentic development despite the compliance overhead described above.
 
-**Where agents excel:** Mechanical refactoring (renaming, restructuring, pattern application across files) is handled almost entirely by agents. Boilerplate generation (new plugins, test scaffolding, configuration structures) is dramatically accelerated. Bug investigation and test writing benefit from agents' ability to rapidly explore code paths. The pattern is clear: **agents excel at tasks where correctness is structurally verifiable** (tests pass, types check, linter is clean) and struggle where **correctness requires institutional knowledge** (trust boundary maintenance, audit trail completeness, appropriate error handling in compliance contexts). Appendix E adds an important nuance: agents can be highly effective investigative instruments once directed, but they do not reliably initiate the semantic question that matters.
+**Where agents perform well:** Mechanical refactoring (renaming, restructuring, pattern application across files) is handled almost entirely by agents. Boilerplate generation (new plugins, test scaffolding, configuration structures) is substantially accelerated. Bug investigation and test writing benefit from agents' ability to rapidly explore code paths. The pattern is consistent: **agents perform well at tasks where correctness is structurally verifiable** (tests pass, types check, linter is clean) and struggle where **correctness requires institutional knowledge** (trust boundary maintenance, audit trail completeness, appropriate error handling in compliance contexts). Appendix E adds an important nuance: agents can be highly effective investigative instruments once directed, but they do not reliably initiate the semantic question that matters.
 
 **The compliance tax.** Governance controls impose a real overhead — the project's retrospective estimate places it at 15–25% of total development time (an informed estimate based on commit-message tagging, not formal time tracking). The distribution is uneven: on large changes, compliance overhead is trivially small relative to the work. On small changes — a one-line bug fix — the agent spends 30 seconds on the fix and 60 seconds grappling with the CI pipeline, rediscovering the enforcement workflow it has never seen in training data. This skew toward small-change cases is where the bulk of the overhead concentrates.
 
@@ -137,7 +137,7 @@ This is not new overhead introduced by agentic coding. It is the same compliance
 
 ### 8.6 The redirection insight (longitudinal observation)
 
-The team's experience reveals that automated semantic enforcement does not *add* tedium — it **redirects existing tedium** toward higher-value activities.
+The team's experience suggests that automated semantic enforcement does not *add* tedium — it **redirects existing tedium** toward higher-value activities.
 
 Without automated enforcement, humans manually review every agent output for trust boundary violations. This is:
 
@@ -180,7 +180,7 @@ Teams working at agentic velocity need continuous awareness of enforcement state
 
 This awareness must be team-wide. The current control law — normal, degraded, or offline — is not a background infrastructure metric but operational context that determines what work is reasonable to undertake. Under direct law (no machine enforcement active), high-risk changes such as security-sensitive code, trust-boundary crossings, and authority-tier logic should not proceed, because the controls that would catch semantic violations in those areas are the ones that are offline.
 
-The lesson from these case studies is that **agentic development is viable precisely because the agent will execute governance that humans under pressure quietly defer — but it requires governance designed for the agent's actual failure modes, not the human's.** Agent governance must be environmental (CI gates, not documentation), boundary-enforced (pre-commit, not post-review), and stateless (every session is the first session). Organisations that apply human-shaped governance to agents will get the agent's compliance without catching the agent's mistakes.
+The lesson from these case studies is that agentic development is viable in part because the agent will execute governance that humans under pressure quietly defer — but it requires governance designed for the agent's actual failure modes, not the human's. Agent governance must be environmental (CI gates, not documentation), boundary-enforced (pre-commit, not post-review), and stateless (every session is the first session). Organisations that apply human-shaped governance to agents will get the agent's compliance without catching the agent's mistakes.
 
 ### 8.7 Operational tests and replication protocol
 

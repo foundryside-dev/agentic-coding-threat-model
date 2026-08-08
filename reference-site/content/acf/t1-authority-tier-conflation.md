@@ -35,7 +35,7 @@ Python's type system does not distinguish between data from different sources. A
 ## Code Examples
 
 ```python
-# Agent-generated — clean, readable, catastrophically wrong
+# Agent-generated — clean, readable, wrong for this context
 def sync_partner_records(partner_api_url):
     response = requests.get(f"{partner_api_url}/records")
     records = response.json()

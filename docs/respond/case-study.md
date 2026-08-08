@@ -42,7 +42,7 @@ This is part of the hazard, not a mitigating detail. To a reader without deep se
 
 ### The three-default compound
 
-The centrepiece finding is three `os.getenv()` calls with development-convenient defaults that compound into total security bypass:
+The central finding is three `os.getenv()` calls with development-convenient defaults that together bypass the system's security controls:
 
 ```python
 # config.py — three lines that look like standard development practice
@@ -127,7 +127,7 @@ The rules are enforced in CI by a project-specific AST pattern-matching tool wit
 
 ### What detection observes
 
-In steady-state development, a combination of rigorous review and the enforcement tool regularly catches and blocks semantic boundary violations that would otherwise pass conventional tooling — **none entered the codebase**. The detection rate is approximately one to two such patterns per day across approximately 25–30 commits per day (the majority agent-generated). This rate occurs *despite* the agent being explicitly prompted against these patterns in project-level instructions — the patterns are deeply embedded in training data and override project-level instructions under context pressure.
+In steady-state development, a combination of rigorous review and the enforcement tool regularly catches and blocks semantic boundary violations that would otherwise pass conventional tooling — none entered the codebase. The detection rate is approximately one to two such patterns per day across approximately 25–30 commits per day (the majority agent-generated). This rate occurs *despite* the agent being explicitly prompted against these patterns in project-level instructions — the patterns are deeply embedded in training data and override project-level instructions under context pressure.
 
 !!! note "Interpreting the violation rate"
     This is a detection rate from a single project under specific conditions: one developer's work, with purpose-built semantic enforcement tooling and rigorous human review. Three aspects merit attention:
@@ -224,7 +224,7 @@ The three Appendix E incidents add a further dimension: the same "policy availab
 
 The longitudinal project reports substantial productivity gains from agentic development despite the compliance overhead.
 
-**Where agents excel:** Mechanical refactoring, boilerplate generation, bug investigation, and test writing — tasks where correctness is structurally verifiable (tests pass, types check, linter is clean). Agents struggle where **correctness requires institutional knowledge** (trust boundary maintenance, audit trail completeness, appropriate error handling in compliance contexts). Agents can be highly effective investigative instruments once directed, but they do not reliably initiate the semantic question that matters.
+**Where agents perform well:** Mechanical refactoring, boilerplate generation, bug investigation, and test writing — tasks where correctness is structurally verifiable (tests pass, types check, linter is clean). Agents struggle where **correctness requires institutional knowledge** (trust boundary maintenance, audit trail completeness, appropriate error handling in compliance contexts). Agents can be highly effective investigative instruments once directed, but they do not reliably initiate the semantic question that matters.
 
 **The compliance tax.** Governance controls impose a real overhead — the project's retrospective estimate places it at 15–25% of total development time. The distribution is uneven: on large changes, compliance overhead is trivially small relative to the work. On small changes — a one-line bug fix — the agent spends 30 seconds on the fix and 60 seconds grappling with the CI pipeline, rediscovering the enforcement workflow it has never seen in training data. This is not new overhead introduced by agentic coding. It is the same compliance overhead redistributed. Before agents, humans spent that time writing compliant code slowly. With agents, humans spend it reviewing agent output for compliance quickly. The total compliance cost is similar; the development velocity is higher.
 
@@ -253,7 +253,7 @@ A practical consequence: if the CI gate is the primary mechanism catching semant
 
 ## The lesson
 
-Agentic development is viable precisely because the agent will execute governance that humans under pressure quietly defer — but it requires governance designed for the agent's actual failure modes, not the human's. Agent governance must be environmental (CI gates, not documentation), boundary-enforced (pre-commit, not post-review), and stateless (every session is the first session). Organisations that apply human-shaped governance to agents will get the agent's compliance without catching the agent's mistakes.
+Agentic development is viable in part because the agent will execute governance that humans under pressure quietly defer — but it requires governance designed for the agent's actual failure modes, not the human's. Agent governance must be environmental (CI gates, not documentation), boundary-enforced (pre-commit, not post-review), and stateless (every session is the first session). Organisations that apply human-shaped governance to agents will get the agent's compliance without catching the agent's mistakes.
 
 ---
 
