@@ -187,7 +187,7 @@ The paper's strongest claim is not that these exact failure rates generalise, bu
 
 These are the conditions that would dissolve the problem. None is straightforwardly testable — each requires either demonstrating a negative, measuring an uninstrumented capability, or longitudinal observation across model generations — but empirical studies targeting any of them would materially advance the discussion.
 
-Two practical tests would meaningfully challenge the thesis without requiring those horizon conditions: a **practitioner deployment test** (deploy ACF-pattern detection rules on a codebase with active agent use and measure the violation rate) and a **reviewer catch-rate test** (present reviewers with agent-generated code containing known semantic violations and measure detection rates with and without the review aids this paper proposes). §8.7 describes both tests in detail with a full replication protocol.
+Two practical tests would meaningfully challenge the thesis without requiring those horizon conditions: a **practitioner deployment test** (deploy ACF-pattern detection rules on a codebase with active agent use and measure the violation rate) and a **reviewer catch-rate test** (present reviewers with agent-generated code containing known semantic violations and measure detection rates with and without the review aids this paper proposes). §8.8 describes both tests in detail with a full replication protocol.
 
 ### 1.5 How to read this paper: three analytical traditions
 

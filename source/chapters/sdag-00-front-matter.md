@@ -1,15 +1,16 @@
 # Semantic Defects in AI-Generated Code: Assurance Frameworks for AI-Assisted Development in High-Stakes Code Paths
 
 **Discussion Paper, Draft for Comment**
-**Version:** 0.1.0
-**Date:** 24 March 2026
+**Version:** 0.2.0
+**Date:** 8 August 2026
 **Prepared by:** John Morrissey
 
 | Version | Date | Summary |
 |---------|------|---------|
 | 0.1.0 | 24 March 2026 | Initial draft |
+| 0.2.0 | 8 August 2026 | First consultation feedback incorporated: enforcement-perimeter scoping heuristic, golden-corpus bootstrapping, automated pattern-wide remediation and baseline-and-ratchet controls, sandboxed baseline for non-SDLC environments, an update on the longitudinal case study's enforcement pipeline (§8.7), and a remediation-phase postscript (Appendix E.8) |
 
-*This version is the first public draft prepared for external consultation. The taxonomy and recommendations are under community consultation and should be read as candidates for validation, not settled outputs.*
+*This version incorporates the first round of external consultation feedback. The taxonomy and recommendations remain under community consultation and should be read as candidates for validation, not settled outputs.*
 
 ## Reading guide
 

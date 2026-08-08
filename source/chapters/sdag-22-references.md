@@ -52,4 +52,4 @@
 
 ---
 
-**Suggested citation:** Morrissey, J. "Semantic Defects in AI-Generated Code: Assurance Frameworks for AI-Assisted Development in High-Stakes Code Paths." Discussion Paper, Draft for Comment v0.1.0, 24 March 2026.
+**Suggested citation:** Morrissey, J. "Semantic Defects in AI-Generated Code: Assurance Frameworks for AI-Assisted Development in High-Stakes Code Paths." Discussion Paper, Draft for Comment v0.2.0, 8 August 2026.

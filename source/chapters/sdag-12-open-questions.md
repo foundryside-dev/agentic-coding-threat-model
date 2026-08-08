@@ -160,6 +160,8 @@ A single agent checking its own output is not meaningful validation — the same
 
 The outstanding questions are whether this kind of prompted perspective diversity constitutes "validation" in a formal assurance sense, whether agents can meaningfully check for the failure modes they are predisposed to produce, and whether pre-review self-checking improves human review quality (by filtering noise) or degrades it (by creating false confidence that the easy problems are already caught).
 
+The longitudinal case study offers a partial working answer to the second question: agents *can* usefully check for the failure modes they produce, but only in a constrained role and never as the final authority. In the project's exception pipeline (§8.7), a model evaluates a *specific flagged violation against a specific declared rule* — a much narrower task than remembering not to produce the pattern in the first place — and its verdict operates as a triage filter: a blocked exception cannot proceed by the normal path, while approval still requires a human signature the agent does not hold. The position this suggests: agent self-checking is a load-bearing *filter* and an unacceptable *authority*, because the judge shares the generator's training-distribution biases and may approve exactly the subtly dangerous cases that matter most.
+
 #### 9.12 Productivity evidence and policy thresholds
 
 **The paper argues that the precautionary case is sufficient for action. The open question is what additional evidence would change implementation choices — not whether action is justified.**
