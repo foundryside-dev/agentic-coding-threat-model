@@ -1,0 +1,64 @@
+<div class="infobox">
+  <div class="infobox-header">{{ .Params.acf_id }}</div>
+  <div class="infobox-body">
+    <div class="infobox-row">
+      <span class="infobox-label">Name</span>
+      <span class="infobox-value">{{ .Params.acf_name }}</span>
+    </div>
+    <div class="infobox-row">
+      <span class="infobox-label">STRIDE</span>
+      <span class="infobox-value">
+        {{- $stridePage := printf "/threat-model/stride/%s" .Params.stride_category -}}
+        {{- with site.GetPage $stridePage -}}
+          <a href="{{ .RelPermalink }}">{{ $.Params.stride_category | humanize | title }}</a>
+        {{- else -}}
+          {{ .Params.stride_category | humanize | title }}
+        {{- end -}}
+      </span>
+    </div>
+    <div class="infobox-row">
+      <span class="infobox-label">Risk</span>
+      <span class="infobox-value">{{ partial "badge.html" (dict "type" "risk" "value" .Params.risk_level) }}</span>
+    </div>
+    <div class="infobox-row">
+      <span class="infobox-label">Detection</span>
+      <span class="infobox-value">{{ partial "badge.html" (dict "type" "detection" "value" .Params.detection_status) }}</span>
+    </div>
+    <div class="infobox-row">
+      <span class="infobox-label">Type</span>
+      <span class="infobox-value">{{ .Params.entry_type | humanize }}</span>
+    </div>
+    <div class="infobox-row">
+      <span class="infobox-label">Relation</span>
+      <span class="infobox-value">{{ .Params.relation | humanize }}</span>
+    </div>
+    <div class="infobox-row">
+      <span class="infobox-label">Status</span>
+      <span class="infobox-value">{{ partial "badge.html" (dict "type" "status" "value" .Params.entry_status) }}</span>
+    </div>
+    <div class="infobox-row">
+      <span class="infobox-label">Language</span>
+      <span class="infobox-value">{{ .Params.language_generality | humanize }}</span>
+    </div>
+
+    {{- with .Params.related_entries }}
+    <div class="infobox-row">
+      <span class="infobox-label">Related</span>
+      <span class="infobox-value">
+        {{- range $i, $id := . -}}
+          {{- if $i }}, {{ end -}}
+          {{- $pages := where site.RegularPages "Section" "acf" -}}
+          {{- $found := false -}}
+          {{- range $pages -}}
+            {{- if eq .Params.acf_id $id -}}
+              <a href="{{ .RelPermalink }}">{{ $id }}</a>
+              {{- $found = true -}}
+            {{- end -}}
+          {{- end -}}
+          {{- if not $found }}{{ $id }}{{ end -}}
+        {{- end -}}
+      </span>
+    </div>
+    {{- end }}
+  </div>
+</div>

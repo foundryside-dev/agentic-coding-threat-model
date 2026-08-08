@@ -1,0 +1,29 @@
+{{ define "main" }}
+<article class="markdown book-article">
+  {{/* Handle special display names */}}
+  {{- $displayTitle := .Title | humanize | title -}}
+  {{- if eq .Title "na" -}}{{- $displayTitle = "N/A (Not Applicable)" -}}{{- end -}}
+  <h1>{{ $displayTitle }}</h1>
+  <p>{{ len .Pages }} entries with this value.</p>
+  <table class="summary-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Risk</th>
+        <th>Detection</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{- range .Pages }}
+      <tr>
+        <td><a href="{{ .RelPermalink }}">{{ .Params.acf_id | default .Title }}</a></td>
+        <td>{{ .Params.acf_name | default .Title }}</td>
+        <td class="risk-cell">{{ with .Params.risk_level }}{{ partial "badge.html" (dict "type" "risk" "value" .) }}{{ end }}</td>
+        <td class="detection-cell">{{ with .Params.detection_status }}{{ partial "badge.html" (dict "type" "detection" "value" .) }}{{ end }}</td>
+      </tr>
+      {{- end }}
+    </tbody>
+  </table>
+</article>
+{{ end }}

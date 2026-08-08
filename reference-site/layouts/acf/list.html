@@ -1,0 +1,40 @@
+{{ define "main" }}
+<article class="markdown book-article">
+  <h1>{{ .Title }}</h1>
+
+  {{ .Content }}
+
+  {{- $entries := where .RegularPages "Params.acf_id" "!=" nil -}}
+  {{- $categories := slice "spoofing" "tampering" "repudiation" "information-disclosure" "denial-of-service" "elevation-of-privilege" -}}
+  {{- $categoryNames := dict "spoofing" "Spoofing" "tampering" "Tampering" "repudiation" "Repudiation" "information-disclosure" "Information Disclosure" "denial-of-service" "Denial of Service" "elevation-of-privilege" "Elevation of Privilege" -}}
+
+  {{- range $cat := $categories -}}
+    {{- $catEntries := where $entries "Params.stride_category" $cat -}}
+    {{- if gt (len $catEntries) 0 }}
+    <h2>{{ index $categoryNames $cat }}</h2>
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Risk</th>
+          <th>Detection</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{- range $catEntries }}
+        <tr>
+          <td><a href="{{ .RelPermalink }}">{{ .Params.acf_id }}</a></td>
+          <td>{{ .Params.acf_name }}</td>
+          <td class="risk-cell">{{ partial "badge.html" (dict "type" "risk" "value" .Params.risk_level) }}</td>
+          <td class="detection-cell">{{ partial "badge.html" (dict "type" "detection" "value" .Params.detection_status) }}</td>
+          <td>{{ partial "badge.html" (dict "type" "status" "value" .Params.entry_status) }}</td>
+        </tr>
+        {{- end }}
+      </tbody>
+    </table>
+    {{- end -}}
+  {{- end }}
+</article>
+{{ end }}

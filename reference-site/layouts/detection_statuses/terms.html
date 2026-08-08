@@ -1,0 +1,21 @@
+{{ define "main" }}
+<article class="markdown book-article">
+  <h1>{{ .Title }}</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Value</th>
+        <th>Entries</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{- range .Pages }}
+      <tr>
+        <td><a href="{{ .RelPermalink }}">{{ .Title | humanize | title }}</a></td>
+        <td>{{ len .Pages }}</td>
+      </tr>
+      {{- end }}
+    </tbody>
+  </table>
+</article>
+{{ end }}

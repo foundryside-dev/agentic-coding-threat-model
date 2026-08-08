@@ -1,0 +1,60 @@
+# Cross-reference matrix: ACF ↔ Wardline Rules
+#
+# Compiled from source/chapters/sdag-14-appendix-a-taxonomy.md (detection
+# approach sections), source/chapters/wardline-01-07-pattern-rules.md (rule
+# definitions).  Each mapping is verified against the source — not estimated.
+
+# ── ACF → Wardline pattern rules ──────────────────────────────────────────────
+# Only rules explicitly named in the taxonomy's "Detection approach" field are
+# listed.  Entries whose detection relies on taint analysis, group declarations,
+# or process controls (rather than a numbered WL rule) have empty arrays.
+
+acf_to_wardline:
+  ACF-S1: ["WL-001"]
+  ACF-S2: ["WL-002"]
+  ACF-S3: ["WL-002", "WL-006"]
+  ACF-T1: []              # taint analysis / tier-flow enforcement, no WL rule
+  ACF-T2: ["WL-001"]
+  ACF-R1: ["WL-003", "WL-004", "WL-005"]
+  ACF-R2: ["WL-005"]
+  ACF-I1: []              # Group 8 / Group 11 declarations, no WL rule
+  ACF-I2: []              # framework-specific traceback detection, no WL rule
+  ACF-D1: []              # process threat — no code-level WL rule
+  ACF-D2: []              # process threat — no code-level WL rule
+  ACF-E1: []              # taint analysis / tier-flow enforcement, no WL rule
+  ACF-E2: []              # taint analysis + Group 14, no WL rule
+  ACF-S4: []              # type-system meta-failure, no WL rule
+  ACF-S5: []              # type structure avoidance, no WL rule
+  ACF-R3: []              # verification displacement, no WL rule
+  ACF-R4: []              # workflow pattern, no WL rule
+  ACF-T3: []              # lint-detectable substring matching, no WL rule
+  ACF-T4: []              # guard erosion, no WL rule
+  ACF-R5: []              # remediation-induced violation, no WL rule
+  ACF-R6: []              # workflow pattern, no WL rule
+
+# ── Related entries (adjacency) ───────────────────────────────────────────────
+# From the [^related-entries] footnote in Appendix A, which documents the
+# distinguishing criteria for closely related pairs.
+
+related_entries:
+  ACF-S1: ["ACF-T2"]
+  ACF-S2: ["ACF-S4"]
+  ACF-S3: ["ACF-E1"]
+  ACF-T1: ["ACF-E1", "ACF-S5"]
+  ACF-T2: ["ACF-S1", "ACF-T3"]
+  ACF-R1: ["ACF-R2"]
+  ACF-R2: ["ACF-R1"]
+  ACF-I1: []
+  ACF-I2: []
+  ACF-D1: ["ACF-D2"]
+  ACF-D2: ["ACF-D1"]
+  ACF-E1: ["ACF-T1", "ACF-S3"]
+  ACF-E2: []
+  ACF-S4: ["ACF-S2", "ACF-S5", "ACF-T4"]
+  ACF-S5: ["ACF-S4", "ACF-T1"]
+  ACF-R3: ["ACF-R5"]
+  ACF-R4: []
+  ACF-T3: ["ACF-T2"]
+  ACF-T4: ["ACF-S4", "ACF-R5"]
+  ACF-R5: ["ACF-R3", "ACF-T4"]
+  ACF-R6: []

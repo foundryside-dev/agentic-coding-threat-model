@@ -1,0 +1,270 @@
+/* ==========================================================================
+   Site theme for Hugo Book
+   Matches the MkDocs Material site at docs/stylesheets/extra.css
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Light mode variables (Hugo Book default)
+   -------------------------------------------------------------------------- */
+:root {
+  --book-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --book-font-code: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* Navy accent */
+  --color-link: #29B480;
+  --body-background: #ffffff;
+  --body-font-color: #414141;
+
+  /* Sidebar */
+  --icon-filter: none;
+
+  /* Table headers */
+  --table-header-bg: #1E3C50;
+  --table-header-fg: #ffffff;
+
+  /* Code blocks */
+  --gray-100: #F4F5F5;
+  --gray-200: #CACCCE;
+  --gray-500: #70767B;
+
+  /* Infobox */
+  --infobox-bg: #F4F5F5;
+  --infobox-border: #1E3C50;
+  --infobox-header-bg: #1E3C50;
+  --infobox-header-fg: #ffffff;
+
+  /* Risk level badges */
+  --risk-critical: #d32f2f;
+  --risk-high: #e65100;
+  --risk-medium: #FAD673;
+  --risk-low: #29B480;
+
+  /* Detection badges */
+  --detection-none: #d32f2f;
+  --detection-partial: #FAD673;
+  --detection-good: #29B480;
+  --detection-na: #9FA4A7;
+
+  /* Entry status */
+  --status-core: #29B480;
+  --status-provisional: #9FA4A7;
+}
+
+/* --------------------------------------------------------------------------
+   Dark mode overrides
+   Hugo Book uses @media query for auto mode AND a body class for manual toggle.
+   We target both so manual dark mode toggle works correctly.
+   -------------------------------------------------------------------------- */
+@mixin dark-theme-vars {
+  --color-link: #69EBA5;
+  --body-background: #1a2631;
+  --body-font-color: #e0e4e7;
+
+  --gray-100: #1f3040;
+  --gray-200: #24384a;
+  --gray-500: #9FA4A7;
+
+  --infobox-bg: #1f3040;
+  --infobox-border: #2a5570;
+  --infobox-header-bg: #1E3C50;
+  --infobox-header-fg: #e0e4e7;
+
+  --table-header-bg: #2a5570;
+  --table-header-fg: #e0e4e7;
+}
+
+/* System preference (auto mode) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    @include dark-theme-vars;
+  }
+}
+
+/* Hugo Book manual toggle — applies dark class to body */
+body.dark {
+  @include dark-theme-vars;
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar — navy
+   -------------------------------------------------------------------------- */
+.book-menu {
+  background: #1E3C50;
+
+  nav {
+    color: #e0e4e7;
+  }
+
+  a {
+    color: #e0e4e7 !important;
+
+    &:hover {
+      color: #69EBA5 !important;
+    }
+
+    &.active {
+      color: #69EBA5 !important;
+      font-weight: 600;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Header / brand area
+   -------------------------------------------------------------------------- */
+.book-brand {
+  background: #152d3d;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   Links
+   -------------------------------------------------------------------------- */
+.book-page a {
+  color: var(--color-link);
+  text-decoration: none;
+
+  &:hover {
+    color: #288264;
+    text-decoration: underline;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .book-page a:hover {
+    color: #C8EBD7;
+  }
+}
+
+body.dark .book-page a:hover {
+  color: #C8EBD7;
+}
+
+/* --------------------------------------------------------------------------
+   Tables
+   -------------------------------------------------------------------------- */
+.book-page table {
+  th {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-fg);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Infobox (ACF entry and rule sidebars)
+   -------------------------------------------------------------------------- */
+.infobox {
+  float: right;
+  width: 280px;
+  margin: 0 0 1rem 1.5rem;
+  border: 1px solid var(--infobox-border);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  background: var(--infobox-bg);
+
+  .infobox-header {
+    background: var(--infobox-header-bg);
+    color: var(--infobox-header-fg);
+    padding: 0.5rem 0.75rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .infobox-body {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .infobox-row {
+    display: flex;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid var(--gray-200);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .infobox-label {
+    flex: 0 0 45%;
+    font-weight: 600;
+    color: var(--gray-500);
+  }
+
+  .infobox-value {
+    flex: 1;
+  }
+
+  /* Responsive: full-width on small screens */
+  @media (max-width: 768px) {
+    float: none;
+    width: 100%;
+    margin: 0 0 1rem 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Risk level badges
+   -------------------------------------------------------------------------- */
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-critical { background: var(--risk-critical); color: #fff; }
+.badge-high     { background: var(--risk-high); color: #fff; }
+.badge-medium   { background: var(--risk-medium); color: #414141; }
+.badge-low      { background: var(--risk-low); color: #fff; }
+
+.badge-detection-none    { background: var(--detection-none); color: #fff; }
+.badge-detection-partial { background: var(--detection-partial); color: #414141; }
+.badge-detection-good    { background: var(--detection-good); color: #fff; }
+.badge-detection-na      { background: var(--detection-na); color: #fff; }
+
+.badge-core        { background: var(--status-core); color: #fff; }
+.badge-provisional { background: var(--status-provisional); color: #fff; }
+
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+.book-footer {
+  .version-footer {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--gray-500);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Summary tables (ACF overview, STRIDE landing pages)
+   -------------------------------------------------------------------------- */
+.summary-table {
+  width: 100%;
+
+  .risk-cell {
+    text-align: center;
+    width: 80px;
+  }
+
+  .detection-cell {
+    text-align: center;
+    width: 80px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Print styles
+   -------------------------------------------------------------------------- */
+@media print {
+  .infobox {
+    float: none;
+    width: 100%;
+    page-break-inside: avoid;
+  }
+}

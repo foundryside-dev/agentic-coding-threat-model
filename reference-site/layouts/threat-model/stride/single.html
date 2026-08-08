@@ -1,0 +1,63 @@
+{{ define "main" }}
+<article class="markdown book-article">
+  <h1>{{ .Title }}</h1>
+
+  {{ .Content }}
+
+  {{/* Query ACF entries matching this STRIDE category */}}
+  {{- $catSlug := .Params.stride_slug -}}
+  {{- $entries := where (where site.RegularPages "Section" "acf") "Params.stride_category" $catSlug -}}
+
+  {{- if gt (len $entries) 0 }}
+
+  {{/* Risk distribution */}}
+  <h2>Risk Distribution</h2>
+  {{- $critical := where $entries "Params.risk_level" "critical" -}}
+  {{- $high := where $entries "Params.risk_level" "high" -}}
+  {{- $medium := where $entries "Params.risk_level" "medium" -}}
+  {{- $low := where $entries "Params.risk_level" "low" -}}
+  <ul>
+    {{- if gt (len $critical) 0 }}<li>{{ partial "badge.html" (dict "type" "risk" "value" "critical") }} {{ len $critical }} entries</li>{{ end }}
+    {{- if gt (len $high) 0 }}<li>{{ partial "badge.html" (dict "type" "risk" "value" "high") }} {{ len $high }} entries</li>{{ end }}
+    {{- if gt (len $medium) 0 }}<li>{{ partial "badge.html" (dict "type" "risk" "value" "medium") }} {{ len $medium }} entries</li>{{ end }}
+    {{- if gt (len $low) 0 }}<li>{{ partial "badge.html" (dict "type" "risk" "value" "low") }} {{ len $low }} entries</li>{{ end }}
+  </ul>
+
+  {{/* Detection coverage */}}
+  <h2>Detection Coverage</h2>
+  {{- $none := where $entries "Params.detection_status" "none" -}}
+  {{- $partial := where $entries "Params.detection_status" "partial" -}}
+  {{- $good := where $entries "Params.detection_status" "good" -}}
+  <ul>
+    {{- if gt (len $none) 0 }}<li>{{ partial "badge.html" (dict "type" "detection" "value" "none") }} {{ len $none }} entries</li>{{ end }}
+    {{- if gt (len $partial) 0 }}<li>{{ partial "badge.html" (dict "type" "detection" "value" "partial") }} {{ len $partial }} entries</li>{{ end }}
+    {{- if gt (len $good) 0 }}<li>{{ partial "badge.html" (dict "type" "detection" "value" "good") }} {{ len $good }} entries</li>{{ end }}
+  </ul>
+
+  {{/* Entry table */}}
+  <h2>Entries</h2>
+  <table class="summary-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Risk</th>
+        <th>Detection</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{- range $entries }}
+      <tr>
+        <td><a href="{{ .RelPermalink }}">{{ .Params.acf_id }}</a></td>
+        <td>{{ .Params.acf_name }}</td>
+        <td class="risk-cell">{{ partial "badge.html" (dict "type" "risk" "value" .Params.risk_level) }}</td>
+        <td class="detection-cell">{{ partial "badge.html" (dict "type" "detection" "value" .Params.detection_status) }}</td>
+        <td>{{ partial "badge.html" (dict "type" "status" "value" .Params.entry_status) }}</td>
+      </tr>
+      {{- end }}
+    </tbody>
+  </table>
+  {{- end }}
+</article>
+{{ end }}

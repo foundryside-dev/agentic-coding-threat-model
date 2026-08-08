@@ -1,0 +1,11 @@
+# Generated Typst output — rebuild with ./build*.sh
+*.typ
+!template.typ
+!pandoc-typst-community.typ
+!pandoc-typst-lite.typ
+
+# Compiled PDFs
+source/*.pdf
+
+# Mermaid build temp dir (cleaned up by build scripts, but just in case)
+.mermaid-tmp/

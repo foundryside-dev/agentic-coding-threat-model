@@ -1,0 +1,16 @@
+{{ define "main" }}
+<article class="markdown book-article">
+  {{ partial "acf-infobox.html" . }}
+
+  <h1>{{ .Title }}</h1>
+
+  {{ .Content }}
+
+  <hr>
+  <p class="book-hint info">
+    <strong>Source:</strong> This entry is derived from
+    <a href="{{ site.Params.wiki_base_url }}understand/paper/">{{ .Params.source_chapter }}</a>
+    in the discussion paper.
+  </p>
+</article>
+{{ end }}

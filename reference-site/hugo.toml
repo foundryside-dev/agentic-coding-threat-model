@@ -1,0 +1,33 @@
+baseURL = "https://semanticdefects.foundryside.dev/reference/"
+title = "ACF Practitioner Reference"
+languageCode = "en-au"
+theme = "hugo-book"
+
+# All content sections appear in sidebar menu
+[params]
+  version = "0.1.0"
+  status = "Draft"
+  wiki_base_url = "https://semanticdefects.foundryside.dev/"
+  BookTheme = "auto"
+  BookSection = "*"
+  BookToC = true
+  BookSearch = true
+  BookComments = false
+
+[taxonomies]
+  risk_level = "risk_levels"
+  detection_status = "detection_statuses"
+  entry_type = "entry_types"
+  audience = "audiences"
+  entry_status = "entry_statuses"
+
+[outputs]
+  home = ["HTML", "JSON"]
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel = 4

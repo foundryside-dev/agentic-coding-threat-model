@@ -1,0 +1,32 @@
+{{ define "main" }}
+<article class="markdown book-article">
+  <h1>{{ .Title }}</h1>
+
+  {{/* "Key entries" sidebar — ACF entries tagged in this chapter's front matter */}}
+  {{- with .Params.acf_tags }}
+  <div class="infobox" style="margin-bottom: 1rem;">
+    <div class="infobox-header">Key Entries</div>
+    <div class="infobox-body">
+      {{- range . -}}
+        {{- $id := . -}}
+        {{- range where site.RegularPages "Section" "acf" -}}
+          {{- if eq .Params.acf_id $id }}
+          <div class="infobox-row">
+            <span class="infobox-value"><a href="{{ .RelPermalink }}">{{ .Params.acf_id }}: {{ .Params.acf_name }}</a></span>
+          </div>
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    </div>
+  </div>
+  {{- end }}
+
+  {{ .Content }}
+
+  <hr>
+  <p class="book-hint info">
+    <strong>Source:</strong> Derived from the
+    <a href="{{ site.Params.wiki_base_url }}understand/paper/">discussion paper</a>.
+  </p>
+</article>
+{{ end }}

@@ -1,0 +1,13 @@
+{{ define "main" }}
+<article class="markdown book-article">
+  <h1>{{ .Title }}</h1>
+
+  {{ .Content }}
+
+  <hr>
+  <p class="book-hint info">
+    <strong>Source:</strong> Derived from the
+    <a href="{{ site.Params.wiki_base_url }}wardline/specification/">Wardline companion specification</a>.
+  </p>
+</article>
+{{ end }}

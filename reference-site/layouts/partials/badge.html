@@ -1,0 +1,15 @@
+{{- $type := .type -}}
+{{- $value := .value -}}
+{{- $class := "" -}}
+{{- $display := $value -}}
+
+{{- if eq $type "risk" -}}
+  {{- $class = printf "badge-%s" $value -}}
+{{- else if eq $type "detection" -}}
+  {{- $class = printf "badge-detection-%s" $value -}}
+  {{- if eq $value "na" -}}{{- $display = "N/A" -}}{{- end -}}
+{{- else if eq $type "status" -}}
+  {{- $class = printf "badge-%s" $value -}}
+{{- end -}}
+
+<span class="badge {{ $class }}">{{ $display }}</span>

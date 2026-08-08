@@ -1,0 +1,115 @@
+site_name: "Semantic Defects in AI-Generated Code"
+site_description: "Assurance frameworks for AI-assisted development in high-stakes code paths"
+site_url: "https://semanticdefects.foundryside.dev/"
+repo_url: "https://github.com/foundryside-dev/agentic-coding-threat-model"
+
+theme:
+  name: material
+  language: en
+  custom_dir: overrides
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - announce.dismiss
+    - navigation.tabs
+    - navigation.indexes
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - navigation.instant
+    - navigation.instant.preview
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.copy
+    - toc.follow
+    - content.tooltips
+    - content.code.annotate
+  icon:
+    logo: material/shield-check
+    repo: fontawesome/brands/github
+
+hooks:
+  - hooks/disclaimer.py
+
+plugins:
+  - search
+  - tags
+
+markdown_extensions:
+  - admonition
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - tables
+  - attr_list
+  - md_in_html
+  - footnotes
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - toc:
+      permalink: true
+  - abbr
+  - pymdownx.snippets:
+      base_path: docs
+      auto_append:
+        - includes/abbreviations.md
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  version: "0.1.0"
+  status: "Draft for Comment"
+
+nav:
+  - Home:
+      - index.md
+
+  - Understand:
+      - "The Problem": understand/index.md
+      - "Taxonomy (Failure Modes)": understand/taxonomy.md
+      - "Full Discussion Paper": understand/paper.md
+
+  - Assess:
+      - "Your Exposure": assess/index.md
+      - "For CISOs & Security Advisors": assess/ciso-assessment.md
+      - "For Security Assessors": assess/irap-checklist.md
+      - "Self-Assessment: Autonomy Levels": assess/autonomy-assessment.md
+
+  - Respond:
+      - "How to Respond": respond/index.md
+      - "Practical Guide for Code Authors": respond/practical-guide.md
+      - "Case Studies": respond/case-study.md
+
+  - Reference:
+      - "Reading Guide (By Role)": reference/reading-guide.md
+      - "Browse by Tags": reference/tags.md
+      - "Glossary": reference/glossary.md
+      - "Bibliography": reference/bibliography.md
+      - "About This Project": reference/about.md
