@@ -1,0 +1,5 @@
+# Archived: Wardline Framework Specification, Draft v0.2.0
+
+Archived 8 August 2026. These 19 chapter files are the original Wardline specification as designed **before** the implementation existed. The shipped implementation (wardline v1.5.0, <https://github.com/foundryside-dev/wardline>) diverged substantially: a skim-depth damage assessment found ~25–30% of this text survives into an as-built rewrite, the 17-group annotation vocabulary collapsed to 3 decorators, the WL-001–008 rule namespace was never built (the implementation uses PY-WL-101–126 plus 2 Rust preview rules), the governance model was deliberately not implemented, and the Java binding has no implementation at all.
+
+The replacement documents in `source/chapters/wardline-*` are rewritten from the implementation as source of truth. This archive is retained for provenance and for harvesting: the enforcement-spec state machine (§5), verification properties (§10), residual risks (§12), problem statement (§2), and non-goals (§3) survive largely intact in the rewrite; the rest is of historical interest as a record of what was designed versus what was built.
