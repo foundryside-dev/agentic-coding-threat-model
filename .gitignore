@@ -40,3 +40,8 @@ reference-site/resources/
 .claude/agents/
 .claude/agent-memory/
 reference-site/data/
+
+# Filigree issue tracker
+.weft/
+.filigree/
+
