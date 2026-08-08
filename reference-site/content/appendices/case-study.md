@@ -821,6 +821,8 @@ The following presents three concrete examples of the failure dynamics, drawn fr
 
 **E.7** draws cross-cutting observations across all three examples.
 
+**E.8** (added in v0.2.0) is a postscript from approximately five months later: the remediation phase of the structural-typing incident cited in the postscript above, in which an agent session discovered that its remediation ticket had been reversed by its own governing decision record — and what a 601-site survey revealed about syntactic bans on semantic properties.
+
 **How to read this appendix.** The transcripts contain code, configuration, and technical detail — they are evidence, and the detail is what makes them evidence. Non-technical readers do not need to follow every line. The narrative structure carries the argument: in each example, the AI completed the task, all automated checks passed, the result was wrong, and a human who already suspected a problem had to ask the right questions to surface it. Readers arriving from different paths:
 
 - **Executives and programme directors** — read the narrative in E.2 (skip the code blocks) and then E.7 (cross-cutting observations, ~1 page). The governance finding is in E.7: "policy available, not applied" recurred in every example, detection required mechanisms above the standard assurance stack, and all three examples represent favourable review conditions, not typical ones. Programme directors should also read E.6 (specification-level review — catching violations before code is written).
@@ -1249,6 +1251,48 @@ The three examples in this appendix — separated by five days and spanning code
 The violation rate data provides the frequency context for how often these patterns occur in steady-state development. The generative conditions — training-distribution bias toward defensive patterns, context collapse under session pressure, and the absence of persistent learning across sessions — are architectural properties of how agents generate code, not properties of this specific project. Any practitioner using a general-purpose coding agent on a codebase with authority-tier distinctions, audit requirements, or trust boundaries can reproduce these patterns by prompting the agent to write error handling, data access, or validation code on those paths.
 
 **The consistency across layers is itself the evidence.** The three examples are not parallel instances of the same failure — they are an ascending series: code-level (E.1–E.3), design-level (E.4–E.5), and specification-level (E.6), caught by three different detection mechanisms (operator challenge, operator-directed investigation, prompted multi-agent review) across five calendar days. The same failure shape — policy available, not applied; adjacent policy correct, governing policy missed; surface quality concealing semantic violation — appeared at every layer, in every detection context, under favourable review conditions (experienced operator, specialised analytical frames). In a typical review context — less operator familiarity, fewer analytical perspectives, higher volume pressure — these defects enter the codebase as locally reasonable code that passes all automated checks. The quality of the outcome depended entirely on someone knowing which questions to ask.
+
+### E.8 Postscript: the remediation phase
+
+*Added in v0.2.0, approximately five months after the incidents above.* E.1–E.6 show semantic defects being *caught*. This postscript documents the other half of the lifecycle — the same project operating inside the mature response — and closes a loop opened by the [validation boundary postscript](#postscript-the-validation-boundary-as-built): the structural-typing guard incident cited there (a runtime-checkable protocol that passed impostor objects while rejecting the real vendor object, with approximately 33,000 unit tests green — the [ACF-S3]({{< relref "/acf/s3-structural-identity-spoofing" >}}) failure shape encountered live) produced a corrective decision record, and that record's aftermath is where this example begins.
+
+#### The stale mandate
+
+A standing remediation ticket directed the elimination of "banned attribute masquerading" across a **601-site** target list, prescribing two remedies: declare runtime-checkable protocols, and ban the attribute-probing tokens outright.
+
+The governing decision record — accepted **one day after the ticket was last edited** — named the ticket explicitly and **reversed both instructions**. The protocol pattern was the root cause of the original P0 (it admits impostors that merely declare the right attribute names, and since Python 3.12 rejects genuine dynamic vendor objects), and the probing tokens it banned are now the *prescribed* pattern at external boundaries (sentinel probe → value assertions → owned type). **Following the ticket literally would have reintroduced the P0.**
+
+The executing agent session caught the contradiction — by checking the ticket against the decision records that cite it before acting — and converted the task from a migration into an investigation.
+
+**The counterfactual is the hazard worth naming.** Agents are unusually literal and compliant executors of work instructions — and the more faithful the execution, the more dangerous a silently superseded instruction becomes. A human assigned the ticket might have remembered the week-old decision or asked; an agent handed the ticket as its task frame has no reason to doubt it, and statelessness compounds the exposure: **the agent re-trusts the stale ticket afresh in every session, indefinitely.**
+
+> [!NOTE]
+> **Candidate failure mode: stale mandate execution.** *An agent faithfully executes a work instruction that has been superseded or withdrawn by a governance artefact the instruction does not reference.* The defect is not in the code the agent writes — **it is that the agent writes the wrong code correctly.**
+>
+> It is distinct from the taxonomy's existing entries: not training-distribution bias (no pattern was being reached for), not context collapse (the context was present and correct; the *instruction* was wrong), and not [ACF-R4]({{< relref "/acf/r4-context-handover-assumption" >}})'s handover loss (nothing was dropped between sessions).
+>
+> The mitigation is the family this paper already proposes: machine-readable governance state that the task frame is forced to consult — work instructions that cite their governing decision records, and tooling that fails the task when a cited record has been superseded. **This is put forward as a workflow-pattern candidate in the Repudiation family through the taxonomy's extension mechanism, not as a settled entry**, and the [ACF taxonomy]({{< relref "/acf" >}}) counts are unchanged.
+
+#### Form predicted defect in neither direction
+
+The session's survey of all 601 sites is the paper's central technical argument quantified on a natural experiment.
+
+- All **8** production sites the ticket's criteria marked "unconditionally banned" were **legitimate on inspection**. Four were module facades resolving from closed literal tables — the very "explicit table" the ticket asks authors to write — and one was *itself an anti-masquerading guard*: the campaign's criteria would have deleted a control the campaign existed to install. That is the [ACF-T4]({{< relref "/acf/t4-safety-guard-erosion" >}}) erosion shape arriving as a directive rather than a refactor.
+- Both genuine defect candidates found in the corpus sat in the class the survey rated **"probably fine"** — structurally invisible to the ticket's criteria.
+
+**On this corpus, a syntactic ban had approximately zero precision and approximately zero recall for the semantic property it targeted.** In the session's own words: the same three tokens are mandatory at a vendor boundary and forbidden one function up — *a ban written as a syntactic form cannot express a rule whose subject is trust domain.*
+
+#### What shipped: a corpus ratchet
+
+Because the rule's subject cannot be expressed syntactically, the deliverable was **not a migration but a freeze**: a per-site baseline of 320 named entries, three narrow structural amnesties for provably safe shapes, and errors on drift in any direction — new sites, vanished entries, and changed occurrence counts all fail the gate. Deliberately no signatures and no authority-tier coupling: a proportionate, bespoke control. The general pattern is described as [baseline-and-ratchet enforcement]({{< relref "/threat-model/response-landscape" >}}#baseline-and-ratchet-enforcement-for-unpatternable-rules).
+
+**The gate carries its own epistemic status.** Most entries were seeded *unadjudicated*, recorded in the baseline's header and in the test messages, so a green gate reads as "nothing new landed" — **not "this corpus is correct."** That is a third epistemic state between "checked and clean" and "didn't look", and it converts the corpus into a visible, classified worklist rather than a silent debt.
+
+The ratchet's own verification produced a finding worth recording: the first build keyed entries on `(path, function, kind)`, collapsing repeated probes within a single function — leaving **135 sites (29%) invisible to the ratchet**, concentrated on the vendor-admission boundary the governing decision record had just corrected. Occurrence counts closed the gap. The weakening had been documented honestly in two places; only *measuring the distribution* showed that it mattered — measured recall demonstrated against the enforcement tool itself, and the tool-verification recursion handled in practice (with detection disabled, eleven tests fail).
+
+#### What was deliberately left
+
+The **471 test-lane sites** were left untouched — not for lack of time, but because the available signal cannot adjudicate them: **a green suite is the expected outcome of both a correct rewrite and a rewrite that neutered the test.** That is the coverage-illusion argument applied prospectively, as a review-planning constraint. The session recorded two defects rather than fixing them, and routed the adjudication to lead review, because *"recorded, not fixed"* was the honest posture the evidence supported.
 
 ---
 

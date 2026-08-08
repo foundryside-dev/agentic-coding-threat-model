@@ -65,7 +65,7 @@ The one-line summary the specification's own author draws: *the designed specifi
 | 1.0.1 | 17 Jun 2026 | Explicit gate verdict; parse failures gate-eligible; the gate stops honouring committed suppressions (all breaking) |
 | 1.1.0 | 29 Jun 2026 | Inert-gate visibility; attestation bundle schema v2 |
 | 1.3.0 | 3 Jul 2026 | Zero scanned files reports `NOT_EVALUATED` |
-| 1.5.0 | 31 Jul 2026 | 28 rules, MCP server, agent-install, Rust preview frontend, trust-grammar packs, attestation and rekeying, FastAPI and Pydantic sources |
+| 1.5.0 | 31 Jul 2026 | *Cumulative surface at this release:* 28 rules, MCP server, agent-install, Rust preview frontend, trust-grammar packs, attestation (bundle schema v2, plus a required `sei_diagnostics` array at this release) and rekeying, FastAPI and Pydantic sources |
 | `release/1.5.0` | current branch | `--fail-on-inert`; Codex judge transport |
 
 Fifteen changelog entries in nine weeks, with no 1.0.0 and no 1.4.0. **The whole implementation is about ten weeks old**, and every maturity claim in this section should be read against that.
