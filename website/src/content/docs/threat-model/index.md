@@ -1,7 +1,7 @@
 ---
 title: Threat Model
 sidebar:
-  order: 1
+  order: 0
 ---
 
 This section presents the threat model for agent-generated code: why plausible, convention-conforming output can be unsafe on high-stakes code paths; how authority and validation boundaries should constrain it; why ordinary review is structurally insufficient; and what organisations can do in response.

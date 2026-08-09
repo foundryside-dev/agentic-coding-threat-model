@@ -1,7 +1,8 @@
 ---
 title: Assess Your Exposure
 sidebar:
-  order: 1
+  label: Overview
+  order: 0
 ---
 
 Use these assessment tools to locate your organisation's current exposure, examine control gaps for security leadership, and gather the evidence an Information Security Registered Assessors Program (IRAP) assessor needs.

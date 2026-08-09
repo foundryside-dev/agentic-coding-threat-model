@@ -1,7 +1,7 @@
 ---
 title: 'ACF-T3: Unstructured Signal Parsing'
 sidebar:
-  label: 'T3 Unstructured Signal Parsing'
+  label: 'ACF-T3: Unstructured Signal Parsing'
   order: 6
 acf:
   id: ACF-T3

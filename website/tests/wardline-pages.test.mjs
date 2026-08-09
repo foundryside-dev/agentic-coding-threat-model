@@ -6,7 +6,7 @@ import matter from 'gray-matter';
 
 const directory = new URL('../src/content/docs/wardline/', import.meta.url);
 const expected = {
-  'index.mdx': ['Wardline', 3, [
+  'index.mdx': ['Wardline', 0, [
     'There is no Java binding, no manifest, no exception register',
     'Five states reachable by default',
     'designed specification was a good threat model and a poor implementation plan',

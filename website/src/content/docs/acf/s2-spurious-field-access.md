@@ -1,7 +1,7 @@
 ---
 title: 'ACF-S2: Spurious Field Access'
 sidebar:
-  label: 'S2 Spurious Field Access'
+  label: 'ACF-S2: Spurious Field Access'
   order: 2
 acf:
   id: ACF-S2

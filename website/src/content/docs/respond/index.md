@@ -1,7 +1,8 @@
 ---
 title: Controls and Actions
 sidebar:
-  order: 1
+  label: Overview
+  order: 0
 ---
 
 These resources turn the threat model into practical action, from reviewing AI-generated code on high-stakes paths to examining the evidence and assurance gaps exposed by the case studies.

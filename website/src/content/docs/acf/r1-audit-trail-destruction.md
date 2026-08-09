@@ -1,7 +1,7 @@
 ---
 title: 'ACF-R1: Audit Trail Destruction'
 sidebar:
-  label: 'R1 Audit Trail Destruction'
+  label: 'ACF-R1: Audit Trail Destruction'
   order: 7
 acf:
   id: ACF-R1

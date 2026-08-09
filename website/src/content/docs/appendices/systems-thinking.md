@@ -1,7 +1,7 @@
 ---
 title: Systems Thinking Primer
 sidebar:
-  order: 5
+  order: 3
 ---
 
 This appendix provides a brief introduction to the systems thinking concepts that underpin the paper's analysis. The paper uses systems-theoretic reasoning throughout — feedback loops, archetypes, stock-flow dynamics, and leverage point analysis — but does not assume the reader is familiar with these frameworks. Readers who already work in systems dynamics or safety engineering may skip this appendix. Readers coming from a security engineering or policy background will find it useful as an interpretive guide to the analytical structure of the preceding sections.

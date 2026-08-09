@@ -1,7 +1,7 @@
 ---
 title: 'ACF-S1: Fabricated Default'
 sidebar:
-  label: 'S1 Fabricated Default'
+  label: 'ACF-S1: Fabricated Default'
   order: 1
 acf:
   id: ACF-S1

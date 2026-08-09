@@ -9,24 +9,24 @@ const repository = new URL('../../', import.meta.url);
 
 const expected = {
   appendices: {
-    'index.md': ['Appendices', 1, ['./sql-extension/', './cross-model-defects/', './systems-thinking/']],
-    'sql-extension.md': ['SQL Extension Case Study', 2, ['citizen programmer problem', 'authoritative data store', 'A SQL query that returns wrong results produces results', 'COALESCE()']],
-    'cross-model-defects.md': ['Cross-Model Defect Chaining', 4, ['overlapping training-distribution bias', 'cross-model defect chaining', 'lineage independence', 'stale mandate execution']],
-    'systems-thinking.md': ['Systems Thinking Primer', 5, ['emergent, non-adversarial', 'Reinforcing loops', 'Shifting the Burden', 'leverage points']],
+    'index.md': ['Appendices', 0, ['./sql-extension/', './cross-model-defects/', './systems-thinking/'], 'Overview'],
+    'sql-extension.md': ['SQL Extension Case Study', 1, ['citizen programmer problem', 'authoritative data store', 'A SQL query that returns wrong results produces results', 'COALESCE()']],
+    'cross-model-defects.md': ['Cross-Model Defect Chaining', 2, ['overlapping training-distribution bias', 'cross-model defect chaining', 'lineage independence', 'stale mandate execution']],
+    'systems-thinking.md': ['Systems Thinking Primer', 3, ['emergent, non-adversarial', 'Reinforcing loops', 'Shifting the Burden', 'leverage points']],
   },
   assess: {
-    'index.md': ['Assess Your Exposure', 1, ['./autonomy-assessment/', './ciso-assessment/', './irap-checklist/']],
+    'index.md': ['Assess Your Exposure', 0, ['./autonomy-assessment/', './ciso-assessment/', './irap-checklist/'], 'Overview'],
     'autonomy-assessment.md': ['Agent Autonomy Self-Assessment', 1, ['not a maturity model', 'purpose is self-location', 'Level 3: Autonomous', 'boundary between levels']],
     'ciso-assessment.md': ['CISO Assessment: AI-Generated Code Risk', 2, ['category error between program state and domain state', 'cross-agency correlated risk', 'ISM-0402', 'semantic boundary enforcement']],
     'irap-checklist.md': ['IRAP Assessor Checklist', 3, ['semantic defect class specific to AI-generated code', 'contracted development pipelines', 'review processes remain effective', 'Evidence to request']],
   },
   respond: {
-    'index.md': ['Controls and Actions', 1, ['./practical-guide/', './case-study/']],
+    'index.md': ['Controls and Actions', 0, ['./practical-guide/', './case-study/'], 'Overview'],
     'practical-guide.md': ['Reviewing AI-Generated Code: A Practical Guide for Code Authors', 1, ['You Are Not Doing Anything Wrong', 'wrong decision about data that matters', 'Five Questions', 'high-stakes path']],
     'case-study.md': ['Case Studies: What the Invisibility Problem Looks Like in Practice', 2, ['government citizen assistance portal', '20 semantic defects', 'six months of longitudinal observation', 'standard assurance stack']],
   },
   understand: {
-    'index.md': ['Governing AI-Generated Code: Semantic Risk in High-Stakes Code Paths', 1, ['structural blind spot', 'security classifications', 'policy non-application', 'not a recommendation to restrict or ban AI coding tools']],
+    'index.md': ['Governing AI-Generated Code: Semantic Risk in High-Stakes Code Paths', 0, ['structural blind spot', 'security classifications', 'policy non-application', 'not a recommendation to restrict or ban AI coding tools'], 'Overview'],
   },
   reference: {
     'about.mdx': ['About This Project', 1, ['The document suite', 'Prepared by', 'John Morrissey', 'independent draft discussion paper']],
@@ -91,9 +91,9 @@ test('Task 14 creates exactly sixteen final routes with exact titles and source 
   assert.equal(Object.keys(flatExpected).length, 16);
   for (const [section, files] of Object.entries(expected)) {
     assert.deepEqual(await sectionFiles(section), Object.keys(files).sort(), section);
-    for (const [file, [title, order]] of Object.entries(files)) {
+    for (const [file, [title, order, , label]] of Object.entries(files)) {
       const source = await safeRead(new URL(`${section}/${file}`, docs));
-      assert.deepEqual(matter(source).data, { title, sidebar: { order } }, `${section}/${file}`);
+      assert.deepEqual(matter(source).data, { title, sidebar: label ? { label, order } : { order } }, `${section}/${file}`);
     }
   }
   assert.equal(await safeRead(new URL('appendices/autonomy-assessment.md', docs)), '');

@@ -4,6 +4,7 @@ import { unified } from '@astrojs/markdown-remark';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
 import { mermaidFences } from './plugins/remark-mermaid.mjs';
+import { sidebar } from './src/data/sidebar.mjs';
 
 export default defineConfig({
 	site: 'https://semanticdefects.foundryside.dev',
@@ -32,16 +33,7 @@ export default defineConfig({
 					href: 'https://github.com/foundryside-dev/agentic-coding-threat-model',
 				},
 			],
-			sidebar: [
-				{ label: 'Understand', items: [{ autogenerate: { directory: 'understand' } }] },
-				{ label: 'Threat Model', items: [{ autogenerate: { directory: 'threat-model' } }] },
-				{ label: 'ACF Taxonomy', items: [{ autogenerate: { directory: 'acf' } }] },
-				{ label: 'Wardline', items: [{ autogenerate: { directory: 'wardline' } }] },
-				{ label: 'Assess', items: [{ autogenerate: { directory: 'assess' } }] },
-				{ label: 'Respond', items: [{ autogenerate: { directory: 'respond' } }] },
-				{ label: 'Appendices', items: [{ autogenerate: { directory: 'appendices' } }] },
-				{ label: 'Reference', items: [{ autogenerate: { directory: 'reference' } }] },
-			],
+			sidebar,
 		}),
 	],
 });

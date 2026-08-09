@@ -1,7 +1,8 @@
 ---
 title: "Governing AI-Generated Code: Semantic Risk in High-Stakes Code Paths"
 sidebar:
-  order: 1
+  label: Overview
+  order: 0
 ---
 
 This page presents the core argument of the discussion paper in accessible form: what AI-generated semantic defects are, why they matter for high-stakes systems, and what a proportionate response could look like. For the full technical analysis, see the [full discussion paper](../pdf/threat-model-discussion-paper-community.pdf). For the threat taxonomy, see the [ACF taxonomy](../acf/). If you write or review code yourself, start with the [Practical Guide for Code Authors](../respond/practical-guide/).

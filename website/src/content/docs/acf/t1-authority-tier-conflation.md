@@ -1,7 +1,7 @@
 ---
 title: 'ACF-T1: Authority Tier Conflation'
 sidebar:
-  label: 'T1 Authority Tier Conflation'
+  label: 'ACF-T1: Authority Tier Conflation'
   order: 4
 acf:
   id: ACF-T1

@@ -1,7 +1,7 @@
 ---
 title: SQL Extension Case Study
 sidebar:
-  order: 2
+  order: 1
 ---
 
 The threat model uses Python for its primary examples. The failure modes generalise, but SQL warrants explicit treatment for three reasons.

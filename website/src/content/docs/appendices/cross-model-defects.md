@@ -1,7 +1,7 @@
 ---
 title: Cross-Model Defect Chaining
 sidebar:
-  order: 4
+  order: 2
 ---
 
 This appendix outlines a plausible second-order systemic risk arising from the most obvious mitigation to model monoculture: the use of multiple models. The concern is not that diversity is ineffective, but that it may reduce common-mode failure while preserving systemic exposure in altered form.

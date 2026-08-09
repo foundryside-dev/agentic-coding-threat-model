@@ -1,7 +1,7 @@
 ---
 title: 'ACF-S3: Structural Identity Spoofing'
 sidebar:
-  label: 'S3 Structural Identity Spoofing'
+  label: 'ACF-S3: Structural Identity Spoofing'
   order: 3
 acf:
   id: ACF-S3

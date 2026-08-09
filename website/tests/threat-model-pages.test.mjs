@@ -8,7 +8,7 @@ const docs = new URL('../src/content/docs/', import.meta.url);
 const directory = new URL('threat-model/', docs);
 
 const expected = {
-  'index.md': ['Threat Model', 1, [
+  'index.md': ['Threat Model', 0, [
     'This section presents the threat model for agent-generated code',
     './introduction/', './threat-landscape/', './trust-boundaries/',
   ]],

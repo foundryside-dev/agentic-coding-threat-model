@@ -1,7 +1,7 @@
 ---
 title: 'ACF-T2: Silent Coercion'
 sidebar:
-  label: 'T2 Silent Coercion'
+  label: 'ACF-T2: Silent Coercion'
   order: 5
 acf:
   id: ACF-T2
