@@ -47,5 +47,8 @@ jobs:
       - name: Install Mermaid CLI 11.16.0
         run: npm install --global @mermaid-js/mermaid-cli@11.16.0
 
+      - name: Test Typst post-processing
+        run: python3 -m unittest discover -s source/pdf/tests -p 'test_*.py'
+
       - name: Rebuild and verify published PDFs
         run: ./source/pdf/build-all.sh --check

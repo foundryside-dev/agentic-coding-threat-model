@@ -148,11 +148,14 @@ table_count = content.count(figure_start)
 content = content.replace(figure_start, '#table(')
 content = content.replace(figure_end, '  )')
 
-# Pandoc 3.9 maps Markdown image alt text to a Typst figure caption but does
-# not yet populate image(alt:), which Typst 0.14 requires for PDF/UA. Copy the
-# generated contextual caption into the image's machine-readable alt field.
+# Pandoc 3.9 maps Markdown image alt text to a Typst figure caption. Patch
+# releases differ on whether they also populate image(alt:), which Typst 0.14
+# requires for PDF/UA. Normalise both forms to the contextual caption so the
+# image has one stable, machine-readable alternative rather than duplicate
+# arguments.
 figure_pattern = re.compile(
-    r'#figure\(image\(\x22(?P<path>\.assets/[^\x22]+\.(?:svg|png))\x22, width: (?P<width>[^)]+)\),'
+    r'#figure\((?P<image_call>image\(\x22(?P<path>\.assets/[^\x22]+\.(?:svg|png))\x22, '
+    r'width: (?P<width>[^,)]+)(?:, alt: .*?)?\)),'
     r'\n  caption: \[\n(?P<caption>.*?)\n  \]\n\)',
     flags=re.DOTALL,
 )
@@ -160,8 +163,8 @@ figure_pattern = re.compile(
 def add_image_alt(match):
     caption = re.sub(r'\s+', ' ', match.group('caption')).strip()
     image_call = 'image(' + json.dumps(match.group('path'), ensure_ascii=False) + ', width: ' + match.group('width')
-    accessible_call = image_call + f', alt: {json.dumps(caption, ensure_ascii=False)}'
-    return match.group(0).replace(image_call, accessible_call, 1)
+    accessible_call = image_call + f', alt: {json.dumps(caption, ensure_ascii=False)})'
+    return match.group(0).replace(match.group('image_call'), accessible_call, 1)
 
 content, accessible_figure_count = figure_pattern.subn(add_image_alt, content)
 

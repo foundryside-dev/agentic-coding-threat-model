@@ -24,6 +24,8 @@ source/pdf/*
 !source/pdf/README.md
 !source/pdf/pandoc-typst-lite.typ
 !source/pdf/.gitignore
+!source/pdf/tests/
+!source/pdf/tests/test_postprocess_typst.py
 .venv/
 site/
 __pycache__/
