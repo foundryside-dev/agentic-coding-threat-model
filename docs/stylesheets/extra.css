@@ -3,6 +3,16 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
+   Texture tokens — grain on dark chrome, hairline blueprint grid on the hero
+   -------------------------------------------------------------------------- */
+:root {
+  --texture-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.16'/%3E%3C/svg%3E");
+  --texture-grain-size: 120px 120px;
+  --texture-grid-dark: linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  --texture-grid-size: 32px 32px;
+}
+
+/* --------------------------------------------------------------------------
    Scrollbar — wider for easier grab targets
    -------------------------------------------------------------------------- */
 ::-webkit-scrollbar {
@@ -30,16 +40,18 @@
 }
 
 /* --------------------------------------------------------------------------
-   Brand Palette
+   Brand Palette — slate & cobalt recut
    --------------------------------------------------------------------------
-   Signature green:  #69EBA5
-   Primary green:    #29B480
-   Dark green:       #288264
-   Primary navy:     #1E3C50
-   Light green:      #C8EBD7
+   Signature blue:   #7FA8FF
+   Primary blue:     #2E5BE3
+   Dark blue:        #2547B0
+   Blue hover:       #1F3D9C
+   Light blue:       #C9D8F8
+   Slate:            #2A323D (light #3C4754, dark #1C2229)
    Body text:        #414141
-   Secondary gold:   #FAD673
-   Secondary salmon: #FFC2B0
+   Secondary gold:   #F0C75E
+   Secondary salmon: #FFB4A2
+   Semantic green:   #2F9E60 (reserved: low risk / good detection / core)
    Neutrals:         #27292B, #70767B, #9FA4A7, #CACCCE, #F4F5F5
    -------------------------------------------------------------------------- */
 
@@ -47,14 +59,14 @@
    Light mode (default scheme)
    -------------------------------------------------------------------------- */
 [data-md-color-scheme="default"] {
-  --md-primary-fg-color: #1E3C50;
-  --md-primary-fg-color--light: #2a5570;
-  --md-primary-fg-color--dark: #152d3d;
+  --md-primary-fg-color: #2A323D;
+  --md-primary-fg-color--light: #3C4754;
+  --md-primary-fg-color--dark: #1C2229;
   --md-primary-bg-color: #ffffff;
   --md-primary-bg-color--light: #F4F5F5;
 
-  --md-accent-fg-color: #29B480;
-  --md-accent-fg-color--transparent: rgba(41, 180, 128, 0.1);
+  --md-accent-fg-color: #2E5BE3;
+  --md-accent-fg-color--transparent: rgba(46, 91, 227, 0.1);
   --md-accent-bg-color: #ffffff;
 
   --md-default-fg-color: #414141;
@@ -66,7 +78,7 @@
   --md-default-bg-color--lighter: #F4F5F5;
   --md-default-bg-color--lightest: #ffffff;
 
-  --md-typeset-a-color: #1d5e49;
+  --md-typeset-a-color: #2444A8;
 
   --md-code-bg-color: #F4F5F5;
   --md-code-fg-color: #27292B;
@@ -76,36 +88,47 @@
    Dark mode (slate scheme)
    -------------------------------------------------------------------------- */
 [data-md-color-scheme="slate"] {
-  --md-primary-fg-color: #1E3C50;
-  --md-primary-fg-color--light: #2a5570;
-  --md-primary-fg-color--dark: #152d3d;
+  --md-primary-fg-color: #2A323D;
+  --md-primary-fg-color--light: #3C4754;
+  --md-primary-fg-color--dark: #1C2229;
   --md-primary-bg-color: #ffffff;
   --md-primary-bg-color--light: #ffffffb3;
 
-  --md-accent-fg-color: #69EBA5;
-  --md-accent-fg-color--transparent: rgba(105, 235, 165, 0.1);
+  --md-accent-fg-color: #7FA8FF;
+  --md-accent-fg-color--transparent: rgba(127, 168, 255, 0.1);
 
-  --md-default-bg-color: #1a2631;
-  --md-default-bg-color--light: #1f3040;
-  --md-default-bg-color--lighter: #24384a;
-  --md-default-bg-color--lightest: #2a4155;
+  --md-default-bg-color: #161B22;
+  --md-default-bg-color--light: #1C232C;
+  --md-default-bg-color--lighter: #232C37;
+  --md-default-bg-color--lightest: #2A3542;
 
   --md-default-fg-color: #e0e4e7;
   --md-default-fg-color--light: #9FA4A7;
   --md-default-fg-color--lighter: #70767B;
-  --md-default-fg-color--lightest: #4a5258;
+  --md-default-fg-color--lightest: #454E58;
 
-  --md-typeset-a-color: #69EBA5;
+  --md-typeset-a-color: #7FA8FF;
 
-  --md-code-bg-color: #1f3040;
-  --md-code-fg-color: #C8EBD7;
+  --md-code-bg-color: #1C232C;
+  --md-code-fg-color: #C9D8F8;
+}
+
+/* --------------------------------------------------------------------------
+   Dark chrome texture — fine grain on header and tab bar
+   -------------------------------------------------------------------------- */
+.md-header,
+.md-tabs {
+  background-image: var(--texture-grain);
+  background-size: var(--texture-grain-size);
 }
 
 /* --------------------------------------------------------------------------
    Announcement bar — draft status banner
    -------------------------------------------------------------------------- */
 .md-banner {
-  background-color: #29B480;
+  background-color: #2E5BE3;
+  background-image: var(--texture-grain);
+  background-size: var(--texture-grain-size);
   color: #ffffff;
   font-size: 0.7rem;
   font-weight: 600;
@@ -119,14 +142,14 @@
 }
 
 [data-md-color-scheme="slate"] .md-banner {
-  background-color: #237057;
+  background-color: #2547B0;
 }
 
 /* --------------------------------------------------------------------------
    Classification bar — compact single-line banner
    -------------------------------------------------------------------------- */
 .classification-bar {
-  background-color: #1E3C50;
+  background-color: #2A323D;
   color: #ffffff;
   text-align: center;
   padding: 0.3rem 1rem;
@@ -142,17 +165,19 @@
 }
 
 [data-md-color-scheme="slate"] .classification-bar {
-  background-color: #2a5570;
+  background-color: #3C4754;
 }
 
 /* --------------------------------------------------------------------------
-   Hero section — landing page
+   Hero section — landing page (flat slate, grain + blueprint grid)
    -------------------------------------------------------------------------- */
 .hero {
   text-align: center;
   padding: 2.5rem 1rem 2rem;
   margin: -0.6rem -0.6rem 2rem;
-  background: linear-gradient(135deg, #1E3C50 0%, #2a5570 100%);
+  background-color: #2A323D;
+  background-image: var(--texture-grain), var(--texture-grid-dark);
+  background-size: var(--texture-grain-size), var(--texture-grid-size);
   border-radius: 6px;
   color: #e0e4e7;
 }
@@ -166,7 +191,7 @@
 }
 
 .hero .hero-subtitle {
-  color: #C8EBD7;
+  color: #C9D8F8;
   font-size: 1rem;
   font-weight: 400;
   margin: 0 0 0.3rem;
@@ -199,24 +224,24 @@
 }
 
 .hero .hero-actions .md-button--primary {
-  background-color: #29B480;
+  background-color: #2E5BE3;
   color: #ffffff;
-  border: 2px solid #29B480;
+  border: 2px solid #2E5BE3;
 }
 
 .hero .hero-actions .md-button--primary:hover {
-  background-color: #237057;
-  border-color: #237057;
+  background-color: #1F3D9C;
+  border-color: #1F3D9C;
 }
 
 .hero .hero-actions .md-button--secondary {
   background-color: transparent;
-  color: #C8EBD7;
-  border: 2px solid #69EBA5;
+  color: #C9D8F8;
+  border: 2px solid #7FA8FF;
 }
 
 .hero .hero-actions .md-button--secondary:hover {
-  background-color: rgba(105, 235, 165, 0.12);
+  background-color: rgba(127, 168, 255, 0.12);
   color: #ffffff;
 }
 
@@ -239,7 +264,7 @@
 .grid.cards > ul > li:hover,
 .grid.cards > ol > li:hover {
   border-color: var(--md-accent-fg-color);
-  box-shadow: 0 2px 8px rgba(30, 60, 80, 0.08);
+  box-shadow: 0 2px 8px rgba(35, 45, 60, 0.08);
 }
 
 [data-md-color-scheme="slate"] .grid.cards > ul > li:hover,
@@ -248,16 +273,16 @@
 }
 
 /* --------------------------------------------------------------------------
-   Navigation tabs — use navy background, green active indicator
+   Navigation tabs — slate background, signature blue active indicator
    -------------------------------------------------------------------------- */
 .md-tabs {
-  background-color: #1E3C50;
+  background-color: #2A323D;
 }
 
 .md-tabs__link--active,
 .md-tabs__link:hover {
-  color: #69EBA5;
-  border-bottom: 2px solid #69EBA5;
+  color: #7FA8FF;
+  border-bottom: 2px solid #7FA8FF;
 }
 
 /* --------------------------------------------------------------------------
@@ -266,7 +291,7 @@
 .md-header :focus-visible,
 .md-tabs :focus-visible,
 .md-footer :focus-visible {
-  outline: 3px solid #69EBA5;
+  outline: 3px solid #7FA8FF;
   outline-offset: 2px;
 }
 
@@ -282,7 +307,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Content links — green with underline on hover (AAA contrast)
+   Content links — cobalt with underline (AAA contrast)
    -------------------------------------------------------------------------- */
 .md-typeset a {
   color: var(--md-typeset-a-color);
@@ -290,12 +315,12 @@
 }
 
 .md-typeset a:hover {
-  color: #29B480;
+  color: #2E5BE3;
   text-decoration: underline;
 }
 
 [data-md-color-scheme="slate"] .md-typeset a:hover {
-  color: #C8EBD7;
+  color: #C9D8F8;
 }
 
 /* Don't underline card links or navigation links */
@@ -318,35 +343,35 @@
 
 .md-typeset .admonition.tip,
 .md-typeset details.tip {
-  border-color: #29B480;
+  border-color: #2E5BE3;
 }
 
 .md-typeset .admonition.info,
 .md-typeset details.info {
-  border-color: #1E3C50;
+  border-color: #2A323D;
 }
 
 /* --------------------------------------------------------------------------
-   Footer — navy background
+   Footer — slate background
    -------------------------------------------------------------------------- */
 .md-footer {
-  background-color: #1E3C50;
+  background-color: #2A323D;
 }
 
 .md-footer-meta {
-  background-color: #152d3d;
+  background-color: #1C2229;
 }
 
 /* --------------------------------------------------------------------------
-   Navigation sidebar — subtle green active state
+   Navigation sidebar — cobalt active state
    -------------------------------------------------------------------------- */
 .md-nav__link--active {
-  color: #1d5e49;
+  color: #2444A8;
   font-weight: 600;
 }
 
 [data-md-color-scheme="slate"] .md-nav__link--active {
-  color: #69EBA5;
+  color: #7FA8FF;
 }
 
 /* --------------------------------------------------------------------------
@@ -360,12 +385,12 @@
    Tables — brand-styled header
    -------------------------------------------------------------------------- */
 .md-typeset table:not([class]) th {
-  background-color: #1E3C50;
+  background-color: #2A323D;
   color: #ffffff;
 }
 
 [data-md-color-scheme="slate"] .md-typeset table:not([class]) th {
-  background-color: #2a5570;
+  background-color: #3C4754;
   color: #e0e4e7;
 }
 
