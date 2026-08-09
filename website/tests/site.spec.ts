@@ -5,7 +5,6 @@ import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 
 const site = JSON.parse(readFileSync(new URL('../src/data/site.json', import.meta.url), 'utf8')) as {
-	classification: string;
 	date: string;
 	status: string;
 	version: string;
@@ -64,7 +63,7 @@ async function setTheme(page: Page, theme: 'light' | 'dark') {
 
 test('landing page publication metadata and all five PDF responses', async ({ page }) => {
 	await navigate(page);
-	const publicationLine = `${site.classification} · v${site.version} · ${site.status} · ${site.date}`;
+	const publicationLine = `v${site.version} · ${site.status} · ${site.date}`;
 	await expect(page.getByText(publicationLine)).toBeVisible();
 	await expect(page.getByRole('heading', { name: 'Start here' })).toBeVisible();
 	await expect(page.getByRole('heading', { name: 'Find your path' })).toBeVisible();

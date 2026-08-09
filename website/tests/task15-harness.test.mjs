@@ -14,9 +14,12 @@ test('landing is a Starlight splash page with dynamic publication data and compl
 	assert.match(landing, /template:\s*splash/);
 	assert.match(landing, /import\s+site\s+from\s+['"]\.\.\/\.\.\/data\/site\.json['"]/);
 	assert.match(landing, /import\s+\{\s*CardGrid,\s*LinkCard\s*\}\s+from\s+['"]@astrojs\/starlight\/components['"]/);
-	for (const field of ['classification', 'version', 'status', 'date']) {
+	for (const field of ['version', 'status', 'date']) {
 		assert.match(landing, new RegExp(`\\{site\\.${field}\\}`), field);
 	}
+	assert.doesNotMatch(landing, /site\.classification|\bOFFICIAL\b/);
+	const site = JSON.parse(await source('src/data/site.json'));
+	assert.equal(Object.hasOwn(site, 'classification'), false);
 	for (const route of ['./understand/', './assess/', './respond/practical-guide/', './assess/ciso-assessment/', './assess/irap-checklist/', './acf/', './wardline/', './reference/reading-guide/']) {
 		assert.ok(landing.includes(route), route);
 	}

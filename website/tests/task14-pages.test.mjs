@@ -139,10 +139,12 @@ test('about renders current project metadata dynamically and owns the stable pap
   ]);
   const metadata = JSON.parse(metadataSource);
   assert.match(about, /import\s+site\s+from\s+['"]\.\.\/\.\.\/\.\.\/data\/site\.json['"]/);
-  for (const field of ['version', 'date', 'status', 'classification']) {
+  for (const field of ['version', 'date', 'status']) {
     assert.match(about, new RegExp(`\\{site\\.${field}\\}`), field);
     assert.ok(!matter(about).content.includes(metadata[field]), `${field} must not be hard-coded`);
   }
+  assert.doesNotMatch(about, /site\.classification|\| \*\*Classification\*\*/);
+  assert.equal(Object.hasOwn(metadata, 'classification'), false);
   assert.match(about, /^## The paper\s*$/m);
   assert.match(about, /\.\.\/\.\.\/pdf\/threat-model-discussion-paper-community\.pdf/);
   assert.doesNotMatch(about, /understand\/paper/);
