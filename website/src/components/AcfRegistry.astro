@@ -1,0 +1,208 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { acfHref, createRegistryView } from '../scripts/acf-registry.mjs';
+
+type AcfPage = CollectionEntry<'docs'> & {
+	data: CollectionEntry<'docs'>['data'] & {
+		acf: NonNullable<CollectionEntry<'docs'>['data']['acf']>;
+	};
+};
+
+type StrideCategory = AcfPage['data']['acf']['stride'];
+
+interface Props {
+	stride?: StrideCategory;
+}
+
+const { stride } = Astro.props;
+const allEntries = (await getCollection(
+	'docs',
+	(entry): entry is AcfPage => entry.id.startsWith('acf/') && entry.data.acf !== undefined,
+)).map((entry) => ({ contentId: entry.id, ...entry.data.acf }));
+const { entries } = createRegistryView(allEntries, stride);
+const base = import.meta.env.BASE_URL;
+
+const categoryLabels: Record<StrideCategory, string> = {
+	spoofing: 'Spoofing',
+	tampering: 'Tampering',
+	repudiation: 'Repudiation',
+	'information-disclosure': 'Information Disclosure',
+	'denial-of-service': 'Denial of Service',
+	'elevation-of-privilege': 'Elevation of Privilege',
+};
+const riskLabels = { critical: 'Critical', high: 'High', medium: 'Medium' } as const;
+const detectionLabels = { none: 'None', partial: 'Partial', na: 'N/A' } as const;
+const statusLabels = { core: 'Core', provisional: 'Provisional' } as const;
+const coverageLabels = {
+	covered: 'Covered',
+	partial: 'Partial',
+	'not-covered': 'Not covered',
+	'not-covered-bespoke-only': 'Not covered (bespoke only)',
+	'na-design-constraint': 'N/A (design constraint)',
+	'indirect-only': 'Indirect only',
+} as const;
+---
+
+<section class="acf-registry" data-acf-registry>
+	{!stride && (
+		<form class="acf-filters" data-acf-filters aria-label="Filter Agentic Coding Failure entries">
+			<label>Category
+				<select data-facet="stride">
+					<option value="">All categories</option>
+					{Object.entries(categoryLabels).map(([value, label]) => <option value={value}>{label}</option>)}
+				</select>
+			</label>
+			<label>Risk
+				<select data-facet="risk_level">
+					<option value="">All risk levels</option>
+					{Object.entries(riskLabels).map(([value, label]) => <option value={value}>{label}</option>)}
+				</select>
+			</label>
+			<label>Detection
+				<select data-facet="detection_status">
+					<option value="">All detection statuses</option>
+					{Object.entries(detectionLabels).map(([value, label]) => <option value={value}>{label}</option>)}
+				</select>
+			</label>
+			<label>Entry status
+				<select data-facet="entry_status">
+					<option value="">All entry statuses</option>
+					{Object.entries(statusLabels).map(([value, label]) => <option value={value}>{label}</option>)}
+				</select>
+			</label>
+		</form>
+	)}
+
+	<p class="acf-results" data-acf-results role="status" aria-live="polite" aria-atomic="true">
+		{entries.length} {entries.length === 1 ? 'entry' : 'entries'} shown
+	</p>
+	<p class="acf-empty" data-acf-empty hidden>No ACF entries match the selected filters.</p>
+
+	<div class="acf-table-wrap" tabindex="0" aria-label="Scrollable Agentic Coding Failure registry">
+		<table>
+			<caption>Agentic Coding Failure registry entries</caption>
+			<thead>
+				<tr>
+					<th scope="col">ID</th>
+					<th scope="col">Failure mode</th>
+					<th scope="col">STRIDE category</th>
+					<th scope="col">Risk</th>
+					<th scope="col">Detection</th>
+					<th scope="col">Portable coverage</th>
+					<th scope="col">Status</th>
+				</tr>
+			</thead>
+			<tbody>
+				{entries.map((entry) => (
+					<tr
+						data-acf-entry
+						data-stride={entry.stride}
+						data-risk_level={entry.risk_level}
+						data-detection_status={entry.detection_status}
+						data-entry_status={entry.entry_status}
+					>
+						<td><a href={acfHref(base, entry.contentId)}><code>{entry.id}</code></a></td>
+						<td>{entry.name}</td>
+						<td>{categoryLabels[entry.stride]}</td>
+						<td>{riskLabels[entry.risk_level]}</td>
+						<td>{entry.detection_note ?? detectionLabels[entry.detection_status]}</td>
+						<td>{coverageLabels[entry.portable_coverage]}</td>
+						<td>{statusLabels[entry.entry_status]}</td>
+					</tr>
+				))}
+			</tbody>
+		</table>
+	</div>
+</section>
+
+<script>
+	import { createAcfRegistryController } from '../scripts/acf-registry.mjs';
+
+	const stateKey = '__semanticDefectsAcfRegistryState__';
+	type AcfRegistryController = ReturnType<typeof createAcfRegistryController>;
+	const stateRegistry = window as unknown as Window & Record<string, AcfRegistryController | undefined>;
+	const controller = stateRegistry[stateKey] ??= createAcfRegistryController();
+
+	controller.install();
+	controller.initAll();
+</script>
+
+<style>
+	.acf-registry {
+		margin-block: 1.5rem;
+	}
+
+	.acf-filters {
+		display: none;
+		grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+		gap: 0.75rem;
+		margin-block: 1rem;
+		padding: 1rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.5rem;
+		background: var(--sl-color-gray-7);
+	}
+
+	[data-acf-registry][data-enhanced] .acf-filters {
+		display: grid;
+	}
+
+	.acf-filters label {
+		display: grid;
+		gap: 0.25rem;
+		font-weight: 600;
+	}
+
+	.acf-filters select {
+		width: 100%;
+		min-height: 2.5rem;
+		padding-inline: 0.5rem;
+		border: 1px solid var(--sl-color-gray-4);
+		border-radius: 0.25rem;
+		color: var(--sl-color-text);
+		background: var(--sl-color-bg);
+	}
+
+	.acf-filters select:focus-visible,
+	.acf-table-wrap:focus-visible {
+		outline: 3px solid var(--sl-color-accent-high);
+		outline-offset: 2px;
+	}
+
+	.acf-results,
+	.acf-empty {
+		margin-block: 0.75rem;
+	}
+
+	.acf-empty {
+		font-weight: 600;
+	}
+
+	.acf-table-wrap {
+		overflow-x: auto;
+	}
+
+	table {
+		width: 100%;
+		min-width: 58rem;
+		border-collapse: collapse;
+	}
+
+	caption {
+		padding-block: 0.5rem;
+		font-weight: 700;
+		text-align: left;
+	}
+
+	th,
+	td {
+		padding: 0.625rem;
+		border-block-end: 1px solid var(--sl-color-gray-5);
+		text-align: left;
+		vertical-align: top;
+	}
+
+	th {
+		background: var(--sl-color-gray-7);
+	}
+</style>

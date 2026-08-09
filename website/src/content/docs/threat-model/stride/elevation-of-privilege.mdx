@@ -1,0 +1,47 @@
+---
+title: Elevation of Privilege
+sidebar: { order: 6 }
+---
+
+import AcfRegistry from '../../../../components/AcfRegistry.astro';
+
+Traditional Elevation of Privilege involves a user or process gaining capabilities beyond what is authorised. The agentic variant is **implicit privilege grant**: an external system's assertions are accepted without independent verification and acted upon as if they carried internal authority.
+
+## Mechanism
+
+This is closely related to Tampering, but focuses on the consequence rather than the mechanism. [ACF-T1](../../../acf/t1-authority-tier-conflation/) describes the missing validation boundary; [ACF-E1](../../../acf/e1-implicit-privilege-grant/) describes what happens when the external assertion is acted upon. The elevation is implicit because it happens through data flow rather than an obvious `setRole()` or `grantPermission()` call.
+
+## Code examples
+
+```python
+# User-supplied filter used in an internal query without validation
+def search_records(user_query: dict):
+    return db.query(Record).filter_by(**user_query)
+
+# External assertion accepted without independent verification
+partner_response = partner_api.verify_identity(applicant_id)
+if partner_response.get("verified", False):
+    grant_access(applicant_id)
+```
+
+## Why existing controls miss it
+
+The code follows common integration patterns. Scanners can flag explicit escalation calls, but generally have no model for elevation by data flow. The two Critical-rated entries — ACF-T1 and ACF-E1 — have no detection capability from existing tooling.
+
+## Risk in government context
+
+Risks include unauthorised access to classified information, acceptance of unverified identity assertions in federated systems, and compliance failures in inter-agency data sharing.
+
+[ACF-E2](../../../acf/e2-unvalidated-delegation/) also reaches the development process layer: an agent can inherit an operator's system credentials and perform privileged operations without constrained scope. It is the same unvalidated delegation expressed at the execution layer rather than the code layer.
+
+## ACF entries in this category
+
+Two core entries map to Elevation of Privilege.
+
+<AcfRegistry stride="elevation-of-privilege" />
+
+## See also
+
+- [Tampering](../tampering/) — the mechanism that produces implicit elevation
+- [ACF-T2: Silent Coercion](../../../acf/t2-silent-coercion/) — a related data-meaning failure
+- [ACF Taxonomy Registry](../../../acf/) — all 20 failure modes

@@ -1,0 +1,17 @@
+source	reason
+docs/includes/abbreviations.md	Merged into prose and the canonical glossary; not a standalone page.
+docs/reference/tags.md	Tag browsing is replaced by Starlight search and the ACF registry filters.
+docs/understand/paper.md	The monolithic paper page is replaced by the downloadable discussion-paper PDF and section pages.
+docs/understand/taxonomy.md	The monolithic taxonomy copy is superseded by the canonical /acf/ registry.
+docs/wardline/index.md	Duplicate Wardline overview; the reference-site Wardline overview is the migration winner.
+docs/wardline/python-binding.md	Duplicate monolith split across the canonical Wardline section and Python reference route.
+docs/wardline/specification.md	Duplicate monolith split across the canonical Wardline section routes.
+reference-site/content/_index.md	Duplicate root landing page; docs/index.md is the migration winner.
+reference-site/content/appendices/autonomy-assessment.md	Duplicate moved to the single canonical /assess/autonomy-assessment/ route.
+reference-site/content/appendices/case-study.md	Duplicate moved to the single canonical /respond/case-study/ route.
+reference-site/content/appendices/glossary.md	Duplicate merged into the superset canonical /reference/glossary/ route.
+reference-site/generated/audiences/**	Generated Hugo taxonomy term and terms pages are replaced by navigation and search.
+reference-site/generated/detection_statuses/**	Generated Hugo taxonomy term and terms pages are replaced by ACF registry filters.
+reference-site/generated/entry_statuses/**	Generated Hugo taxonomy term and terms pages are replaced by ACF registry filters.
+reference-site/generated/entry_types/**	Generated Hugo taxonomy term and terms pages are replaced by ACF registry filters.
+reference-site/generated/risk_levels/**	Generated Hugo taxonomy term and terms pages are replaced by ACF registry filters.

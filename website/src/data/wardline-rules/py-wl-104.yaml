@@ -1,0 +1,8 @@
+id: PY-WL-104
+language: python
+family: boundary
+base_severity: WARN
+maturity: stable
+summary: "An exception handler that silently swallows the error — body is only pass/.../continue/break or a bare constant expression"
+cwes: []
+covers_acf: [ACF-R1, ACF-R2]

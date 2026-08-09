@@ -1,0 +1,43 @@
+---
+title: 'About This Project'
+sidebar: { order: 1 }
+---
+
+import site from '../../../data/site.json';
+
+| Field | Value |
+|---|---|
+| **Version** | {site.version} |
+| **Status** | {site.status} |
+| **Date** | {site.date} |
+| **Prepared by** | John Morrissey |
+
+This site hosts the discussion paper suite *Semantic Defects in AI-Generated Code: Assurance Frameworks for AI-Assisted Development in High-Stakes Code Paths* — a body of work examining how AI coding tools produce code that is syntactically correct and passes automated checks but makes wrong decisions about data that matters in institutional contexts.
+
+## The document suite
+
+The suite comprises the documents below, which present one argument at different depths. PDF versions are available for offline reading and distribution.
+
+| Document | Audience | What it covers | PDF |
+|---|---|---|---|
+| **[Understanding AI Code Risk](../../understand/)** (~13 pp) | Everyone | The problem statement: what the defects are, why existing checks do not target them, and why updated assurance is needed. The entry point for all other reading. | [PDF](../../pdf/governing-ai-generated-code.pdf) |
+| **[Reviewing AI-Generated Code: A Practical Guide](../../respond/practical-guide/)** (~23 pp) | Staff using AI to write code | Five review questions, worked code examples, and high-stakes-path identification for people working without CI or developer tooling. | [PDF](../../pdf/reviewing-ai-generated-code.pdf) |
+| **Discussion Paper** (~200 pp) | Technical leads, assessors, and security architects | The full analysis: the 20-entry ACF taxonomy (15 core entries, 5 provisional), STRIDE mapping, two case studies, an annotated agent transcript, cross-model defect chaining, and a systems thinking primer. | [PDF](../../pdf/threat-model-discussion-paper-community.pdf) |
+| **[Wardline Companion](../../wardline/)** (Parts I–II, ~86 pp) | Tool implementers, assessors, and pilot leads | The as-built specification of a shipped semantic trust-boundary analyser: the trust lattice, boundary declarations and caller-granted trust, rule catalogue and tier-modulated severity, gate/suppression/judge semantics, verification properties, residual risks, and a Python practitioner reference. | [PDF](../../pdf/wardline-companion-community.pdf) |
+
+The [Document Suite Map](../../pdf/document-suite-map.pdf) is a one-page guide routing 12 roles to the most useful document.
+
+## Key entry points
+
+- **[The accessible argument](../../understand/)** — the problem statement in plain language
+- **[Practical guide for code authors](../../respond/practical-guide/)** — hands-on review guidance for staff using AI to write code
+- **[Full discussion paper](../../pdf/threat-model-discussion-paper-community.pdf)** — complete technical analysis and evidence base
+- **[Wardline companion](../../wardline/)** — the as-built specification of semantic trust-boundary enforcement
+
+## The paper
+
+The complete technical evidence and analysis are published as the [full discussion paper](../../pdf/threat-model-discussion-paper-community.pdf). The [accessible argument](../../understand/), [ACF taxonomy](../../acf/), [practical guide](../../respond/practical-guide/), and [Wardline companion](../../wardline/) provide focused routes through that material.
+
+## Disclaimer
+
+This is an independent draft discussion paper, written and published in a personal capacity. It does not constitute official guidance or policy of any government body. Views and analysis are the author’s own.

@@ -9,4 +9,4 @@ description: "A role-based map of the Semantic Defects publication suite and its
 keywords: "document suite, reading guide, AI-generated code, threat model, wardline"
 source-date-epoch: "1786233600"
 disclaimer: "This is a navigation guide to the discussion paper suite. It is independent work published in a personal capacity and does not constitute official guidance or policy of any government body. Views and analysis are the author's own."
-parent-paper: "Semantic Defects in AI-Generated Code (v0.3.0)"
+parent-paper: "Semantic Defects in AI-Generated Code: Assurance Frameworks for AI-Assisted Development in High-Stakes Code Paths (v0.3.0)"

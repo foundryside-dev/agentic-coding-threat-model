@@ -1,0 +1,8 @@
+id: PY-WL-123
+language: python
+family: sink
+base_severity: WARN
+maturity: preview
+summary: "Reflective attribute access — untrusted data used as the attribute name in setattr/getattr; dynamic attribute injection / mass assignment"
+cwes: [CWE-915]
+covers_acf: []

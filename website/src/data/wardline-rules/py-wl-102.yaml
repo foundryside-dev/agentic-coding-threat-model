@@ -1,0 +1,8 @@
+id: PY-WL-102
+language: python
+family: boundary
+base_severity: ERROR
+maturity: stable
+summary: "A trust boundary has no rejection path (no raise, no falsy-constant return) — so it cannot validate"
+cwes: []
+covers_acf: []

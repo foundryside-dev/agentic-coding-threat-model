@@ -1,0 +1,90 @@
+---
+title: "What a Wardline Is"
+sidebar:
+  order: 1
+---
+
+import Rule from '../../../components/Rule.astro';
+import State from '../../../components/State.astro';
+
+A wardline is the set of declarations an application makes about where its trust boundaries are — which functions take untrusted data in, which functions raise trust by validating it, and which functions are entitled to assume they are working on trusted data.
+
+Everything else follows from those declarations: the [lattice](../trust-lattice/) is what a declaration assigns, the [rules](../rules/) are what a declaration makes checkable, and the [gate](../gates-suppression-and-judge/) is what a declaration makes enforceable.
+
+## Where the declarations live
+
+**In the source, on the functions they describe, as three decorators.** There is no manifest.
+
+- No project-level policy file is required to scan a codebase.
+- Configuration under `weft.toml [wardline]` is **optional** and, where it names trust-extending packs, is **subordinate to what the caller grants at the command line**.
+- This reverses the designed specification (archived), which made a root `wardline.yaml` the primary artefact and annotations a secondary binding. That schema was never built.
+
+A `wardline.yaml` *does* exist in the implementation's own repository root. It is roughly a hundred bytes of federation endpoint URLs for the surrounding tool suite: no policy, no boundary declarations, no trust topology. Early releases also used a `wardline.yaml` as the tool's own configuration file before that moved to `weft.toml [wardline]`; a reader who meets it in the changelog should not mistake it for the designed manifest either. It configured the scanner. It never declared a trust topology.
+
+The consequence of putting declarations in the source is the point: **a wardline is not a document about a codebase; it is a property of one.** It cannot drift from the code it describes without the drift being a code change, visible in the same diff and reviewed by the same reviewer.
+
+## What a wardline declares
+
+Four things, all of them local to a function:
+
+1. That a function's return is **raw and untrusted**, because data crosses into the system there.
+2. That a function **validates**, and what trust level its output has earned.
+3. That a function is **entitled to assume trusted data**, and at what level.
+4. **By omission** — that a function is in the developer-freedom zone and is not being asserted about at all.
+
+## What it does not declare
+
+It does not declare what the data *means*. The designed specification attempted this — named boundary contracts, bounded contexts, declared domain defaults, institutional evidence categories for restoring serialised artefacts. None of it was built (see [Roadmap: the unbuilt](../roadmap-the-unbuilt/)).
+
+The implemented model is narrower and correspondingly more defensible. It decides:
+
+- whether a function's **actual** trust matches its **declared** trust, and
+- whether untrusted data reaches a **dangerous sink**.
+
+It cannot decide whether a validator checks the *right* predicate. That limit is stated explicitly in [Residual risks](../residual-risks/).
+
+## Declaration versus enforcement tool
+
+The one distinction that survived from the designed specification. The declarations are three decorators from a tiny marker package (`weft-markers`) whose runtime behaviour is **to do nothing**. They survive uninstalling wardline.
+
+What they cost the application is three import lines. What they buy is that the institutional knowledge of where the trust boundaries are stops living in reviewers' heads.
+
+## Normative language
+
+This section describes an as-built specification, so most of it is **indicative** — it describes what the implementation does, in the present tense, and carries no normative force. RFC 2119 / RFC 8174 uppercase keywords appear only where the source text states a contract the implementation is committed to holding — an invariant a frontend, a pack, or a downstream consumer may rely on.
+
+## Terms and definitions
+
+| Term | Definition |
+|---|---|
+| **Taint state** | The trust level the engine assigns to a value or to a function's return. One of the eight members of `TaintState`. See [the trust lattice](../trust-lattice/). |
+| **Trust lattice** | The eight taint states together with their trust ranking (`TRUST_RANK`) and combination operators. |
+| **Reachable set** | The five taint states any source can introduce into the live pipeline: <State name="INTEGRAL" />, `ASSURED`, `GUARDED`, `EXTERNAL_RAW`, `UNKNOWN_RAW`. Of the remaining three, `UNKNOWN_ASSURED` and `UNKNOWN_GUARDED` have no producer under any configuration; `MIXED_RAW` becomes producible only under a non-default configuration key. |
+| **Boundary** | A function carrying one of the three trust decorators. An *external boundary* introduces untrusted data; a *trust boundary* raises trust by validating; a *trusted producer* asserts that it both works on and returns trusted data. |
+| **Anchored function** | A function whose taint is fixed by its own declaration rather than inferred from its callees. Anchored functions are authoritative and are not refined by the project-level fixed point. |
+| **Developer-freedom zone** | Undecorated code. It resolves to `UNKNOWN_RAW`, and the tier-modulated rules suppress on it. Wardline is silent until a declaration opts a function in. |
+| **Inert scan** | A scan that recognised zero trust boundaries over at least five analysed functions — a gate that passes green while enforcing nothing. |
+| **Trust-grammar pack** | An installable Python package extending the recognised declaration vocabulary beyond the three built-in decorators. A repository may *declare* which packs it uses; only the caller may *grant* them. |
+| **Trust grant** | A caller-supplied authorisation (`--trust-pack`, `--allow-custom-packs`) permitting a declared pack to take effect. Absent the grant, configuration naming the pack is a hard configuration error, not a warning. |
+| **Finding** | One record emitted by a scan. Carries a rule identifier, a location, a fingerprint, a kind, a severity, and a suppression state. |
+| **Kind** | What a finding *is*: `defect`, `fact`, `classification`, `metric`, or `suggestion`. Only defects can trip the gate; facts and metrics are engine observations carrying severity `NONE`. |
+| **Severity** | `CRITICAL`, `ERROR`, `WARN`, `INFO`, `NONE`, in that order. A rule declares a base severity, modulated by the resolved taint tier of the function it fired in. |
+| **Gate** | The pass/fail decision a scan renders, controlled by `--fail-on` and by the inertness and unanalysed trips. Exit 0 clean, 1 tripped, 2 wardline error. |
+| **Fingerprint** | The stable identity of a finding, and the join key for all three suppression stores. A single join predicate resolves a fingerprint against waivers, judged records, and the baseline, in that precedence. |
+| **Suppression state** | `active`, `baselined`, `waived`, or `judged`. Only `active` findings can trip the gate. |
+| **Baseline** | A fingerprint snapshot of findings present at a point in time, stored under `.weft/wardline/`, used to adopt the tool on an existing codebase without an immediate gate failure. |
+| **Waiver** | An explicit, human-authored suppression carrying a mandatory reason and an optional expiry date. Expired waivers resurface. |
+| **Judged record** | A suppression written by the opt-in LLM triage command when it labels a finding a false positive. Judging is never automatic; its effect on later scans is. |
+| **Attestation** | A signed posture bundle produced by `wardline attest`, using HMAC-SHA256 under a shared project key. Tamper-evidence within a key-holding trust domain, not non-repudiable proof. |
+| **Frontend** | A language plug-point implementing the `LanguageFrontend` Protocol — a name, a set of file suffixes, and an analyser constructor. Currently `python` and `rust`. |
+| **Enforcement perimeter** | The set of functions the engine analysed *and* that carry, or transitively derive from, a recognised declaration. Code outside it resolves to `UNKNOWN_RAW`, which the severity model treats as the freedom zone and suppresses to `NONE` — including for the sink rules, which are tier-modulated on the containing function's resolved tier like every other rule family. |
+
+:::note
+**Terms that are no longer current.** *Annotation group*, *boundary contract*, *bounded context*, *coding posture*, *effective state*, *exceptionability*, *fingerprint baseline (governance sense)*, *normalisation boundary*, *overlay*, *restoration boundary*, *semantic boundary manifest*, and *trust topology (as a declared artefact)* all belong to the designed specification. None has an implemented counterpart. Where the idea survives in reduced form, [Roadmap: the unbuilt](../roadmap-the-unbuilt/) records it.
+:::
+
+## See also
+
+- [Declarations and Trust Grants](../declarations-and-trust-grants/) — the three decorators in full
+- [The Trust Lattice](../trust-lattice/) — what a declaration assigns
+- [Python Reference](../python-reference/) — install, decorator signatures, and configuration

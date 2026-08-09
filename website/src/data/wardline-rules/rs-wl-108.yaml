@@ -1,0 +1,8 @@
+id: RS-WL-108
+language: rust
+family: sink
+base_severity: ERROR
+maturity: preview
+summary: "Untrusted data reaches the program of Command::new — an attacker chooses which executable runs"
+cwes: [CWE-78]
+covers_acf: []

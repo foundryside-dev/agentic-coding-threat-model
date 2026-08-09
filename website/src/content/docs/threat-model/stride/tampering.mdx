@@ -1,0 +1,44 @@
+---
+title: Tampering
+sidebar: { order: 2 }
+---
+
+import AcfRegistry from '../../../../components/AcfRegistry.astro';
+
+In traditional STRIDE analysis, tampering involves unauthorised modification of data in transit or at rest. The agentic variant is **authority tier conflation**: external, untrusted data is treated as internal, trusted data without validation, effectively tampering with the authority tier rather than the data itself.
+
+## Mechanism
+
+Agents do not distinguish between data from different authority tiers because most programming languages do not enforce provenance. A `dict` from a validated database query and a `dict` from an unvalidated API response have the same type, so an agent can treat them interchangeably.
+
+## Code examples
+
+```python
+# API response used directly without a validation boundary
+api_response = requests.get(external_url).json()
+save_to_internal_database(api_response["records"])
+
+# Deserialised data assumed trustworthy
+config = json.loads(uploaded_config_file.read())
+apply_system_settings(config)
+```
+
+## Why existing controls miss it
+
+Type checkers verify shape, not provenance. Linters check syntax, not trust-boundary crossings. The defect becomes visible only at the level of semantic boundary enforcement.
+
+## Risk in government context
+
+Consequences include injection through unvalidated external data, corruption of authoritative records, and compliance failures when data provenance cannot be demonstrated.
+
+## ACF entries in this category
+
+Four entries map to Tampering. ACF-T1, ACF-T2, and ACF-T3 are core entries; ACF-T4 is provisional.
+
+<AcfRegistry stride="tampering" />
+
+## See also
+
+- [Elevation of Privilege](../elevation-of-privilege/) — where T1 describes the missing boundary, E1 describes the consequence
+- [Spoofing](../spoofing/) — fabricated defaults that compound with unvalidated data
+- [ACF Taxonomy Registry](../../../acf/) — all 20 failure modes

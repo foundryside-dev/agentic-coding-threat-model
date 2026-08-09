@@ -1,0 +1,8 @@
+id: PY-WL-106
+language: python
+family: sink
+base_severity: WARN
+maturity: stable
+summary: "Deserialisation — pickle/Unpickler/marshal/yaml.load/shelve, plus a curated third-party table (dill, jsonpickle, joblib, torch.load, numpy.load(allow_pickle=True))"
+cwes: [CWE-502]
+covers_acf: [ACF-E2]

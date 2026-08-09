@@ -1,0 +1,8 @@
+id: PY-WL-117
+language: python
+family: sink
+base_severity: WARN
+maturity: preview
+summary: "SSRF — the URL slot of an HTTP client sink: requests/httpx/aiohttp/urllib, module-level calls, constructed client/session methods, and client base_url="
+cwes: [CWE-918]
+covers_acf: []

@@ -1,0 +1,44 @@
+---
+title: Denial of Service
+sidebar: { order: 5 }
+---
+
+import AcfRegistry from '../../../../components/AcfRegistry.astro';
+
+Traditional Denial of Service exhausts runtime resources such as bandwidth, CPU, memory, or connection pools. The agentic variant extends STRIDE to the development lifecycle: the “service” being denied is the **review process**, a security control, rather than a user-facing system.
+
+This is an analogical extension and the loosest of the six mappings. It concerns depletion of a security control, not an attack on a runtime system.
+
+## Mechanism
+
+This process threat operates at two scales.
+
+At the **individual scale**, agent-generated code arrives at multiples of human review velocity. The queue grows, reviewers shift from semantic review to surface scanning, and the control degrades towards a rubber stamp.
+
+At the **organisational scale**, the same dynamic overwhelms:
+
+- security teams' capacity to evaluate changes;
+- the IRAP assessment pipeline's ability to keep pace with system change; and
+- the audit function's ability to maintain meaningful coverage.
+
+The degradation compounds from reviewer fatigue into weaker team review and then weaker organisational assurance. A secondary mechanism occurs when automated tools flood reviewers with findings, causing habituated dismissal that hides genuine security issues in the noise.
+
+## Why existing controls miss it
+
+Existing controls assume review capacity scales with generation rate. In practice, the control becomes less effective as the volume it must process rises.
+
+## Risk in government context
+
+Security review can become a compliance checkbox while accreditation continues to rely on assurance that the process no longer provides.
+
+## ACF entries in this category
+
+Two core process-threat entries map to Denial of Service.
+
+<AcfRegistry stride="denial-of-service" />
+
+## See also
+
+- [Spoofing](../spoofing/) — code-level failures that pass under review pressure
+- [Repudiation](../repudiation/) — audit-destroying patterns approved under volume pressure
+- [ACF Taxonomy Registry](../../../acf/) — all 20 failure modes

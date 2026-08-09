@@ -1,0 +1,54 @@
+---
+title: Repudiation
+sidebar: { order: 3 }
+---
+
+import AcfRegistry from '../../../../components/AcfRegistry.astro';
+
+In traditional STRIDE analysis, repudiation concerns a user performing an action and later denying it because the system lacks sufficient logging, signing, or non-repudiation controls. The gap is in the recording of events.
+
+The agentic variant is **audit trail destruction through error handling**: patterns catch, log, and continue rather than failing in a way that preserves an error as a first-class audit event.
+
+## Mechanism
+
+Agents generate broad exception handlers that prevent crashes but can also prevent errors from reaching audit systems. The program continues, yet the event that caused the error is lost to the authoritative trail.
+
+## Code examples
+
+```python
+# Error swallowed — the audit trail has a gap
+try:
+    record_decision(case_id, decision, rationale, evidence)
+except Exception as error:
+    logger.error(f"Failed to record decision: {error}")
+    # The decision was made but not recorded.
+
+# Partial completion without rollback
+try:
+    update_classification(document_id, new_level)
+    notify_stakeholders(document_id, new_level)
+    record_classification_change(document_id, old_level, new_level)
+except NotificationError:
+    pass
+    # Operations that should be atomic are silently partial.
+```
+
+## Why existing controls miss it
+
+The code handles exceptions, which is generally considered good practice. Distinguishing safe continuation from destruction of evidence requires knowing which operations are audit-critical.
+
+## Risk in government context
+
+The result can be incomplete regulatory records, gaps in legal evidence chains, and inability to demonstrate traceability during an IRAP assessment.
+
+## ACF entries in this category
+
+Six entries map to Repudiation: four core entries and two provisional candidates.
+
+<AcfRegistry stride="repudiation" />
+
+## See also
+
+- [Spoofing](../spoofing/) — fabricated defaults that compound with audit gaps
+- [Denial of Service](../denial-of-service/) — review pressure that allows audit-destroying patterns through
+- [ACF Taxonomy Registry](../../../acf/) — all 20 failure modes

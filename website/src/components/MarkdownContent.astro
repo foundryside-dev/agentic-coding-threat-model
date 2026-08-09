@@ -1,0 +1,21 @@
+---
+import AcfInfobox from './AcfInfobox.astro';
+import DefaultMarkdownContent from '@astrojs/starlight/components/MarkdownContent.astro';
+
+const acf = Astro.locals.starlightRoute?.entry?.data?.acf;
+---
+
+{acf && <AcfInfobox acf={acf} />}
+<DefaultMarkdownContent><slot /></DefaultMarkdownContent>
+
+<script>
+	import { createMermaidRenderer } from '../scripts/mermaid-renderer.mjs';
+
+	const stateKey = '__semanticDefectsMermaidState__';
+	type MermaidRenderer = ReturnType<typeof createMermaidRenderer>;
+	const stateRegistry = window as unknown as Window & Record<string, MermaidRenderer | undefined>;
+	const renderer = stateRegistry[stateKey] ??= createMermaidRenderer();
+
+	renderer.install();
+	renderer.schedule();
+</script>

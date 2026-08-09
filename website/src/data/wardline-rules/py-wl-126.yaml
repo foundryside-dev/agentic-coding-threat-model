@@ -1,0 +1,8 @@
+id: PY-WL-126
+language: python
+family: sink
+base_severity: WARN
+maturity: preview
+summary: "Mail/header injection — untrusted recipient or message reaching smtplib.SMTP.sendmail"
+cwes: [CWE-93]
+covers_acf: []

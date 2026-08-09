@@ -9,4 +9,4 @@ description: "A practical guide to reviewing AI-generated code for semantic defe
 keywords: "AI-generated code, code review, code authors, practical guide, semantic defects"
 source-date-epoch: "1786233600"
 disclaimer: "This is a draft discussion paper circulated for peer review. It is independent work published in a personal capacity and does not constitute official guidance or policy of any government body. It does not mandate or recommend specific controls for any agency, system, or project. Views and analysis are the author's own."
-parent-paper: "Semantic Defects in AI-Generated Code (v0.3.0)"
+parent-paper: "Semantic Defects in AI-Generated Code: Assurance Frameworks for AI-Assisted Development in High-Stakes Code Paths (v0.3.0)"

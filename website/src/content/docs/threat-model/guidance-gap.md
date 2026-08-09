@@ -1,0 +1,202 @@
+---
+title: The Guidance Gap
+sidebar:
+  order: 6
+---
+
+This section translates the threat model into specific gaps in existing cybersecurity guidance — ISM, Essential Eight, OWASP, NIST SSDF, and contracted development frameworks. It is the most directly policy-relevant section of the analysis, identifying where current controls fall short and what extensions are needed.
+
+## Australian Information Security Manual (ISM)
+
+The ISM provides controls for software development security (primarily in the Software Development and Web Application Development chapters). The analysis below maps relevant controls to the agentic code threat model, identifying where existing controls provide partial coverage, where they assume conditions that agentic coding invalidates, and where gaps exist.
+
+*Note: The ISM underwent a significant expansion in June 2025, adding approximately 24 new controls to the Software Development guidelines. The analysis below references the December 2025 revision of the ISM. Organisations using earlier versions should verify control numbers against the current release.*
+
+### Controls with partial coverage
+
+The following controls provide partial coverage of agentic threats. For each, we identify what the control currently addresses and where its assumptions break down when applied to agent-generated code.
+
+**ISM-0401** (Rev 8, Jun-25) — *Secure by Design principles and practices throughout the SDLC*
+
+*Coverage:* Establishes that organisations should follow Secure by Design principles across the entire software development lifecycle. Agentic failure modes ([the ACF taxonomy](../../acf/)) could in principle be addressed as part of an organisation's Secure by Design practices.
+
+*Gap:* The control assumes a human development team that can *internalise* security principles and apply them with judgment. Agents do not internalise principles — they reproduce training data patterns. A Secure by Design practice that says "do not fabricate defaults for missing safety-critical data" is unenforceable against an agent unless encoded as a machine-checkable rule. The control's scope is correct, but its enforcement mechanism (human judgment) does not transfer to agent-generated code.
+
+**ISM-2060** (Rev 0, Jun-25) — *Code reviews ensure software meets Secure by Design principles and secure programming practices*
+
+*Coverage:* Directly applicable to agent-generated code. The control explicitly links code review to Secure by Design principles, not just functional correctness.
+
+*Gap:* The control assumes the reviewer can meaningfully evaluate the code at the rate it is produced. At agent-scale volume, this assumption fails ([the review analysis](../review-problem/)). The control does not address review effectiveness degradation or distinguish between surface-level and security-focussed review.
+
+**ISM-2061** (Rev 0, Jun-25) — *Security-focussed peer reviews on critical and security-focussed software components*
+
+*Coverage:* Requires developer-supported, security-focussed peer reviews specifically on critical components. This is the strongest existing review control for the agentic context.
+
+*Gap:* The control's limitation is scope: it applies to "critical and security-focussed software components," which requires the organisation to correctly identify which agent-generated code touches security-critical paths. Agents generate code across the entire codebase; the security-critical subset must be identified before the review control can be applied. The control also assumes the peer reviewer has the institutional knowledge to evaluate trust boundary maintenance — knowledge that may not be documented in machine-readable form.
+
+**ISM-0402** (Rev 9, Jun-25) — *Comprehensive software testing using SAST, DAST, and SCA*
+
+*Coverage:* Mandates static application security testing (SAST), dynamic application security testing (DAST), and software composition analysis (SCA). These tools catch known vulnerability patterns and dependency risks.
+
+*Gap:* Current SAST answers "does the code match known vulnerability patterns?" It does not answer whether data flows preserve authority tiers or whether trust boundaries are maintained. Semantic boundary testing is a distinct control category not addressed by existing SAST tooling ([the threat landscape](../threat-landscape/)). SCA is relevant for agent-introduced dependencies but does not address first-party code quality.
+
+**ISM-2026/2027/2028** (Jun-25) — *Software artefact integrity — malicious code scanning, digital signatures, SAST/DAST/SCA on artefacts*
+
+*Coverage:* Addresses integrity and security scanning of software artefacts before deployment. These controls cover the supply chain from build to deployment.
+
+*Gap:* Agent-generated code fits neither established category cleanly: it is not human-authored in-house code, but neither is it a third-party component. The artefact integrity controls have no category for first-party code generated by a third-party system. The risk properties also differ: third-party components have independent defect distributions, while agent-generated code has correlated defects ([the threat landscape](../threat-landscape/)).
+
+ISM-1419 (environment segregation) was also reviewed. It remains important — agents should not have direct access to production environments — but is orthogonal to semantic correctness concerns.
+
+### Controls with no direct coverage
+
+The following gap areas have no corresponding ISM control. Each represents a category of agentic risk that falls outside the current framework's scope.
+
+**Agent output as trust boundary** — *[ACF-T1](../../acf/t1-authority-tier-conflation/) (authority tier conflation), [ACF-E1](../../acf/e1-implicit-privilege-grant/) (implicit privilege grant)*
+
+No current ISM control category explicitly addresses the artefact classification of AI-generated output. ISM-2074 (Rev 0, Dec-25) requires an AI usage policy, but this is a governance control, not a technical trust boundary control.
+
+**Review capacity scaling** — *[ACF-D1](../../acf/d1-finding-flood/) (finding flood), [ACF-D2](../../acf/d2-review-capacity-exhaustion/) (review capacity exhaustion)*
+
+ISM-2060 and ISM-2061 mandate code review and security-focussed peer review, but neither addresses what happens when code generation velocity exceeds review capacity. No control requires organisations to demonstrate that review remains effective under volume pressure. Even with an attentive operator, surfacing a semantic defect concealed by conventional-looking code required four rounds of directed challenge over approximately eight minutes — suggesting that effective review of agent output demands domain-specific questioning strategies, not merely increased review time ([the case study](../../respond/case-study/)).
+
+**Semantic boundary enforcement** — *[ACF-S1](../../acf/s1-fabricated-default/) (fabricated default), [ACF-S3](../../acf/s3-structural-identity-spoofing/) (structural identity spoofing), [ACF-T1](../../acf/t1-authority-tier-conflation/) (authority tier conflation), [ACF-T2](../../acf/t2-silent-coercion/) (silent coercion)*
+
+No control addresses the gap between syntactic correctness and semantic correctness in the context of trust boundaries. ISM-0402's SAST/DAST/SCA requirement covers known vulnerability patterns but not context-dependent semantic correctness. Existing controls assume that if code passes review and testing, it is adequate.
+
+**Correlated failure detection** — *All ACF categories*
+
+No control addresses the distinct risk profile of correlated defects. Testing and review strategies are designed for independent failure distributions.
+
+**Code provenance tracking** — *[ACF-D2](../../acf/d2-review-capacity-exhaustion/) (review capacity exhaustion)*
+
+No control requires organisations to track which code was generated by AI agents vs. authored by humans. ISM-2074 requires an AI usage policy but not per-artefact provenance. Without provenance, risk assessment cannot distinguish between code populations with different failure characteristics.
+
+### Candidate ISM extensions
+
+The following are illustrative extensions, not formal proposals. They are included to show that the gaps are addressable within the ISM's existing structure. The wording follows the ISM's conditional-control style and is illustrative rather than normative.
+
+**Extension to ISM-0401 (Secure by Design):**
+
+> *When AI agents are used to generate code for assessed systems, the organisation's Secure by Design practices should include machine-enforceable rules for trust boundary maintenance, defensive pattern restrictions appropriate to the system's data sensitivity, and audit trail preservation requirements. Secure by Design principles that exist only as human-readable documentation are insufficient controls against AI-generated code, which does not read documentation.*
+
+**Extension to ISM-2060/2061 (Code Review and Security-Focussed Peer Review):**
+
+> *When AI agents generate a significant proportion of code changes, the organisation should demonstrate that its code review process (ISM-2060) and security-focussed peer review process (ISM-2061) remain effective at detecting semantic defects — not merely syntactic or conventional defects — under the volume of changes produced. Evidence must include at minimum one of: measured defect escape rates, review depth audits, or demonstrated use of automated semantic pre-screening that reduces the burden on human reviewers.*
+
+**New control (Agent Output Trust Boundary):**
+
+> *Code generated by AI agents should be treated as untrusted input requiring validation at the boundary before integration into assessed systems. The organisation should define and document the validation boundary, including what properties are verified (trust boundary maintenance, audit trail integrity, error handling appropriateness) and what evidence demonstrates the validation is effective.*
+
+**New control (Code Provenance):**
+
+> *When AI agents are used in the development of assessed systems, the organisation should maintain records of which code was generated by AI agents, which was human-authored, and which was agent-generated then human-modified. This provenance metadata supports risk assessment, incident response, and targeted remediation when systematic agent-introduced defects are discovered.*
+
+## NIST Secure Software Development Framework (SSDF)
+
+SP 800-218 defines practices for secure software development organised into four groups. Each practice group is mapped below to agentic code concerns:
+
+| Practice Group | SSDF Practices | Agentic Code Coverage |
+|---------------|----------------|----------------------|
+| **Prepare the Organisation (PO)** | Define security requirements, roles, training | Does not address training requirements for reviewing agent output (which requires different skills than reviewing human output) or organisational capacity planning for agent-scale review volume |
+| **Protect the Software (PS)** | Protect code, integrity verification | Addresses integrity of code artefacts but not the artefact classification of code based on its generation method. An agent-generated commit and a human-authored commit are indistinguishable in the VCS |
+| **Produce Well-Secured Software (PW)** | Design, code review, testing | Most relevant group. Partially applies, but assumes trainable human developers, learning from feedback, and largely independent error distributions — none of which hold for agents |
+| **Respond to Vulnerabilities (RV)** | Vulnerability response, disclosure | Does not address the correlated nature of agent-introduced defects. Standard vulnerability response treats each finding independently; agent defects may require pattern-wide remediation ([the open questions](../open-questions/)) |
+
+**Key SSDF gap:** Practice PW.1 ("Design Software to Meet Security Requirements and Mitigate Security Risks") includes task PW.1.1, which recommends "using forms of risk-based analysis to determine how much effort is adequate" for security practices. This implicitly assumes that risk is assessable per-component. Agent-generated code introduces *systematic* risk across many components from a single source. The analysis framework needs to account for correlation, not just per-component risk.
+
+**NIST's own recognition of this gap:** NIST published SP 800-218A (July 2024) as a supplement to the SSDF specifically for generative AI and dual-use foundation model development contexts, acknowledging that the original framework's human-centred assumptions need AI-specific augmentation. However, SP 800-218A's focus is on secure practices for AI *model* development across the SDLC — not on the assurance of source code *generated by* AI systems. This is the gap this paper addresses: substantial guidance now exists for building AI safely, but almost none for securing what AI builds.
+
+SP 800-218A itself makes the assumption explicit: its practices and tasks do not distinguish between human-written and AI-generated source code, on the basis that all source code should be evaluated for vulnerabilities and other issues before use. This paper's central contention is that this assumption — that uniform evaluation suffices — does not hold for the failure modes described here, because the *nature* of agent-generated defects (correlated, semantically plausible, context-insensitive) demands different evaluation, not just equal evaluation.
+
+## Essential Eight
+
+The Essential Eight maturity model is an operational security framework, not an SDLC framework — it does not directly address software development practices.
+
+Two strategies offer indirect relevance: **Application Control** establishes that not all software should be trusted equally based on its source, providing a conceptual precedent for graduated trust in code generation sources; **Restrict Administrative Privileges** supports the principle that agents should not modify security-critical configuration (allowlists, audit configuration, access control rules) without human approval. These analogies are directional rather than prescriptive — the Essential Eight's value here is as evidence that the *principles* of graduated trust and least privilege are already embedded in Australian government security posture, even though the specific controls were not designed for the SDLC context this paper addresses.
+
+## OWASP and industry guidance
+
+**OWASP Top 10 for LLM Applications (2025)** primarily addresses threats *to* LLM systems — prompt injection, training data poisoning, model denial of service. The closest entry to this paper's concerns is **LLM05 (Improper Output Handling)**, whose attack scenarios explicitly include LLM-generated code introducing vulnerabilities such as SQL injection. However, even LLM05 frames this as an application-level output-handling problem — advising developers to treat LLM output with "zero-trust" validation — rather than providing a comprehensive treatment of the distinct failure characteristics of AI-assisted code generation (correlated defects, review capacity exhaustion, context-inappropriate patterns).
+
+The project has since evolved into the broader **OWASP GenAI Security Project**, covering LLM applications, agentic AI systems, and AI-driven applications — but no OWASP project specifically targets the assurance of AI-generated source code in government systems in the sense addressed by this paper.
+
+**OWASP Secure Coding Practices** provides a checklist of defensive coding practices. Several "secure" practices in the OWASP checklist are the same anti-patterns that the agentic threat model identifies as dangerous in high-stakes contexts. For example, "validate all input" is correct, but the common defensive practice of providing a default value when input is missing is context-dependent — in audit-critical systems, a missing value should crash, not default. This illustrates the gap between generic secure coding guidance and domain-specific trust boundary requirements.
+
+**MITRE ATT&CK and CWE** provide taxonomies for attack techniques and code weaknesses respectively. The agentic code failure modes in [the ACF taxonomy](../../acf/) do not map cleanly to existing CWE entries because they are not individual weaknesses — they are *patterns* that are correct in most contexts and dangerous in specific ones. A `try/except` that logs and continues is not a weakness; it is a weakness *when it wraps an audit-critical write and prevents the failure from reaching the audit system*. A default value on a missing field is not a weakness; it is a weakness *when the field's absence signals corruption, not a case to handle gracefully*. Context-free taxonomies do not serve context-dependent weaknesses.
+
+#### The gap between "securing AI" and "securing what AI builds"
+
+The gap identified in [the guidance-gap analysis](../guidance-gap/) — substantial guidance for securing AI systems themselves, almost none for securing what AI builds — is consistent across all frameworks reviewed above. The gap is widening faster than it is closing: agent adoption is accelerating ([the introduction and scope](../introduction/)), the highest-risk failure modes pass all existing automated checks ([the threat landscape](../threat-landscape/), [the ACF taxonomy](../../acf/) detection summary), the vocabulary for discussing these failures does not yet exist in policy contexts, and guidance development cycles are inherently slower than technology adoption cycles.
+
+## Detection coverage is worst where risk is highest
+
+The preceding sections established that the highest-risk agentic failure modes are semantic: they largely fall outside syntactic and structural analysis because the wrongness depends on institutional context, not code shape. The quantitative picture below shows how that category gap translates into detection coverage.
+
+The ACF taxonomy ([the ACF taxonomy](../../acf/)) catalogues fifteen core agentic code failure modes (plus five provisional candidates). Of the fifteen core entries:
+
+| Detection Level | Count | Implication |
+|----------------|-------|-------------|
+| **None** — no existing tool detects it | 4 | Requires new tooling or new review practices |
+| **Partial** — some tools catch some cases | 9 | Existing tools provide incomplete coverage |
+| **N/A** — process threat, not code pattern | 2 | Requires process controls, not technical controls |
+
+Of the fifteen core failure modes, thirteen are undetected or only partially detected by existing tools — including all four with no tool coverage at all, both Critical-rated entries among them. The four with zero detection capability are [ACF-T1](../../acf/t1-authority-tier-conflation/) (authority tier conflation, Critical), [ACF-E1](../../acf/e1-implicit-privilege-grant/) (implicit privilege grant, Critical), [ACF-R2](../../acf/r2-partial-completion/) (partial completion, High), and [ACF-R5](../../acf/r5-remediation-induced-violation/) (remediation-induced violation, High). The highest-risk failures fall outside the detection scope of current tooling. The full detection breakdown with specific failure IDs is in [the ACF taxonomy](../../acf/).
+
+## Structural gaps
+
+The detection picture above is the quantitative expression of a set of structural gaps — categories of control and analytical vocabulary that no current framework provides.
+
+Of these, items 1–3 are foundational — the remaining gaps are difficult to address without a shared taxonomy, a semantic verification layer, and review controls that account for agent-generated volume:
+
+1. **A taxonomy of agentic code failure modes** grounded in established threat modelling (STRIDE or equivalent)
+2. **A verification layer for semantic correctness** — the missing layer between "does the code match known vulnerability patterns?" and "does the code preserve trust boundaries, audit integrity, and failure-mode requirements?" ([the response controls](../response-landscape/); [Wardline as-built specification](../../wardline/))
+3. **Controls for review effectiveness at scale** — not just "is code reviewed?" but "does the review process remain effective at agent-generated volume?"
+4. **Authority classification for agent output** — how should agent-generated code be treated in the system's authority model?
+5. **Accreditation criteria for agentic development workflows** — what evidence must organisations provide to demonstrate that agentic coding maintains the required security posture?
+6. **Vocabulary for context-dependent code weaknesses** — patterns that are correct in general but dangerous in specific security contexts, encoded in machine-readable form ([the response controls](../response-landscape/); the [Wardline as-built specification](../../wardline/) implements one candidate vocabulary for this — as built, a single generic trust-boundary group)
+7. **Correlated failure risk models** — testing and remediation strategies that account for the non-independent failure distribution of agent-generated code
+8. **Governance perimeter expansion** — controls for executable logic produced by non-developers using agentic tools outside traditional SDLC channels ([the introduction and scope](../introduction/))
+9. **Cross-model defect chaining** (emerging) — defects from different models may compose, where one model's failure creates preconditions for another's ([the threat landscape](../threat-landscape/); [the cross-model defects analysis](../../appendices/cross-model-defects/)). A candidate gap warranting attention as multi-model environments become common
+
+Current frameworks scope software development controls to recognised development teams and established code repositories. Agent-generated automations, integrations, and plugins produced by analysts and operators outside these channels are not addressed by any current guidance.
+
+The structural gaps listed above are not addressable through individual organisational practice alone. They require shared vocabulary, common assessment criteria, cross-organisational detection mechanisms, and agent output classification standards that sit at the whole-of-government level. Only bodies with the institutional mandate and cross-government visibility to develop controls of this kind are positioned to close them.
+
+## Contracted development as the primary delivery context
+
+The gaps identified above assume that the organisation writing the code also controls the development tooling, review process, and enforcement boundary. For most Australian Government software, this assumption is false — contracted service providers (consultancies, systems integrators, and specialist vendors) are the dominant delivery channel. Any threat model that addresses only in-house development addresses the minority case.
+
+This is not an edge case or a procurement footnote. It is the primary delivery context in which the paper's risks materialise. The question is not merely "how should developers use agents?" but "how should agencies assure systems built through commercial delivery pipelines in which agents are increasingly present?"
+
+**The structural risk.** When multiple agencies contract the same provider, and that provider uses the same agent tooling and prompts across engagements, the correlated failure problem ([the threat landscape](../threat-landscape/)) extends across agency boundaries through the contractor — even if the agencies have no direct relationship.
+
+This is concentration risk through interconnected delivery chains: the topology alone is sufficient to identify the vulnerability, in the same way that interconnected counterparties create systemic risk in financial networks regardless of their individual creditworthiness.
+
+A systematic defect introduced by a contractor's agent may propagate to every agency that contractor serves, producing cross-agency correlated exposure from a single tooling decision the agencies had no visibility into.
+
+**The control gap.** Current acceptance criteria for contracted software development typically focus on functional requirements, test coverage, and compliance with coding standards. They do not address the semantic correctness properties this paper identifies — trust boundary maintenance, audit trail integrity, context-appropriate error handling. A contractor could deliver code that meets every contractual requirement while containing systematic ACF-pattern violations.
+
+Existing assessment frameworks such as IRAP, SOC 2, and Essential Eight compliance evaluate the contractor's security posture and process maturity, but none evaluate whether the contractor's development workflow detects agentic failure modes or whether acceptance testing covers semantic boundary properties.
+
+The visibility problem compounds this. Contracting agencies may have limited visibility into whether a contractor is using agentic tools, what proportion of deliverables are agent-generated, and whether the contractor's review processes address the failure modes in [the ACF taxonomy](../../acf/). ISM-2074's AI usage policy requirement applies to the agency's own use; how it flows down to contracted development is unclear.
+
+When a contractor delivers agent-generated code, the review responsibility is ambiguous — the contractor's internal review, the agency's acceptance review, or both? If the agency relies on the contractor's review, the agency inherits the contractor's review capacity constraints and habituation dynamics ([the review analysis](../review-problem/)).
+
+**Principles for contract requirements.** This paper does not propose draft contract clauses — that is the downstream deliverable for procurement bodies (ASD/ACSC, DTA) with the legal and jurisdictional expertise to draft them. What follows are principles that contracted development should address:
+
+- **Agent tool disclosure:** contracts should require disclosure of AI code generation tool usage — which tools, which models, and what configuration — so that agencies can assess correlated risk across their supplier base.
+- **Provenance tracking:** contractors should maintain and provide provenance records for agent-generated code in deliverables, enabling targeted review and remediation.
+- **Semantic correctness acceptance criteria:** acceptance testing should include verification of trust boundary maintenance, classification handling, and audit trail integrity — not just functional correctness and test coverage.
+- **Right to inspect validation controls:** agencies should be able to request evidence that agent-generated code was subject to validation controls addressing the failure modes in [the ACF taxonomy](../../acf/).
+- **Pattern-wide remediation obligations:** where a systematic agent-induced defect is discovered in one engagement, the contractor should assess and remediate the same pattern across other deliverables. Notification of other affected clients is the logical extension, though this crosses commercial confidentiality boundaries and may require a structured disclosure framework — analogous to coordinated vulnerability disclosure — rather than a blanket contractual obligation.
+- **Cross-agency correlation awareness:** agencies should assess whether their contracted suppliers serve other government clients with the same tooling stack, and consider the correlated risk this creates.
+
+Formal clause drafting should be left to the bodies with procurement expertise; these principles are intended as structured inputs for that work.
+
+## See also
+
+- [The Response Landscape](../response-landscape/) — practical response categories and control types
+- [The ACF taxonomy](../../acf/) — the full detection breakdown and failure-mode vocabulary
+- [The Cross-model Defects Analysis](../../appendices/cross-model-defects/) — the qualified analysis behind the emerging cross-model gap
+- [Bibliography](../../reference/bibliography/) — primary framework and guidance sources

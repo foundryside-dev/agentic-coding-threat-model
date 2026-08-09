@@ -1,0 +1,53 @@
+---
+title: Spoofing
+sidebar: { order: 1 }
+---
+
+import AcfRegistry from '../../../../components/AcfRegistry.astro';
+
+In traditional STRIDE analysis, spoofing refers to an entity claiming to be something it is not: a forged authentication token, a spoofed IP address, or a process impersonating another user. The system accepts the false identity and grants access or trust accordingly.
+
+The agentic variant extends this to **competence spoofing**: code *appears* to handle data correctly but operates on fabricated or default values, presenting a false picture of data integrity.
+
+## Mechanism
+
+Agents default to defensive patterns that substitute values rather than failing. The code works — it produces output and does not crash — but the output is based on fabricated data rather than actual data. The code spoofs the competence of correct data handling.
+
+This is an **analogical extension** of STRIDE's original Spoofing category: fabricated data presents as authoritative rather than performing identity forgery. It is a candidate extension, not established STRIDE doctrine.
+
+## Code examples
+
+```python
+# Fabricates a default rather than surfacing missing data
+user_role = getattr(session, "role", "readonly")
+# Missing role silently becomes "readonly" — wrong in either direction.
+
+# Substitutes processing time for missing event time
+event_time = record.timestamp or datetime.now()
+# The audit trail records processing time, not event time.
+
+# Fabricates identity via structural presence
+if hasattr(obj, "security_clearance"):
+    handle_classified(obj)
+# Structural check, not identity check — any object with the attribute passes.
+```
+
+## Why existing controls miss it
+
+The code is syntactically valid, follows common patterns, and passes tests because the failure is semantic. Determining whether a default fabricates authoritative data requires domain context about the security meaning of that field. A reviewer under time pressure may instead see defensive coding as a positive signal.
+
+## Risk in government context
+
+Classification decisions, access control, and evidentiary integrity are all exposed wherever “unknown” and “the default” are different answers with different consequences.
+
+## ACF entries in this category
+
+Five entries map to Spoofing: three core entries and two provisional candidates.
+
+<AcfRegistry stride="spoofing" />
+
+## See also
+
+- [Tampering](../tampering/) — authority tier conflation
+- [Elevation of Privilege](../elevation-of-privilege/) — implicit privilege grant from unvalidated claims
+- [ACF Taxonomy Registry](../../../acf/) — all 20 failure modes

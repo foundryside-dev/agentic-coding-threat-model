@@ -1,0 +1,8 @@
+id: PY-WL-105
+language: python
+family: boundary
+base_severity: ERROR
+maturity: stable
+summary: "Untrusted data passed as an argument to a trusted producer at a call site"
+cwes: [CWE-501]
+covers_acf: [ACF-T1, ACF-E1]
