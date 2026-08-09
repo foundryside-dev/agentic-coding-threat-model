@@ -13,8 +13,8 @@ It is also the single largest piece of the designed specification (archived) tha
 | Rank | State | Set by | Meaning |
 |---:|---|---|---|
 | 0 | `INTEGRAL` | You — `@trusted` (default) | Fully trusted data the application produces and relies on. |
-| 1 | `ASSURED` | You — `@trusted(level="ASSURED")`, `@trust_boundary(to_level="ASSURED")` | Trusted after validation; a notch below integral. |
-| 2 | `GUARDED` | You — `@trust_boundary(to_level="GUARDED")`; also the bundled stdlib table | Partially checked: passed a shape or format guard, not fully assured. |
+| 1 | `ASSURED` | You —<br>`@trusted` or<br>`@trust_boundary`<br>(ASSURED) | Trusted after validation; a notch below integral. |
+| 2 | `GUARDED` | You —<br>`@trust_boundary`<br>(GUARDED); also the bundled stdlib table | Partially checked: passed a shape or format guard, not fully assured. |
 | 3 | `UNKNOWN_ASSURED` | The engine (never produced — see §4.4) | Semantically validated, provenance unestablished. |
 | 4 | `UNKNOWN_GUARDED` | The engine (never produced — see §4.4) | Shape-validated, provenance unestablished. |
 | 5 | `EXTERNAL_RAW` | You — `@external_boundary`; also the stdlib table | Raw untrusted data crossing into the system from outside. |

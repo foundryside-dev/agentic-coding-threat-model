@@ -2,7 +2,11 @@ title: "Semantic Defects in AI-Generated Code: Assurance Frameworks for AI-Assis
 author: "John Morrissey"
 date: "9 August 2026"
 version: "Draft for Comment v0.3.0"
+document-type: "OPEN CONSULTATION · DISCUSSION PAPER"
+running-title: "Semantic Defects in AI-Generated Code"
+description: "A threat model and assurance framework for semantic defects in AI-generated code used in high-stakes systems."
 keywords: "AI-generated code, threat model, semantic defects, STRIDE, software assurance, high-stakes systems, agentic coding"
+source-date-epoch: "1786233600"
 disclaimer: "This is a draft discussion paper circulated for peer review. It is independent work published in a personal capacity and does not constitute official guidance or policy of any government body. It does not mandate or recommend specific controls for any agency, system, or project. Views and analysis are the author's own."
 version-table:
   - version: "0.1.0"

@@ -4,14 +4,22 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   Light mode variables (Hugo Book default)
+   Texture tokens — grain on dark chrome (sidebar)
+   -------------------------------------------------------------------------- */
+:root {
+  --texture-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.16'/%3E%3C/svg%3E");
+  --texture-grain-size: 120px 120px;
+}
+
+/* --------------------------------------------------------------------------
+   Light mode variables (Hugo Book default) — slate & cobalt recut
    -------------------------------------------------------------------------- */
 :root {
   --book-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --book-font-code: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
 
-  /* Navy accent */
-  --color-link: #29B480;
+  /* Cobalt accent */
+  --color-link: #2444A8;
   --body-background: #ffffff;
   --body-font-color: #414141;
 
@@ -19,7 +27,7 @@
   --icon-filter: none;
 
   /* Table headers */
-  --table-header-bg: #1E3C50;
+  --table-header-bg: #2A323D;
   --table-header-fg: #ffffff;
 
   /* Code blocks */
@@ -29,24 +37,24 @@
 
   /* Infobox */
   --infobox-bg: #F4F5F5;
-  --infobox-border: #1E3C50;
-  --infobox-header-bg: #1E3C50;
+  --infobox-border: #2A323D;
+  --infobox-header-bg: #2A323D;
   --infobox-header-fg: #ffffff;
 
   /* Risk level badges */
   --risk-critical: #d32f2f;
   --risk-high: #e65100;
-  --risk-medium: #FAD673;
-  --risk-low: #29B480;
+  --risk-medium: #F0C75E;
+  --risk-low: #2F9E60;
 
   /* Detection badges */
   --detection-none: #d32f2f;
-  --detection-partial: #FAD673;
-  --detection-good: #29B480;
+  --detection-partial: #F0C75E;
+  --detection-good: #2F9E60;
   --detection-na: #9FA4A7;
 
   /* Entry status */
-  --status-core: #29B480;
+  --status-core: #2F9E60;
   --status-provisional: #9FA4A7;
 }
 
@@ -56,20 +64,20 @@
    We target both so manual dark mode toggle works correctly.
    -------------------------------------------------------------------------- */
 @mixin dark-theme-vars {
-  --color-link: #69EBA5;
-  --body-background: #1a2631;
+  --color-link: #7FA8FF;
+  --body-background: #161B22;
   --body-font-color: #e0e4e7;
 
-  --gray-100: #1f3040;
-  --gray-200: #24384a;
+  --gray-100: #1C232C;
+  --gray-200: #232C37;
   --gray-500: #9FA4A7;
 
-  --infobox-bg: #1f3040;
-  --infobox-border: #2a5570;
-  --infobox-header-bg: #1E3C50;
+  --infobox-bg: #1C232C;
+  --infobox-border: #3C4754;
+  --infobox-header-bg: #2A323D;
   --infobox-header-fg: #e0e4e7;
 
-  --table-header-bg: #2a5570;
+  --table-header-bg: #3C4754;
   --table-header-fg: #e0e4e7;
 }
 
@@ -86,10 +94,12 @@ body.dark {
 }
 
 /* --------------------------------------------------------------------------
-   Sidebar — navy
+   Sidebar — slate with fine grain
    -------------------------------------------------------------------------- */
 .book-menu {
-  background: #1E3C50;
+  background-color: #2A323D;
+  background-image: var(--texture-grain);
+  background-size: var(--texture-grain-size);
 
   nav {
     color: #e0e4e7;
@@ -99,13 +109,18 @@ body.dark {
     color: #e0e4e7 !important;
 
     &:hover {
-      color: #69EBA5 !important;
+      color: #7FA8FF !important;
     }
 
     &.active {
-      color: #69EBA5 !important;
+      color: #7FA8FF !important;
       font-weight: 600;
     }
+  }
+
+  :focus-visible {
+    outline: 3px solid #7FA8FF;
+    outline-offset: 2px;
   }
 }
 
@@ -113,32 +128,32 @@ body.dark {
    Header / brand area
    -------------------------------------------------------------------------- */
 .book-brand {
-  background: #152d3d;
+  background: #1C2229;
   padding: 1rem;
   margin-bottom: 0.5rem;
 }
 
 /* --------------------------------------------------------------------------
-   Links
+   Links — underlined in body content, cobalt
    -------------------------------------------------------------------------- */
 .book-page a {
   color: var(--color-link);
-  text-decoration: none;
+  text-decoration: underline;
 
   &:hover {
-    color: #288264;
+    color: #2E5BE3;
     text-decoration: underline;
   }
 }
 
 @media (prefers-color-scheme: dark) {
   .book-page a:hover {
-    color: #C8EBD7;
+    color: #C9D8F8;
   }
 }
 
 body.dark .book-page a:hover {
-  color: #C8EBD7;
+  color: #C9D8F8;
 }
 
 /* --------------------------------------------------------------------------

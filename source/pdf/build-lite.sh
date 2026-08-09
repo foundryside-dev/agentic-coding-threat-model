@@ -67,7 +67,7 @@ build_document() {
 
     # Prepare body: strip the H1 title line (metadata provides the title page)
     # and strip horizontal rules (Typst sections provide structure)
-    BODY_MD=$(mktemp)
+    BODY_MD=$(mktemp --suffix=.md)
     trap 'rm -f "$BODY_MD"' RETURN
 
     # Remove the first H1 heading (title) — the template renders the title page from metadata
@@ -94,6 +94,10 @@ build_document() {
     # Strip disclaimer blockquote — rendered on title page from metadata
     sed -i '/^> This is a navigation guide/d' "$BODY_MD"
     sed -i '/^> This is a draft discussion paper/d' "$BODY_MD"
+
+    # PDF companions live together in docs/pdf; keep the link useful after
+    # Pandoc conversion instead of embedding a source-only Markdown path.
+    sed -i 's|(governing-ai-generated-code.md)|(governing-ai-generated-code.pdf)|g' "$BODY_MD"
 
     # Convert MkDocs admonitions (!!! type "title") to blockquotes for pandoc
     python3 -c "
@@ -135,7 +139,7 @@ with open(sys.argv[1], 'w') as f:
     postprocess_tables "$output_typ" '{}' 'lite'
 
     if $BUILD_PDF; then
-        compile_pdf "$SCRIPT_DIR" "$(dirname "$SCRIPT_DIR")" "$(basename "$output_typ")" "$(basename "$output_pdf")"
+        compile_pdf "$SCRIPT_DIR" "$(dirname "$SCRIPT_DIR")" "$(basename "$output_typ")" "$(basename "$output_pdf")" "$metadata"
     fi
 
     echo ""

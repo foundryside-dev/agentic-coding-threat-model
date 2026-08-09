@@ -1,12 +1,18 @@
-// Typst template for long-form discussion papers
+// Typst template for the Semantic Defects publication suite.
+// Requires Typst >= 0.14.0.
 //
 // Used via pandoc: pandoc input.md -t typst --template=pandoc-typst.typ --metadata-file=metadata.yaml
 
-// --- Brand Colours ---
-#let dta-navy = rgb("#2C3E5D")
-#let dta-body = rgb("#333333")
-#let dta-code-bg = rgb("#F5F5F5")
-#let dta-rule-blue = rgb("#2E5090")
+// A restrained, high-contrast palette for screen and print. Colour is never
+// the only carrier of meaning; links are also underlined and callouts use rules.
+#let ink = rgb("#18212F")
+#let muted = rgb("#56616E")
+#let accent = rgb("#315C87")
+#let accent-dark = rgb("#234564")
+#let teal = rgb("#2D7371")
+#let paper-blue = rgb("#EAF1F5")
+#let code-bg = rgb("#F4F6F8")
+#let rule = rgb("#CBD5DE")
 
 // --- conf function (called by pandoc's template wrapper) ---
 #let conf(
@@ -24,6 +30,9 @@
   pdf-title: none,
   pdf-author: none,
   pdf-keywords: none,
+  pdf-description: none,
+  running-title: none,
+  running-version: none,
   // Custom metadata passed via pandoc
   doc,
 ) = {
@@ -36,25 +45,36 @@
     title: if pdf-title != none { pdf-title } else { none },
     author: if pdf-author != none { (pdf-author,) } else { () },
     keywords: if pdf-keywords != none { pdf-keywords.split(", ") } else { () },
+    description: pdf-description,
     date: auto,
   )
 
   // --- Page setup ---
   set page(
     paper: "a4",
-    margin: (top: 3cm, bottom: 3cm, left: 3cm, right: 3cm),
+    margin: (top: 2.8cm, bottom: 2.8cm, left: 2.7cm, right: 2.7cm),
     fill: white,
-    header: {
-      line(length: 100%, stroke: 0.4pt + luma(180))
+    header: context {
+      grid(
+        columns: (1fr, auto),
+        align: (left, right),
+        text(size: 9pt, fill: muted)[#if running-title != none { running-title }],
+        text(size: 9pt, fill: muted)[#if running-version != none { running-version }],
+      )
+      v(0.25em)
+      line(length: 100%, stroke: 0.6pt + rule)
     },
     footer: context {
-      let page-num = counter(page).display()
-      line(length: 100%, stroke: 0.4pt + luma(180))
-      v(0.2em)
+      // Read the counter value directly: display() is a locatable reference,
+      // which PDF/UA correctly forbids inside an artifact.
+      let page-num = str(counter(page).get().first())
+      line(length: 100%, stroke: 0.6pt + rule)
+      v(0.25em)
       grid(
-        columns: (1fr, 1fr, 1fr),
-        align: (left, center, right),
-        [], [], text(size: 9pt)[#page-num],
+        columns: (1fr, auto),
+        align: (left, right),
+        text(size: 9pt, fill: muted, "semanticdefects.foundryside.dev"),
+        text(size: 9pt, weight: "medium", fill: ink, page-num),
       )
     },
   )
@@ -67,21 +87,19 @@
   set text(
     font: ("Libertinus Serif", "TeX Gyre Termes", "Liberation Serif", "DejaVu Serif"),
     size: 11pt,
-    fill: dta-body,
+    fill: ink,
     lang: lang,
     region: region,
     hyphenate: true,
   )
 
   // --- Paragraph spacing ---
-  // Justified body text with controlled hyphenation for formal government documents.
-  // "optimized" linebreaks provide some implicit widow/orphan mitigation by choosing
-  // better break points across the full paragraph.
-  // Note: par(costs: (widow: ..., orphan: ...)) requires Typst 0.15+ — add when available.
+  // Ragged-right copy avoids rivers in long technical passages and is easier
+  // to track for readers with dyslexia or low vision.
   set par(
-    leading: 0.9em,
+    leading: 0.78em,
     spacing: 1.1em,
-    justify: true,
+    justify: false,
     linebreaks: "optimized",
   )
 
@@ -92,13 +110,23 @@
   // Prevent headings from appearing at the bottom of a page with no following content
   show heading: set block(sticky: true)
 
-  // Level 1 = ## in markdown (part titles) — strong visual separation with rule
-  show heading.where(level: 1): it => {
+  // Front-matter H1s are semantic landmarks but stay within their composed page.
+  show heading.where(level: 1, outlined: false): it => {
+    text(
+      font: ("TeX Gyre Heros", "Liberation Sans", "DejaVu Sans"),
+      size: 21pt,
+      weight: "bold",
+      fill: ink,
+    )[#it.body]
+  }
+
+  // Level 1 = ## in markdown (part titles) — strong visual separation with rule.
+  show heading.where(level: 1, outlined: true): it => {
     pagebreak(weak: true)
     v(1.5cm)
-    line(length: 100%, stroke: 1.5pt + dta-navy)
+    line(length: 100%, stroke: 2pt + accent)
     v(0.6em)
-    text(font: ("TeX Gyre Heros", "Liberation Sans", "DejaVu Sans"), size: 20pt, weight: "bold", fill: dta-navy)[#it.body]
+    text(font: ("TeX Gyre Heros", "Liberation Sans", "DejaVu Sans"), size: 21pt, weight: "bold", fill: ink)[#it.body]
     v(1em)
   }
 
@@ -106,7 +134,7 @@
   show heading.where(level: 2): it => {
     v(1.5em)
     block(breakable: false)[
-      #text(font: ("TeX Gyre Heros", "Liberation Sans", "DejaVu Sans"), size: 14pt, weight: "bold", fill: dta-navy)[#it.body]
+      #text(font: ("TeX Gyre Heros", "Liberation Sans", "DejaVu Sans"), size: 14pt, weight: "bold", fill: accent-dark)[#it.body]
       #v(0.4em)
     ]
   }
@@ -115,7 +143,7 @@
   show heading.where(level: 3): it => {
     v(0.8em)
     block(breakable: false)[
-      #text(font: ("TeX Gyre Heros", "Liberation Sans", "DejaVu Sans"), size: 12pt, weight: "bold", fill: dta-navy)[#it.body]
+      #text(font: ("TeX Gyre Heros", "Liberation Sans", "DejaVu Sans"), size: 12pt, weight: "bold", fill: ink)[#it.body]
       #v(0.3em)
     ]
   }
@@ -124,13 +152,13 @@
   show heading.where(level: 4): it => {
     v(0.6em)
     block(breakable: false)[
-      #text(font: ("TeX Gyre Heros", "Liberation Sans", "DejaVu Sans"), size: 11pt, weight: "bold", fill: dta-navy)[#it.body]
+      #text(font: ("TeX Gyre Heros", "Liberation Sans", "DejaVu Sans"), size: 11pt, weight: "bold", fill: ink)[#it.body]
       #v(0.2em)
     ]
   }
 
   // --- Links ---
-  show link: it => text(fill: dta-rule-blue)[#it]
+  show link: it => text(fill: accent-dark)[#underline(it)]
 
   // --- Code blocks ---
   // Noto Sans Mono is more compact than DejaVu, fitting longer lines before wrapping.
@@ -139,20 +167,20 @@
     set text(font: ("Noto Sans Mono", "DejaVu Sans Mono", "Liberation Mono"), size: 9pt)
     block(
       width: 100%,
-      fill: dta-code-bg,
+      fill: code-bg,
       inset: (x: 12pt, y: 10pt),
       radius: 3pt,
       breakable: true,
-      stroke: 0.5pt + luma(200),
+      stroke: (left: 2pt + teal, rest: 0.5pt + rule),
       it,
     )
   }
 
   // --- Inline code ---
   show raw.where(block: false): it => {
-    set text(font: ("Noto Sans Mono", "DejaVu Sans Mono", "Liberation Mono"), size: 9.5pt)
+    set text(font: ("Noto Sans Mono", "DejaVu Sans Mono", "Liberation Mono"), size: 9pt)
     box(
-      fill: dta-code-bg,
+      fill: code-bg,
       inset: (x: 3pt, y: 0pt),
       outset: (y: 2pt),
       radius: 2pt,
@@ -164,13 +192,13 @@
   set table(
     inset: (x: 8pt, y: 6pt),
     stroke: (x, y) => {
-      if y == 0 { (bottom: 1.2pt + dta-navy) }
-      else { (bottom: 0.5pt + luma(200)) }
+      if y == 0 { (bottom: 1.2pt + accent-dark) }
+      else { (bottom: 0.5pt + rule) }
     },
     fill: (x, y) => {
-      if y == 0 { dta-navy.lighten(90%) }
+      if y == 0 { paper-blue }
       else if calc.odd(y) { white }
-      else { luma(240) }
+      else { rgb("#F8FAFB") }
     },
   )
 
@@ -180,21 +208,23 @@
   set table.cell(breakable: true)
 
   // Bold header row text
-  show table.cell.where(y: 0): set text(weight: "bold", size: 9pt, fill: dta-navy, hyphenate: true)
+  show table.cell.where(y: 0): set text(weight: "bold", size: 9pt, fill: accent-dark, hyphenate: true)
 
   // Pandoc wraps tables in figure blocks — make them breakable across pages
   show figure.where(kind: table): set block(breakable: true, width: 100%)
   show figure.where(kind: table): set align(left)
 
   // Table captions smaller than body text
-  show figure.caption: set text(size: 8.5pt)
+  show figure.caption: set text(size: 9pt, fill: muted)
 
   // --- Block quotes ---
   show quote.where(block: true): it => {
     block(
-      inset: (left: 1.5em, top: 0.5em, bottom: 0.5em),
-      stroke: (left: 2.5pt + dta-navy.lighten(60%)),
-      text(style: "italic", fill: dta-body.lighten(15%))[#it.body],
+      width: 100%,
+      inset: (left: 1.2em, right: 1.2em, top: 0.8em, bottom: 0.8em),
+      fill: paper-blue,
+      stroke: (left: 3pt + teal),
+      text(fill: ink)[#it.body],
     )
   }
 
@@ -205,7 +235,7 @@
   // --- Footnotes ---
   // Smaller footnote text with a visible separator rule
   set footnote.entry(separator: line(length: 30%, stroke: 0.5pt + luma(180)))
-  show footnote.entry: set text(size: 8.5pt)
+  show footnote.entry: set text(size: 9pt)
 
   // Emit the document body
   doc

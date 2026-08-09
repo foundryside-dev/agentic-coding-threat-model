@@ -36,6 +36,15 @@ $endif$
 $if(keywords)$
   pdf-keywords: "$keywords$",
 $endif$
+$if(description)$
+  pdf-description: "$description$",
+$endif$
+$if(running-title)$
+  running-title: [$running-title$],
+$endif$
+$if(version)$
+  running-version: [$version$],
+$endif$
 $if(date)$
   date: [$date$],
 $endif$
@@ -54,42 +63,47 @@ $endif$
 // =====================================================================
 #page(header: none, footer: none, numbering: none)[
 
-  #v(7cm)
+  #v(2.2cm)
 
-  // Decorative rule — provides visual weight at the head of the title page
-  #line(length: 100%, stroke: 2pt + rgb("#2C3E5D"))
-  #v(0.8cm)
+  #text(size: 9pt, weight: "bold", tracking: 0.12em, fill: rgb("#2D7371"))[
+    $if(document-type)$$document-type$$else$OPEN CONSULTATION$endif$
+  ]
+
+  #v(1.1cm)
 
   #set text(hyphenate: false)
   #set par(justify: false)
-  #text(size: 22pt, weight: "bold", fill: rgb("#2C3E5D"))[$if(title)$$title$$endif$]
+  #heading(level: 1, outlined: false)[$if(title)$$title$$endif$]
 
-  #v(0.8cm)
+  #v(0.5cm)
 
   $if(subtitle)$
-  #text(size: 15pt, fill: rgb("#414141"))[$subtitle$]
+  #text(size: 15pt, fill: rgb("#56616E"))[$subtitle$]
 
-  #v(0.6cm)
+  #v(0.8cm)
   $endif$
 
-  #text(size: 14pt)[Discussion Paper --- $if(version)$$version$$endif$]
+  #line(length: 7cm, stroke: 2pt + rgb("#315C87"))
 
-  #v(1.2cm)
+  #v(1.1cm)
 
-  #table(
-    columns: (auto, 1fr),
-    stroke: none,
-    fill: none,
-    align: left,
-    inset: (x: 8pt, y: 4pt),
-    [*Date:*], [$if(date)$$date$$endif$],
-    [*Prepared by:*], [$if(author)$$author$$endif$],
-  )
+  #block(fill: rgb("#EAF1F5"), radius: 4pt, inset: 14pt, width: 100%)[
+    #grid(
+      columns: (auto, 1fr),
+      column-gutter: 14pt,
+      row-gutter: 7pt,
+      [*Version*], [$if(version)$$version$$endif$],
+      [*Date*], [$if(date)$$date$$endif$],
+      [*Author*], [$if(author)$$author$$endif$],
+    )
+  ]
 
   #v(1fr)
 
-  #text(size: 9pt, fill: rgb("#414141"))[
-    $if(disclaimer)$$disclaimer$$else$This is a discussion paper. It presents a threat model and preliminary analysis, not final guidance. Comments and contributions are welcome.$endif$
+  #block(stroke: (left: 3pt + rgb("#2D7371")), inset: (left: 12pt, y: 7pt), width: 100%)[
+    #text(size: 9pt, fill: rgb("#56616E"))[
+      $if(disclaimer)$$disclaimer$$else$This is a discussion paper. It presents a threat model and preliminary analysis, not final guidance. Comments and contributions are welcome.$endif$
+    ]
   ]
 ]
 
@@ -99,22 +113,21 @@ $endif$
 $if(version-table)$
 #page(header: none, footer: none, numbering: none)[
 
+  #heading(level: 1, outlined: false)[Document control]
   #v(0.5cm)
-  #text(size: 16pt, weight: "bold", fill: rgb("#2C3E5D"))[Document Control]
-  #v(1cm)
 
   #table(
     columns: (auto, auto, 1fr),
     inset: 8pt,
     stroke: (x, y) => {
-      if y == 0 { (bottom: 1.2pt + rgb("#2C3E5D")) }
-      else { (bottom: 0.5pt + luma(200)) }
+      if y == 0 { (bottom: 1.2pt + rgb("#315C87")) }
+      else { (bottom: 0.5pt + rgb("#CBD5DE")) }
     },
     fill: (x, y) => {
-      if y == 0 { rgb("#2C3E5D").lighten(90%) }
+      if y == 0 { rgb("#EAF1F5") }
       else { none }
     },
-    table.cell(stroke: none)[*Version*], table.cell(stroke: none)[*Date*], table.cell(stroke: none)[*Changes*],
+    table.header([*Version*], [*Date*], [*Changes*]),
     $for(version-table)$
     [$version-table.version$], [$version-table.date$], [#text(size: 9pt)[$version-table.changes$]],
     $endfor$
@@ -129,14 +142,10 @@ $endif$
 #set page(numbering: "i")
 #counter(page).update(1)
 
-// ToC title styled as front matter — no navy rule or forced page break
+// The explicit heading gives the tagged PDF a navigable front-matter landmark.
+#heading(level: 1, outlined: false)[Contents]
 #outline(
-  title: text(
-    font: ("TeX Gyre Heros", "Liberation Sans", "DejaVu Sans"),
-    size: 20pt,
-    weight: "bold",
-    fill: rgb("#2C3E5D"),
-  )[Contents],
+  title: none,
   depth: 4,
   indent: 1.5em,
 )
