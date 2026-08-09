@@ -36,6 +36,15 @@ $endif$
 $if(keywords)$
   pdf-keywords: "$keywords$",
 $endif$
+$if(description)$
+  pdf-description: "$description$",
+$endif$
+$if(running-title)$
+  running-title: [$running-title$],
+$endif$
+$if(version)$
+  running-version: [$version$],
+$endif$
 $if(date)$
   date: [$date$],
 $endif$
@@ -54,45 +63,50 @@ $endif$
 // =====================================================================
 #page(header: none, footer: none, numbering: none)[
 
-  #v(7cm)
+  #v(2.2cm)
 
-  // Decorative rule — provides visual weight at the head of the title page
-  #line(length: 100%, stroke: 2pt + rgb("#2C3E5D"))
-  #v(0.8cm)
+  #text(size: 9pt, weight: "bold", tracking: 0.12em, fill: rgb("#2D7371"))[
+    $if(document-type)$$document-type$$else$BRIEFING$endif$
+  ]
+
+  #v(1.1cm)
 
   #set text(hyphenate: false)
   #set par(justify: false)
-  #text(size: 22pt, weight: "bold", fill: rgb("#2C3E5D"))[$if(title)$$title$$endif$]
+  #heading(level: 1, outlined: false)[$if(title)$$title$$endif$]
 
-  #v(0.8cm)
+  #v(0.5cm)
 
   $if(subtitle)$
-  #text(size: 15pt, fill: rgb("#414141"))[$subtitle$]
+  #text(size: 15pt, fill: rgb("#56616E"))[$subtitle$]
 
-  #v(0.6cm)
+  #v(0.8cm)
   $endif$
 
-  #text(size: 14pt)[Discussion Paper --- $if(version)$$version$$endif$]
+  #line(length: 7cm, stroke: 2pt + rgb("#315C87"))
 
-  #v(1.2cm)
+  #v(1.1cm)
 
-  #table(
-    columns: (auto, 1fr),
-    stroke: none,
-    fill: none,
-    align: left,
-    inset: (x: 8pt, y: 4pt),
-    [*Date:*], [$if(date)$$date$$endif$],
-    [*Prepared by:*], [$if(author)$$author$$endif$],
-    $if(parent-paper)$
-    [*Parent paper:*], [#text(size: 10pt)[$parent-paper$]],
-    $endif$
-  )
+  #block(fill: rgb("#EAF1F5"), radius: 4pt, inset: 14pt, width: 100%)[
+    #grid(
+      columns: (auto, 1fr),
+      column-gutter: 14pt,
+      row-gutter: 7pt,
+      [*Version*], [$if(version)$$version$$endif$],
+      [*Date*], [$if(date)$$date$$endif$],
+      [*Author*], [$if(author)$$author$$endif$],
+      $if(parent-paper)$
+      [*Related work*], [#text(size: 10pt)[$parent-paper$]],
+      $endif$
+    )
+  ]
 
   #v(1fr)
 
-  #text(size: 9pt, fill: rgb("#414141"))[
-    $if(disclaimer)$$disclaimer$$else$This is a discussion paper. It presents a threat model and preliminary analysis, not final guidance. Comments and contributions are welcome.$endif$
+  #block(stroke: (left: 3pt + rgb("#2D7371")), inset: (left: 12pt, y: 7pt), width: 100%)[
+    #text(size: 9pt, fill: rgb("#56616E"))[
+      $if(disclaimer)$$disclaimer$$else$This is a discussion paper. It presents a threat model and preliminary analysis, not final guidance. Comments and contributions are welcome.$endif$
+    ]
   ]
 ]
 

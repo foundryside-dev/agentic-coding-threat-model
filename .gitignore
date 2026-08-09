@@ -20,6 +20,8 @@ source/pdf/*
 !source/pdf/metadata-suite-map.yaml
 !source/pdf/build-lite.sh
 !source/pdf/build-common.sh
+!source/pdf/build-all.sh
+!source/pdf/README.md
 !source/pdf/pandoc-typst-lite.typ
 !source/pdf/.gitignore
 .venv/

@@ -7,5 +7,6 @@
 # Compiled PDFs
 source/*.pdf
 
-# Mermaid build temp dir (cleaned up by build scripts, but just in case)
-.mermaid-tmp/
+# Generated Mermaid source and SVG assets. These stay on disk so the generated
+# .typ intermediates remain independently compilable.
+.assets/

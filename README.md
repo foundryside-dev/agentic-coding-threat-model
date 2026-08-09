@@ -32,6 +32,16 @@ pip install mkdocs mkdocs-material
 mkdocs serve        # http://127.0.0.1:8000
 ```
 
+To rebuild and verify the public PDF suite (Pandoc 3.2+, Typst 0.14+, Mermaid
+CLI 11+, and Poppler required):
+
+```bash
+./source/pdf/build-all.sh --publish
+```
+
+See [the PDF pipeline guide](source/pdf/README.md) for profiles, accessibility
+requirements, and reproducibility checks.
+
 ## Licence
 
 See [About This Project](https://semanticdefects.foundryside.dev/reference/about/) for attribution and licence details.

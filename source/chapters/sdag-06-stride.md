@@ -41,9 +41,9 @@ Two of the six categories — "fabricated default" (S) and the process-level DoS
 
 ### 3.2 Threat categories
 
-#### S — Spoofing: Competence and identity spoofing[^stride-s-traditional]
+#### S — Spoofing: Competence and identity spoofing
 
-**Agentic variant:** Code *appears* to handle data correctly but operates on fabricated or default values, presenting a false picture of data integrity.
+**Agentic variant:** Code *appears* to handle data correctly but operates on fabricated or default values, presenting a false picture of data integrity.[^stride-s-traditional]
 
 **Mechanism:** Agents default to defensive patterns that substitute values rather than failing. The code "works" — it produces output, it does not crash — but the output is based on fabricated data rather than actual data. The code spoofs the competence of correct data handling.
 
@@ -69,9 +69,9 @@ if hasattr(obj, "security_clearance"):
 
 **Risk in government context:** Classification decisions, access control, evidentiary integrity — any domain where "I don't know" and "the default" are different answers with different consequences.[^stride-s-entries]
 
-#### T — Tampering: Authority tier conflation[^stride-t-traditional]
+#### T — Tampering: Authority tier conflation
 
-**Agentic variant:** External (untrusted) data is treated as internal (trusted) data without validation, effectively tampering with the authority tier rather than the data itself.
+**Agentic variant:** External (untrusted) data is treated as internal (trusted) data without validation, effectively tampering with the authority tier rather than the data itself.[^stride-t-traditional]
 
 **Mechanism:** Agents do not distinguish between data from different authority tiers because the programming language does not enforce it. A `dict` from a validated database query and a `dict` from an unvalidated API response are the same type. The agent treats them interchangeably.
 
@@ -94,9 +94,9 @@ apply_system_settings(config)
 
 **Risk in government context:** Injection attacks through unvalidated external data, data corruption of authoritative records, and compliance failures when data provenance cannot be demonstrated.[^stride-t-entries]
 
-#### R — Repudiation: Audit trail destruction through error handling[^stride-r-traditional]
+#### R — Repudiation: Audit trail destruction through error handling
 
-**Agentic variant:** Error handling patterns destroy the audit trail by catching, logging, and continuing rather than failing in a way that preserves the error as a first-class audit event.
+**Agentic variant:** Error handling patterns destroy the audit trail by catching, logging, and continuing rather than failing in a way that preserves the error as a first-class audit event.[^stride-r-traditional]
 
 **Mechanism:** Agents generate broad exception handlers that prevent crashes but also prevent errors from being recorded in audit systems. The error is "handled" in the sense that the program continues, but the event that caused the error is lost to the audit trail.
 
@@ -124,9 +124,9 @@ except NotificationError:
 
 **Risk in government context:** Regulatory compliance (failure to maintain complete audit trails), legal proceedings (gaps in evidence chains), and IRAP assessment failures (inability to demonstrate complete traceability).[^stride-r-entries]
 
-#### I — Information Disclosure: Verbose error response and stack trace exposure[^stride-i-traditional]
+#### I — Information Disclosure: Verbose error response and stack trace exposure
 
-**Agentic variant:** Agent-generated error handling exposes internal system details in error responses, log messages, or API returns.
+**Agentic variant:** Agent-generated error handling exposes internal system details in error responses, log messages, or API returns.[^stride-i-traditional]
 
 **Mechanism:** Agents produce "helpful" error messages that include internal state, query parameters, file paths, or stack traces (ACF-I1: Verbose Error Response). This is good practice for development but dangerous in production, and agents do not distinguish between the two contexts. Stack trace exposure — a related pattern well-covered by existing SAST tooling — is not catalogued as a separate ACF entry because existing tools provide adequate detection.
 
@@ -153,9 +153,9 @@ except Exception as e:
 
 **Risk in government context:** Reconnaissance information for attackers, credential exposure, and violation of need-to-know principles.[^stride-i-entries]
 
-#### D — Denial of Service: Finding flood and review capacity exhaustion (meta-threat)[^stride-d-traditional]
+#### D — Denial of Service: Finding flood and review capacity exhaustion (meta-threat)
 
-**Agentic variant:** The volume of agent-generated code overwhelms the review process, degrading review quality to the point where the review is no longer an effective security control.
+**Agentic variant:** The volume of agent-generated code overwhelms the review process, degrading review quality to the point where the review is no longer an effective security control.[^stride-d-traditional]
 
 *Note: This extends STRIDE to the development lifecycle. The "service" being denied is the review process — a security control per ISM-2060/2061 — not a user-facing system.*
 
@@ -175,9 +175,9 @@ A secondary mechanism: when automated analysis tools produce too many findings o
 
 **Risk in government context:** Security review as a compliance checkbox rather than an effective control, accreditation based on a process that no longer provides the assurance it claims to provide.[^stride-d-entries]
 
-#### E — Elevation of Privilege: Implicit privilege grant[^stride-e-traditional]
+#### E — Elevation of Privilege: Implicit privilege grant
 
-**Agentic variant:** External system assertions are accepted without independent verification, granting privileges based on unvalidated claims — treating an external authority statement as if it were an internal trust decision.
+**Agentic variant:** External system assertions are accepted without independent verification, granting privileges based on unvalidated claims — treating an external authority statement as if it were an internal trust decision.[^stride-e-traditional]
 
 **Mechanism:** Closely related to the Tampering category above (ACF-T1/T2), but focussed on the *consequence* rather than the *mechanism*. Where T1 describes the missing validation boundary, E1 describes what happens next: the external system's assertion is acted upon as though it carried internal authority.
 
