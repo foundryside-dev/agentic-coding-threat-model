@@ -1,0 +1,13 @@
+---
+import Default from '@astrojs/starlight/components/Footer.astro';
+import site from '../data/site.json';
+---
+
+<div class="sd-disclaimer">
+  <strong>Disclaimer:</strong> This is a draft discussion paper circulated for peer review
+  (v{site.version}, {site.date}). It is independent work published in a personal capacity and
+  does not constitute official guidance or policy of any government body. It does not mandate
+  or recommend specific controls for any agency, system, or project. Views and analysis are
+  the author's own.
+</div>
+<Default />

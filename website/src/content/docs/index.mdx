@@ -1,0 +1,54 @@
+---
+title: Semantic Defects in AI-Generated Code
+description: A threat model and assurance framework for high-reliability systems that use AI to generate code
+template: splash
+hero:
+  tagline: A threat model and assurance framework for high-reliability systems that use AI to generate code
+  actions:
+    - text: Start reading
+      link: ./understand/
+      icon: right-arrow
+      variant: primary
+    - text: Assess your exposure
+      link: ./assess/
+      icon: right-arrow
+      variant: minimal
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import site from '../../data/site.json';
+
+<p class="sd-publication-line">{site.classification} · v{site.version} · {site.status} · {site.date}</p>
+
+AI coding tools are in active use across organisations and their contracted suppliers. These tools are productive and increasingly standard — this body of work does not recommend restricting them. It identifies a specific class of defect they produce that existing assurance frameworks were not designed to catch: code that is syntactically correct, passes all automated checks, looks right to reviewers, but makes the wrong decision about data that matters in its institutional context.
+
+## Start here
+
+[**Governing AI-Generated Code**](./understand/) (~13 pages) is the entry point for all audiences — it establishes the problem and summarises the response. Two paths branch from it:
+
+- **For practitioners** — [Reviewing AI-Generated Code: A Practical Guide](./respond/practical-guide/) gives hands-on review guidance for staff who use AI to write code but do not have CI pipelines or developer tooling.
+- **For assessment and governance** — the [CISO Assessment](./assess/ciso-assessment/) and [Assessor Checklist](./assess/irap-checklist/) evaluate organisational exposure against the failure taxonomy.
+
+The [Full Discussion Paper](./pdf/threat-model-discussion-paper-community.pdf) (~200 pages) is the complete technical analysis underpinning both paths. The [Wardline Companion](./wardline/) is the as-built specification of a shipped semantic enforcement tool — what the missing verification layer looks like when it is actually built.
+
+## Find your path
+
+<CardGrid>
+  <LinkCard title="CISO / Security Adviser" href="./assess/ciso-assessment/" description="Evaluate control gaps against the ACF taxonomy." />
+  <LinkCard title="Security Assessor" href="./assess/irap-checklist/" description="Use an assessment-ready checklist with ISM mapping." />
+  <LinkCard title="Developer / Code Author" href="./respond/practical-guide/" description="Apply five review questions with worked code examples." />
+  <LinkCard title="Executive" href="./understand/" description="Read the core problem and proportionate response in about 13 pages." />
+  <LinkCard title="Architect / Tech Lead" href="./acf/" description="Explore the failure taxonomy mapped to STRIDE categories." />
+</CardGrid>
+
+For detailed reading paths with time estimates and depth options, see the [Reading Guide](./reference/reading-guide/).
+
+## The document suite
+
+| Document | Pages | Audience | PDF |
+|---|:---:|---|---|
+| [**Governing AI-Generated Code**](./understand/) | ~13 | Everyone — entry point for all other reading | [Download](./pdf/governing-ai-generated-code.pdf) |
+| [**Practical Guide**](./respond/practical-guide/) | ~23 | Staff using AI to write code | [Download](./pdf/reviewing-ai-generated-code.pdf) |
+| **Discussion Paper** | ~200 | Technical leads, assessors, security architects | [Download](./pdf/threat-model-discussion-paper-community.pdf) |
+| [**Wardline Companion**](./wardline/) | ~86 | Tool implementers, assessors, pilot leads | [Download](./pdf/wardline-companion-community.pdf) |
+| **Document Suite Map** | 1 | Role-based route through the document suite | [Download](./pdf/document-suite-map.pdf) |

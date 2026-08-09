@@ -1,0 +1,8 @@
+id: PY-WL-112
+language: python
+family: sink
+base_severity: ERROR
+maturity: stable
+summary: "Conditional shell — a subprocess call with a literal shell=True"
+cwes: [CWE-78]
+covers_acf: [ACF-E2]

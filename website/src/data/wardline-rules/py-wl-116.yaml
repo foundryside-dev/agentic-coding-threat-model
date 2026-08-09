@@ -1,0 +1,8 @@
+id: PY-WL-116
+language: python
+family: sink
+base_severity: WARN
+maturity: preview
+summary: "Path/filesystem traversal — open/os.path.join/pathlib.Path, mutation via os.remove/os.rename/shutil.*, methods on a tainted pathlib.Path, and tarfile/zipfile extraction (Zip Slip)"
+cwes: [CWE-22]
+covers_acf: []

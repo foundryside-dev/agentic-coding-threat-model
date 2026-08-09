@@ -1,0 +1,16 @@
+---
+import { getCollection } from 'astro:content';
+import { buildLatticeDiagramSource } from '../lib/lattice-diagram.mjs';
+
+const states = (await getCollection('lattice'))
+	.map((entry) => entry.data)
+	.sort((left, right) => left.rank - right.rank);
+const source = buildLatticeDiagramSource(states);
+---
+
+<pre
+	class="mermaid"
+	data-src={source}
+	role="img"
+	aria-label="Trust lattice progression from INTEGRAL to MIXED_RAW"
+>{source}</pre>

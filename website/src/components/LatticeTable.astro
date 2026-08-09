@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+
+const states = (await getCollection('lattice'))
+	.map((entry) => entry.data)
+	.sort((left, right) => left.rank - right.rank);
+---
+
+<table>
+	<caption>Wardline trust lattice states</caption>
+	<thead>
+		<tr>
+			<th scope="col">Rank</th>
+			<th scope="col">State</th>
+			<th scope="col">Set by</th>
+			<th scope="col">Meaning</th>
+		</tr>
+	</thead>
+	<tbody>
+		{states.map((state) => (
+			<tr>
+				<td>{state.rank}</td>
+				<td>
+					<code style={`border-left:3px solid ${state.colour};padding-left:.3em`}>
+						{state.state}
+					</code>
+				</td>
+				<td>{state.set_by}</td>
+				<td>{state.meaning}</td>
+			</tr>
+		))}
+	</tbody>
+</table>

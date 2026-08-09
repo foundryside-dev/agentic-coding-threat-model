@@ -1,0 +1,19 @@
+---
+import Default from '@astrojs/starlight/components/Banner.astro';
+import site from '../data/site.json';
+---
+
+<div class="sd-announce" data-pagefind-ignore>
+  {site.classification} · <strong>{site.status}</strong> · v{site.version} — views and analysis are the author's own
+</div>
+<Default />
+
+<style>
+  .sd-announce {
+    background: var(--sl-color-accent-low);
+    color: var(--sl-color-text);
+    text-align: center;
+    padding: 0.4rem 1rem;
+    font-size: var(--sl-text-sm);
+  }
+</style>

@@ -1,0 +1,190 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { acfHref } from '../scripts/acf-registry.mjs';
+import { ruleHref } from '../scripts/rules-index.mjs';
+
+type RuleEntry = CollectionEntry<'wardlineRules'>;
+type AcfPage = CollectionEntry<'docs'> & {
+	data: CollectionEntry<'docs'>['data'] & {
+		acf: NonNullable<CollectionEntry<'docs'>['data']['acf']>;
+	};
+};
+
+const rules: RuleEntry['data'][] = (await getCollection('wardlineRules'))
+	.map((entry) => entry.data)
+	.sort((left, right) => left.id.localeCompare(right.id));
+const base = import.meta.env.BASE_URL;
+const acfEntries = (await getCollection(
+	'docs',
+	(entry): entry is AcfPage => entry.id.startsWith('acf/') && entry.data.acf !== undefined,
+)).map((entry) => ({ id: entry.data.acf.id, contentId: entry.id }));
+const acfEntryHref = (id: string) => {
+	const entry = acfEntries.find((candidate) => candidate.id === id);
+	return entry ? acfHref(base, entry.contentId) : acfHref(base, 'acf');
+};
+
+const facets = {
+	language: { label: 'Language', all: 'All languages', values: { python: 'Python', rust: 'Rust' } },
+	family: { label: 'Family', all: 'All families', values: { boundary: 'Boundary', sink: 'Sink' } },
+	base_severity: {
+		label: 'Base severity',
+		all: 'All base severities',
+		values: { ERROR: 'Error', WARN: 'Warn', INFO: 'Info' },
+	},
+	maturity: { label: 'Maturity', all: 'All maturities', values: { stable: 'Stable', preview: 'Preview' } },
+} as const;
+---
+
+<section class="rules-index" data-rules-index>
+	<form class="rules-filters" data-rules-filters aria-label="Filter Wardline rules">
+		{Object.entries(facets).map(([facet, configuration]) => (
+			<label>{configuration.label}
+				<select data-facet={facet}>
+					<option value="">{configuration.all}</option>
+					{Object.entries(configuration.values).map(([value, label]) => (
+						<option value={value}>{label}</option>
+					))}
+				</select>
+			</label>
+		))}
+	</form>
+
+	<p class="rules-results" data-rules-results role="status" aria-live="polite" aria-atomic="true">
+		{rules.length} rules shown
+	</p>
+	<p class="rules-empty" data-rules-empty hidden>No Wardline rules match the selected filters.</p>
+
+	<div class="rules-table-wrap" tabindex="0" aria-label="Scrollable Wardline rules registry">
+		<table>
+			<caption>Wardline policy rules</caption>
+			<thead>
+				<tr>
+					<th scope="col">ID</th>
+					<th scope="col">Language</th>
+					<th scope="col">Family</th>
+					<th scope="col">Base</th>
+					<th scope="col">Maturity</th>
+					<th scope="col">What it detects</th>
+					<th scope="col">Covers ACF</th>
+				</tr>
+			</thead>
+			<tbody>
+				{rules.map((rule) => (
+					<tr
+						data-rule-entry
+						data-language={rule.language}
+						data-family={rule.family}
+						data-base_severity={rule.base_severity}
+						data-maturity={rule.maturity}
+					>
+						<td><a href={ruleHref(base, rule)}><code>{rule.id}</code></a></td>
+						<td>{rule.language === 'python' ? 'Python' : 'Rust'}</td>
+						<td>{rule.family === 'boundary' ? 'Boundary' : 'Sink'}</td>
+						<td>{rule.base_severity}</td>
+						<td>{rule.maturity}</td>
+						<td>{rule.summary}{rule.cwes.length > 0 && <> ({rule.cwes.join(' / ')})</>}</td>
+						<td>
+							{rule.covers_acf.length > 0
+								? rule.covers_acf.map((id, index) => (
+									<>{index > 0 && ', '}<a href={acfEntryHref(id)}><code>{id}</code></a></>
+								))
+								: '—'}
+						</td>
+					</tr>
+				))}
+			</tbody>
+		</table>
+	</div>
+</section>
+
+<script>
+	import { createRulesIndexController } from '../scripts/rules-index.mjs';
+
+	const stateKey = '__semanticDefectsRulesIndexState__';
+	type RulesIndexController = ReturnType<typeof createRulesIndexController>;
+	const stateRegistry = window as unknown as Window & Record<string, RulesIndexController | undefined>;
+	const controller = stateRegistry[stateKey] ??= createRulesIndexController();
+
+	controller.install();
+	controller.initAll();
+</script>
+
+<style>
+	.rules-index {
+		margin-block: 1.5rem;
+	}
+
+	.rules-filters {
+		display: none;
+		grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+		gap: 0.75rem;
+		margin-block: 1rem;
+		padding: 1rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.5rem;
+		background: var(--sl-color-gray-7);
+	}
+
+	[data-rules-index][data-enhanced] .rules-filters {
+		display: grid;
+	}
+
+	.rules-filters label {
+		display: grid;
+		gap: 0.25rem;
+		font-weight: 600;
+	}
+
+	.rules-filters select {
+		width: 100%;
+		min-height: 2.5rem;
+		padding-inline: 0.5rem;
+		border: 1px solid var(--sl-color-gray-4);
+		border-radius: 0.25rem;
+		color: var(--sl-color-text);
+		background: var(--sl-color-bg);
+	}
+
+	.rules-filters select:focus-visible,
+	.rules-table-wrap:focus-visible {
+		outline: 3px solid var(--sl-color-accent-high);
+		outline-offset: 2px;
+	}
+
+	.rules-results,
+	.rules-empty {
+		margin-block: 0.75rem;
+	}
+
+	.rules-empty {
+		font-weight: 600;
+	}
+
+	.rules-table-wrap {
+		overflow-x: auto;
+	}
+
+	table {
+		width: 100%;
+		min-width: 64rem;
+		border-collapse: collapse;
+	}
+
+	caption {
+		padding-block: 0.5rem;
+		font-weight: 700;
+		text-align: left;
+	}
+
+	th,
+	td {
+		padding: 0.625rem;
+		border-block-end: 1px solid var(--sl-color-gray-5);
+		text-align: left;
+		vertical-align: top;
+	}
+
+	th {
+		background: var(--sl-color-gray-7);
+	}
+</style>

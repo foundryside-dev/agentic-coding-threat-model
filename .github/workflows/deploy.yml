@@ -47,6 +47,37 @@ jobs:
       - name: Nest Hugo output into MkDocs site
         run: cp -r reference-site/public/* site/reference/
 
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24.13.0'
+
+      - name: Build Starlight preview
+        working-directory: website
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm run test:preview-output
+          npm audit --audit-level=high
+          npm run build
+          npm run test:e2e
+          npm run build:preview
+
+      - name: Upload Starlight browser evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: starlight-browser-evidence
+          path: |
+            website/playwright-report/
+            website/test-results/
+          retention-days: 14
+
+      - name: Nest Starlight preview into MkDocs site
+        run: |
+          mkdir -p site/preview
+          cp -a website/dist/. site/preview/
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:

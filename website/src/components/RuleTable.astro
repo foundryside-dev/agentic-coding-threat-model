@@ -1,0 +1,96 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+
+type AcfPage = CollectionEntry<'docs'> & {
+	data: CollectionEntry<'docs'>['data'] & {
+		acf: NonNullable<CollectionEntry<'docs'>['data']['acf']>;
+	};
+};
+
+interface Props {
+	family: 'boundary' | 'sink';
+	language?: 'python' | 'rust';
+}
+
+const { family, language = 'python' } = Astro.props;
+const rules = (await getCollection('wardlineRules'))
+	.map((entry) => entry.data)
+	.filter((rule) => rule.family === family && rule.language === language)
+	.sort((left, right) => left.id.localeCompare(right.id));
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const acfEntries = (await getCollection(
+	'docs',
+	(entry): entry is AcfPage => entry.id.startsWith('acf/') && entry.data.acf !== undefined,
+)).map((entry) => ({ id: entry.data.acf.id, slug: entry.id }));
+const acfHref = (id: string) => {
+	const entry = acfEntries.find((candidate) => candidate.id === id);
+	return entry ? `${base}/${entry.slug}/` : `${base}/acf/`;
+};
+---
+
+<div class="rule-table-wrap" tabindex="0" aria-label={`Scrollable ${language} ${family} rule table`}>
+	<table>
+		<caption>{language === 'python' ? 'Python' : 'Rust'} {family} rules</caption>
+		<thead>
+			<tr>
+				<th scope="col">ID</th>
+				<th scope="col">Base</th>
+				<th scope="col">Maturity</th>
+				<th scope="col">What it detects</th>
+				<th scope="col">Covers ACF</th>
+			</tr>
+		</thead>
+		<tbody>
+			{rules.map((rule) => (
+				<tr id={rule.id.toLowerCase()}>
+					<td><code>{rule.id}</code></td>
+					<td>{rule.base_severity}</td>
+					<td>{rule.maturity}</td>
+					<td>{rule.summary}{rule.cwes.length > 0 && <> ({rule.cwes.join(' / ')})</>}</td>
+					<td>
+						{rule.covers_acf.length > 0
+							? rule.covers_acf.map((id, index) => (
+								<>{index > 0 && ', '}<a href={acfHref(id)}><code>{id}</code></a></>
+							))
+							: '—'}
+					</td>
+				</tr>
+			))}
+		</tbody>
+	</table>
+</div>
+
+<style>
+	.rule-table-wrap {
+		overflow-x: auto;
+	}
+
+	.rule-table-wrap:focus-visible {
+		outline: 3px solid var(--sl-color-accent-high);
+		outline-offset: 2px;
+	}
+
+	table {
+		width: 100%;
+		min-width: 48rem;
+		border-collapse: collapse;
+	}
+
+	caption {
+		padding-block: 0.5rem;
+		font-weight: 700;
+		text-align: left;
+	}
+
+	th,
+	td {
+		padding: 0.625rem;
+		border-block-end: 1px solid var(--sl-color-gray-5);
+		text-align: left;
+		vertical-align: top;
+	}
+
+	th {
+		background: var(--sl-color-gray-7);
+	}
+</style>

@@ -1,0 +1,8 @@
+id: PY-WL-125
+language: python
+family: sink
+base_severity: INFO
+maturity: preview
+summary: "Log injection — untrusted data used as the log message format string"
+cwes: [CWE-117]
+covers_acf: []

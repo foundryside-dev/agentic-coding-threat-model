@@ -1,0 +1,8 @@
+id: RS-WL-112
+language: rust
+family: sink
+base_severity: WARN
+maturity: preview
+summary: "Untrusted data reaches a sh -c style shell command line"
+cwes: [CWE-78]
+covers_acf: []

@@ -1,0 +1,48 @@
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+
+:root {
+  --sl-font: 'Inter', sans-serif;
+  --sl-font-mono: 'JetBrains Mono', monospace;
+  --sd-green-signature: #69eba5;
+  --sd-green: #29b480;
+  --sd-green-dark: #24765b;
+  --sd-green-light: #c8ebd7;
+  --sd-navy: #1e3c50;
+  --sd-gold: #fad673;
+  --sd-salmon: #ffc2b0;
+}
+
+/* Light theme */
+:root[data-theme='light'] {
+  --sl-color-accent: var(--sd-green-dark);
+  --sl-color-accent-high: var(--sd-navy);
+  --sl-color-accent-low: var(--sd-green-light);
+  --sl-color-text: #414141;
+}
+
+/* Dark theme */
+:root[data-theme='dark'] {
+  --sl-color-accent: var(--sd-green);
+  --sl-color-accent-high: var(--sd-green-signature);
+  --sl-color-accent-low: #1c3a30;
+}
+
+.sd-disclaimer {
+  font-size: var(--sl-text-xs);
+  color: var(--sl-color-gray-3);
+  border-top: 1px solid var(--sl-color-hairline);
+  padding-top: 0.75rem;
+  margin-top: 1rem;
+}
+
+.sd-publication-line {
+  margin-block: 0 2rem;
+  color: var(--sl-color-gray-3);
+  font-size: var(--sl-text-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: center;
+}

@@ -1,0 +1,26 @@
+---
+import { getCollection } from 'astro:content';
+
+interface Props {
+	name: string;
+}
+
+const { name } = Astro.props;
+const states = await getCollection('lattice');
+const state = states.find((entry) => entry.data.state === name);
+
+if (!state) throw new Error(`Unknown lattice state: ${name}`);
+---
+
+<code
+	class="sd-state"
+	style={`--state-colour:${state.data.colour}`}
+	title={`rank ${state.data.rank} — ${state.data.meaning}`}
+>{state.data.state}</code>
+
+<style>
+	.sd-state {
+		border-left: 3px solid var(--state-colour);
+		padding-left: 0.3em;
+	}
+</style>

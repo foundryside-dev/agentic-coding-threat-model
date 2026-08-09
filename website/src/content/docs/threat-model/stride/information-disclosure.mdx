@@ -1,0 +1,49 @@
+---
+title: Information Disclosure
+sidebar: { order: 4 }
+---
+
+import AcfRegistry from '../../../../components/AcfRegistry.astro';
+
+Traditional Information Disclosure threats expose sensitive data to unauthorised parties through channels such as misconfigured access control, unprotected APIs, or unencrypted storage. The agentic variant concerns **verbose error responses and stack-trace exposure** in generated error handling.
+
+## Mechanism
+
+Agents produce helpful error messages containing internal state, query parameters, paths, or stack traces. That information helps during development but is dangerous in production, and generated code may fail to distinguish the two contexts. Stack-trace exposure is already well covered by SAST and is therefore not a separate ACF entry.
+
+## Code examples
+
+```python
+# Agent-generated "helpful" error handler
+except DatabaseError as error:
+    return {
+        "error": str(error),
+        "query": sql_query,
+        "connection": str(db_url),
+        "params": query_params,
+    }
+
+except Exception:
+    import traceback
+    return {"error": traceback.format_exc()}
+```
+
+## Why existing controls miss it
+
+The error handling is syntactically correct and useful during development. Detecting that internal details must not appear in production responses requires deployment context, not only code structure.
+
+## Risk in government context
+
+Verbose responses can disclose reconnaissance information, credentials, internal identifiers, and other material that violates need-to-know principles.
+
+## ACF entries in this category
+
+One core entry maps to Information Disclosure.
+
+<AcfRegistry stride="information-disclosure" />
+
+## See also
+
+- [Repudiation](../repudiation/) — error handling can also destroy audit trails
+- [Elevation of Privilege](../elevation-of-privilege/) — disclosed details can enable exploitation
+- [ACF Taxonomy Registry](../../../acf/) — all 20 failure modes

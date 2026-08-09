@@ -1,0 +1,8 @@
+id: PY-WL-122
+language: python
+family: sink
+base_severity: ERROR
+maturity: preview
+summary: "Server-side template compilation — jinja2.Template/Environment.from_string, mako Template (SSTI)"
+cwes: [CWE-1336]
+covers_acf: []
