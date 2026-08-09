@@ -1,0 +1,111 @@
+---
+title: Rules
+sidebar:
+  order: 0
+---
+
+import RulesIndex from '../../../../components/RulesIndex.astro';
+import Rule from '../../../../components/Rule.astro';
+
+The implementation ships **26 Python policy rules** (<Rule id="PY-WL-101" /> … <Rule id="PY-WL-126" />) and **2 Rust preview rules** (<Rule id="RS-WL-108" />, <Rule id="RS-WL-112" />) — **twenty-eight in total** — plus a small set of engine-emitted `WLN-ENGINE-*` findings that report on the scan itself rather than on the code.
+
+Each Python rule is one module under `src/wardline/scanner/rules/`, carrying a `RuleMetadata` descriptor with its identifier, base severity, kind, one-line description, and worked violating and clean examples.
+
+<RulesIndex />
+
+:::caution
+**There is no `WL-001`–`WL-008`.** The designed specification defined eight abstract pattern rules. **Three survive** in recognisable form — `WL-003` as <Rule id="PY-WL-103" />, `WL-004` as <Rule id="PY-WL-104" />, `WL-007` as <Rule id="PY-WL-102" /> and <Rule id="PY-WL-119" />. The other five, including `WL-001` (the parent paper's flagship member-access-with-fallback-default), were never built. Any page describing `WL-00x` rules describes a specification that was not implemented.
+:::
+
+## Rule families
+
+| Family | Count | Page |
+|---|---:|---|
+| Boundary, declaration, and exception discipline | 12 | [Boundary rules](./boundary-rules/) |
+| Sink rules | 14 | [Sink rules](./sink-rules/) |
+| Rust preview | 2 | [Rust preview rules](./rust-rules/) |
+| Engine findings (`WLN-ENGINE-*`) | — | [Engine findings](./engine-findings/) |
+
+## How the catalogue arrived
+
+The catalogue **grew** rather than being designed. v0.1.0 (30 May 2026) shipped four rules — <Rule id="PY-WL-101" /> through `104`, precisely the trust-declaration and exception-flow core. The remaining twenty-two Python rules and both Rust rules arrived over roughly ten weeks to v1.5.0, and the six most recent (<Rule id="PY-WL-121" />–`126`) shipped as `preview`.
+
+Reading the catalogue as a designed whole would misread it: **the boundary family is the original thesis, and the sink family is what the engine turned out to be capable of once it existed.** Roughly half the catalogue is classic sink analysis the designed specification never contemplated — it exists because the taint machinery built to answer the trust-declaration question turned out to answer the sink question for free.
+
+## Analysis scope: L1–L2 with an L3 fixed point
+
+The project's own roadmap states the boundary:
+
+> Wardline is deliberately **L1–L2 with an L3 project fixed point**, not an exhaustive path-sensitive whole-program prover, and Python-first (with a Rust preview). We favour a small, precise, opt-in rule set over broad SAST coverage.
+
+| Level | Module | What it does |
+|---|---|---|
+| **L1 — function level** | `function_level.py` | For each discovered function, ask the taint-source provider for a declared taint; when it has no opinion, fall back to `UNKNOWN_RAW`. Precedence is `provider > UNKNOWN_RAW`. This fail-closed fallback is what puts undeclared code in the freedom zone. |
+| **L2 — variable level** | `variable_level.py` | Walk a function body tracking taint per variable through assignments, control-flow joins, and call sites. Both value combiners (`BinOp`, `IfExp`, `BoolOp`, containers, `.get` defaults, `+=`, container writes) and control-flow merges (`if`/`else`, loop back-edges, `match` arms, `except` handlers) use the rank-meet `least_trusted`. An unresolved bare-name call propagates the worst of the caller seed and its argument taints, so a trusted seed cannot launder a raw argument through an unmodelled callee. |
+| **L3 — project fixed point** | `project_resolver.py`, `callgraph.py` | Assemble per-module data into an inter-module call graph and run a strongly-connected-component fixed-point kernel. Call resolution covers local bare names, imported aliases, `self`/`cls` method calls, same-project classmethod calls through a class object, and variable-typed dispatch through a flow-sensitive reaching-definitions pass; everything else counts as unresolved and raises the caller's pessimistic floor. |
+
+**Supporting machinery.** `stdlib_taint.yaml` is a curated, versioned table of the taint carried by common stdlib call returns, applied at call resolution rather than at L1 seeding so unresolved cross-module calls do not inflate `UNKNOWN_RAW` rates. `fastapi_sources.py` and `pydantic_discovery.py` recognise framework entry points and models. `summary_cache.py` memoises the per-module taint contract; the resolver always recomputes edges and call counts fresh, so a warm run is byte-identical to a cold run.
+
+Two properties of that cache are of a piece with [caller-granted trust](../declarations-and-trust-grants/): it carries **no repository governance** (the designed CI-attestation path was discarded outright), and disk cache files are integrity-checked with an **operator-held HMAC key** before they can rehydrate summaries, "so repository-controlled JSON cannot become analyser truth."
+
+**Known gap.** Star imports are not yet materialised for edge resolution, so a trust marker reached only through `from x import *` can be missed.
+
+## Severity is a product, not a table
+
+Every rule declares a `base_severity`. What a finding actually carries is that base **modulated by the resolved taint tier of the function it fired in**. `rules/severity_model.py` implements this in about ten lines — the designed specification's eighty-cell rule × taint matrix, compressed.
+
+| Resolved tier of the enclosing function | Effect on base severity |
+|---|---|
+| `INTEGRAL`, `ASSURED` | base severity, unchanged |
+| `GUARDED`, `UNKNOWN_ASSURED`, `UNKNOWN_GUARDED` | one step down (`CRITICAL`→`ERROR`→`WARN`→`INFO`), floor at `INFO` |
+| `EXTERNAL_RAW`, `UNKNOWN_RAW`, `MIXED_RAW` | **`NONE` — suppressed** |
+
+Severity ladder: `INFO` &lt; `WARN` &lt; `ERROR` &lt; `CRITICAL`, plus a non-gating `NONE` used for engine facts and for suppressed modulation results.
+
+`MIXED_RAW` appears in the third row for completeness only — it is [carried but not produced](../trust-lattice/#reachability-five-states-not-eight) under the default configuration. Because the state sits in the freedom zone either way, nothing in this arithmetic depends on the setting.
+
+**The third row is the mechanism behind the whole opt-in posture.** Undecorated code resolves to `UNKNOWN_RAW`, lands in the freedom zone, and is suppressed to `NONE`.
+
+:::note
+**The claim is total, not confined to the trust-declaration rules.** The shared sink machinery in `rules/_sink_helpers.py` calls `modulate` twice, and its docstring names the path in so many words: *"the developer-freedom zone (undecorated → `UNKNOWN_RAW` → `modulate` → `NONE`)"*. The fourteen sink rules — which would fire everywhere in a conventional scanner — are silent in undeclared code for exactly the same reason the boundary rules are.
+:::
+
+### Two checkable consequences
+
+**No rule ships at `CRITICAL`.** Fourteen rules carry base `ERROR`, eleven carry `WARN`, one (<Rule id="PY-WL-125" />) carries `INFO`. `CRITICAL` is reachable only through a `rules.severity` override — that is, only when an operator deliberately promotes a rule.
+
+**A rule's severity in a report is not its severity in this catalogue.** The family pages give *base* severities. A `WARN` rule firing inside a `GUARDED` function reports at `INFO`; the same rule firing inside an undecorated function does not report at all.
+
+## De-confliction
+
+Several rules deliberately partition territory so one defect yields one finding.
+
+| Pair | How they partition |
+|---|---|
+| <Rule id="PY-WL-102" /> / <Rule id="PY-WL-119" /> | A boundary with no rejection path at all is 102; the bare `return p` shape — a validator that is a no-op — is 119. |
+| <Rule id="PY-WL-108" /> / <Rule id="PY-WL-112" /> / <Rule id="PY-WL-118" /> | Calibrated against each other: tainted command execution and tainted SQL are treated as the same exploit class in blast radius, so they carry the same base severity. |
+| <Rule id="PY-WL-120" /> → <Rule id="PY-WL-101" /> | 120 delegates to 101 per finding, **and only when the delegate will actually pick the defect up.** `_return_delegated_to_101` mirrors 101's own gate including enablement, and returns `False` when `rules.enable` has excluded <Rule id="PY-WL-101" /> — so disabling 101 makes 120 *keep* the return finding rather than drop it. **The defect is never lost by turning a rule off; the de-confliction runs in the direction that fails safe.** |
+| <Rule id="RS-WL-108" /> / <Rule id="RS-WL-112" /> | De-conflict identically on the Rust side. |
+
+## Selecting and re-weighting the rule set
+
+Two keys under `[wardline.rules]`, both optional, both validated with `additionalProperties: false` so a typo is a hard error:
+
+```toml
+[wardline.rules]
+enable = ["*"]
+severity = { "PY-WL-103" = "WARN", "PY-WL-104" = "INFO" }
+```
+
+- `enable` — an fnmatch include list over rule identifiers. `"*"` (the default) selects everything; `"PY-WL-1*"` selects a family.
+- `severity` — overrides a rule's base severity, applied **before** tier modulation. The only route to a `CRITICAL` finding.
+
+Both keys live in the repository's own `weft.toml`, which is why [`WLN-ENGINE-POLICY-CONFIG`](./engine-findings/#wln-engine-policy-config--the-rule-set-defending-itself) exists and why every rejection path fails loud rather than degrading.
+
+**The eleven `preview` rules are enabled by default** alongside the stable fifteen. Maturity is a stability signal about a rule's interface and false-positive profile, **not a switch** — and since v1.2 a `preview` rule gates exactly like a `stable` one.
+
+## See also
+
+- [The Trust Lattice](../trust-lattice/) — the states severity modulates on
+- [Gates, Suppression, and the Judge](../gates-suppression-and-judge/) — what happens to a finding after it fires
+- [Verification Properties](../verification/) — the labelled corpus and false-positive gate behind the catalogue

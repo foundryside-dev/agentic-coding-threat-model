@@ -1,0 +1,8 @@
+id: PY-WL-103
+language: python
+family: boundary
+base_severity: WARN
+maturity: stable
+summary: "A broad exception handler (bare except / Exception / BaseException) in a trusted-tier function"
+cwes: []
+covers_acf: [ACF-R1, ACF-R2]

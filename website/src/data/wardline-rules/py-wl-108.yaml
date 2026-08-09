@@ -1,0 +1,8 @@
+id: PY-WL-108
+language: python
+family: sink
+base_severity: ERROR
+maturity: stable
+summary: "Command/program execution — os.system/os.popen/subprocess.getoutput, os.exec*/os.spawn*/os.posix_spawn/pty.spawn"
+cwes: [CWE-78]
+covers_acf: [ACF-E2]

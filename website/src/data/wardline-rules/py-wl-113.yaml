@@ -1,0 +1,8 @@
+id: PY-WL-113
+language: python
+family: boundary
+base_severity: ERROR
+maturity: stable
+summary: "A trust boundary fails open — an exception handler swallows the failure and returns a substitute value instead of re-raising, so the boundary can be bypassed by triggering the exception"
+cwes: [CWE-636]
+covers_acf: []

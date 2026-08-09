@@ -1,0 +1,55 @@
+{
+  "name": "website",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "test:preview-output": "node --test test/check-preview-output.test.mjs",
+    "test:registry": "node --test tests/check-registry.test.mjs",
+    "test:mermaid": "node --test tests/remark-mermaid.test.mjs",
+    "test:mermaid-client": "node --test tests/mermaid-renderer.test.mjs",
+    "test:lattice-diagram": "node --test tests/lattice-diagram.test.mjs",
+    "test:acf-registry": "node --test tests/acf-registry.test.mjs",
+    "test:rules-index": "node --test tests/rules-index.test.mjs",
+    "test:wardline-pages": "node --test tests/wardline-pages.test.mjs",
+    "test:threat-model-pages": "node --test tests/threat-model-pages.test.mjs",
+		"test:sidebar": "node --test tests/sidebar-navigation.test.mjs",
+		"test:task14-pages": "node --test tests/task14-pages.test.mjs",
+		"test:task15-harness": "node --test tests/task15-harness.test.mjs",
+		"test:built-links": "node --test tests/check-built-links.test.mjs",
+		"test:route-inventory": "node --test tests/route-inventory.test.mjs",
+		"test:e2e": "playwright test",
+    "check:registry": "node scripts/check-registry.mjs --mode=strict",
+		"check": "npm run test:registry && npm run test:mermaid && npm run test:mermaid-client && npm run test:lattice-diagram && npm run test:acf-registry && npm run test:rules-index && npm run test:wardline-pages && npm run test:threat-model-pages && npm run test:sidebar && npm run test:task14-pages && npm run test:task15-harness && npm run test:built-links && npm run test:route-inventory && npm run check:registry && astro check",
+    "build": "npm run check && astro build && node scripts/check-built-links.mjs --base=/",
+    "build:preview": "npm run check && ASTRO_BASE=/preview/ astro build && node scripts/check-built-links.mjs --base=/preview/ && EXPECTED_BASE=/preview/ node scripts/check-preview-output.mjs",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "0.41.7",
+    "@fontsource/inter": "5.3.0",
+    "@fontsource/jetbrains-mono": "5.3.0",
+    "astro": "7.2.0",
+    "mermaid": "11.16.1",
+    "sharp": "0.35.3",
+    "starlight-links-validator": "0.25.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@astrojs/markdown-remark": "7.2.2",
+    "@axe-core/playwright": "4.12.1",
+    "@playwright/test": "1.62.1",
+    "gray-matter": "4.0.3",
+    "parse5": "7.3.0",
+    "postcss": "8.5.26",
+    "postcss-value-parser": "4.2.0",
+    "typescript": "6.0.3",
+    "unist-util-visit": "5.1.0",
+    "yaml": "2.9.0"
+  },
+  "engines": {
+    "node": "24.13.0"
+  }
+}

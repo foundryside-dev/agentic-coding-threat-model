@@ -1,0 +1,214 @@
+---
+title: "Verification Properties"
+sidebar:
+  order: 7
+---
+
+import Rule from '../../../components/Rule.astro';
+
+The parent paper sets out **seven verification properties** against which any semantic enforcement tool proposed for a high-assurance environment should be assessed. They are *evaluation criteria, not product features* — they define what an independent evaluator can check, not what a vendor should claim.
+
+| # | Property | Status |
+|---:|---|---|
+| 1 | [Golden corpus](#property-1--golden-corpus) | **Implemented** — labelled corpus with bidirectional reconciliation |
+| 2 | [Self-hosting gate](#property-2--self-hosting-gate) | **Implemented** — gated CI scan, zero committed suppressions |
+| 3 | [Measured precision](#property-3--measured-precision) | **Partly** — aggregate FP-rate gate; no per-rule or per-state measurement |
+| 4 | [Measured recall](#property-4--measured-recall) | **Not implemented** |
+| 5 | [Deterministic output](#property-5--deterministic-output) | **Implemented** — byte-identity goldens, cross-process and cross-interpreter |
+| 6 | [Taint propagation correctness](#property-6--taint-propagation-correctness) | **Partly** — exercised throughout the corpus; no dedicated propagation suite |
+| 7 | [Inertness detection](#property-7--inertness-detection) | **Implemented** — the flag is opt-in |
+
+The suite these properties live in is approximately **4,050 test functions across 330 files**, with a CI coverage gate of `--cov-fail-under=90`.
+
+:::caution
+**One caveat frames everything below.** The implementation is about ten weeks old — v0.1.0 on 30 May 2026, v1.5.0 on 31 July 2026, fourteen releases apart. The verification machinery is correspondingly young: the golden corpus, the byte-identity contract, and the gated self-hosting scan are all more recent than the engine they check.
+
+**Nothing here is a track record.** It is what an evaluator can check today, which is the only claim a verification chapter is entitled to make.
+:::
+
+## Property 1 — Golden corpus
+
+**Implemented.** `tests/corpus/` holds Python fixture files and a single ground-truth file, `MANIFEST.yaml`. Each entry is keyed on `(path, rule_id, qualname)` and labelled `TRUE_POSITIVE` or `FALSE_POSITIVE`, with a short note recording *why* the specimen is what it is.
+
+| | Count |
+|---|---:|
+| `TRUE_POSITIVE` entries | 29, across 14 fixture files |
+| `FALSE_POSITIVE` entries | 5, across 4 sentinel files |
+| **Total labelled expectations** | **34** |
+
+The specimens are not textbook examples. Several are explicitly **discriminating** — chosen so they vanish if a specific fix regresses. Two entries testing laundering through a shadowed stdlib module carry the note *"discriminating: vanishes if the fix regresses"*; others pin control-flow joins in `if`/`else`, `try`/`except`, and `match` arms, single- and two-hop variable indirection, f-string interpolation, container aggregation carrying the weakest element, and a boundary that declares `ASSURED` but re-derives raw data in its body.
+
+### The reconciliation property
+
+The strongest guarantee here, and stronger than the rate computed on top of it. The corpus is reconciled **bidirectionally** against a real analyser run, and **both directions are failures**:
+
+| Direction | Meaning | What it catches |
+|---|---|---|
+| **Unaccounted** | The engine fired an active defect with no manifest entry | A clean-shape regression — a rule that starts firing somewhere new cannot slip in unnoticed |
+| **Stale** | A manifest entry that no finding matched | A silently-lost detection — a rule that stops firing cannot be masked by the aggregate number staying green |
+
+Together they mean the corpus and the engine must agree *exactly*, in both directions, on every fixture. **A corpus that only ratchets a rate can drift on both sides at once; this one cannot drift on either.**
+
+### Sentinels
+
+`tests/corpus/sentinels/` holds four clean-shape files the engine must stay silent on:
+
+1. Parameterised SQL with the raw value confined to the parameter tuple
+2. A boundary with a genuine raise-on-invalid rejection path
+3. `eval` over a constant-only argument
+4. `os.system` over a literal command plus a `shlex`-quoted constant through `subprocess.run(shell=True)`
+
+These are exactly the **adversarial-false-positive** category — code that looks like a violation and is not.
+
+The semantics are deliberate: a **silent sentinel is passing, not stale**, and the reconciler is tested to treat it that way; a **fired sentinel is a live false positive counted against the budget**. The sentinels live outside `fixtures/` so the byte-identity goldens keep their substrate undisturbed.
+
+### Non-vacuity guards
+
+The corpus tests guard against the corpus itself becoming meaningless:
+
+- `test_corpus_carries_false_positive_sentinels` — requires at least three `FALSE_POSITIVE` sentinels, so the FP rate is computed over a **mixed** corpus rather than a vacuous all-true-positive one
+- `test_fired_sentinel_counts_against_budget` — proves the fired-sentinel path end to end by relabelling a known-firing entry in a scratch manifest
+- `test_reconciliation_fp_rate_arithmetic` — exercises the rate computation directly on the false-positive path the live corpus never reaches, including the zero-denominator case
+- `test_corpus_surface_non_vacuous` — the matching guard on the identity goldens
+
+### What is absent
+
+| Absent | Detail |
+|---|---|
+| **Corpus independence machinery** | `MANIFEST.yaml` is a labelled ground-truth file, **not a hash manifest**. No per-specimen SHA-256 digests, no separately versioned publication obtainable without the tool, no `wardline corpus verify` command. The corpus is maintained in-tree by the implementer |
+| **CODEOWNERS protection** | The designed specification and the parent paper both place the corpus behind CODEOWNERS-style review, so an agent cannot resolve a failing verification run by editing the expectations. **There is no `CODEOWNERS` file in the repository.** The compensating control is weaker and procedural: the reconciliation invariants make an expectations edit *visible* in the diff, but nothing structurally requires a second reviewer |
+| **Rule × taint-state coverage floor** | The corpus covers many rules well and others not at all; there is no per-cell minimum and no filesystem layout making coverage gaps visible |
+
+## Property 2 — Self-hosting gate
+
+**Implemented.** The CI workflow runs a job named `self-hosting-scan`, dependent on the test job:
+
+```
+wardline scan src/ --format sarif --output results.sarif --fail-on ERROR
+```
+
+The `--fail-on ERROR` is **load-bearing and was added deliberately**: the inline comment records that the dogfood scan previously uploaded its SARIF without gating, so a genuinely-introduced `ERROR` trust-boundary finding in the tool's own source would have been *"silently uploaded"* rather than turning the build red.
+
+The SARIF is preserved as an artefact and uploaded to code scanning on pushes to the default branch, through a separate job holding the elevated permissions, so the scanning job runs with read-only credentials.
+
+:::note
+**The strongest evidence is not the job but what it passes with.** `git ls-files .weft` returns nothing: **the repository carries no committed baseline and no committed waivers.** The self-hosting scan is green at `--fail-on ERROR` with zero suppressions of any kind.
+:::
+
+The wider layering discipline belongs to the same property. CI enforces **import-linter contracts** as a gating step, so the engine and policy tiers cannot import up into orchestration, output, or federation. `mypy` runs in strict mode. `ruff` check and format both gate.
+
+## Property 3 — Measured precision
+
+**Partly implemented.** `tests/corpus/test_fp_rate.py` gates the false-positive rate at **5%**: false positives divided by total active defects over the corpus, computed from the reconciliation.
+
+Two guards keep the number from being trivially satisfiable:
+
+1. The corpus must carry **at least 20 active defects**, so a single mislabel cannot breach the budget by arithmetic accident
+2. The mixed-corpus requirement ensures the denominator and numerator are both real
+
+**The measured rate today is 0%** — per the recorded 31 May 2026 taint-combination audit the engine has no live false positive over the corpus, so every sentinel is expected to stay silent. **The budget is headroom, not a measurement of current noise.**
+
+### What is absent
+
+The parent paper asks for precision to be measured, tracked, and published; the designed specification went further and required it **per cell**, rule by taint state, with an 80% floor applied to each cell individually — on the argument that *"the averaged number hides the context where trust is being lost."*
+
+The implementation measures **one aggregate number over one corpus**. There is no per-rule rate, no per-taint-state rate, no published time series, and no mechanism that demotes a rule whose precision falls in a particular context.
+
+**A scope limit worth naming:** this is *corpus* precision. It measures the engine against 34 curated expectations over 18 files, **not against the distribution of code patterns in any real codebase**. Operational precision is not measured at all, and the designed proposal to segment operational precision by code origin — agent-generated versus human-written — was never built.
+
+## Property 4 — Measured recall
+
+:::caution
+**Not implemented.** There is no recall measurement in the repository: no known-bad corpus held separately for the purpose of counting misses, no false-negative rate, no floor, and no tracking. **This is the largest gap in the chapter and should not be softened.**
+:::
+
+What exists instead is a set of properties *adjacent* to recall without being it:
+
+- The **stale** direction of corpus reconciliation catches a *regression* in recall — a rule that stops firing on a specimen it used to catch fails the gate. That guards against losing detections the corpus already knows about. It says nothing about detections the corpus never knew about, which is what recall measures.
+- The **discriminating specimens** are recall guards for specific closed evasions: two laundering shapes that "vanish if the fix regresses" are single-specimen recall assertions for those shapes.
+- The **coverage gate** (`--cov-fail-under=90`) measures *code* coverage, which is not detection coverage and must not be presented as a proxy for it.
+
+The designed specification's proposed floor — **70%**, deliberately lower than the precision floor because false negatives are less immediately corrosive to developer trust — remains a reasonable target, and its bootstrapping route (synthetic failure injection against the project's own clean code) remains [unbuilt](../roadmap-the-unbuilt/#smaller-designed-items).
+
+## Property 5 — Deterministic output
+
+**Implemented, to a stronger standard than the property asks for.**
+
+### Byte-identity goldens
+
+`tests/golden/identity/` freezes wardline's externally-observable identity as a byte-exact corpus:
+
+- The JSONL finding wire format including fingerprints, rule identifiers, qualnames, location spans, properties, and suppression state
+- The full span of **every analysed entity**, so the parser's span rendering is frozen even for constructs producing no finding
+- The Loomweave taint-fact payload, the SARIF output, the `assure` posture, and the `explain` derivation
+
+Engine diagnostics are deliberately excluded, on the reasoning that a different engine may legitimately differ on them. **The corpus is the frozen contract that gates a future Rust-core cutover** — "parity corpus green" is a hard gate, recorded in an ADR.
+
+The determinism verified before freezing goes beyond run-to-run stability: **in-process stable, path-independent, cross-process under `PYTHONHASHSEED` 0 and 1, and cross-interpreter** — frozen on CPython 3.12 and reproduced byte-identically on 3.13. The gate runs on every CI interpreter with no skip. Fixtures deliberately carry no `.weft/` directory or `weft.toml`, because a baseline or waiver would date-poison the corpus through `date.today()`; `.gitattributes` pins them to LF.
+
+### An independent output-boundary guard
+
+`tests/grammar/test_output_determinism.py` exists because the golden oracle pins one run against a frozen golden and only for stable-maturity findings — it would catch drift, but a non-deterministic *preview* rule or per-run engine state could slip past it.
+
+The guard requires **two independent analyser runs** over the corpus to produce byte-identical full streams, every maturity and every kind, in identical order. Its docstring is explicit about why: the property is otherwise held by convention across roughly ten engine sites — sorted discovery, Tarjan node and neighbour ordering, commutativity of the least-trusted join over unsorted callee sets.
+
+### Verification-mode SARIF, satisfied by construction
+
+The designed specification required a verification-mode output profile omitting or normalising `run.invocations`. `core/sarif.py` **never emits `run.invocations` at all** — there is no volatile-metadata mode to switch off. The identity corpus normalises the one remaining mutable field, `driver.version`, and drops `ruleIndex` as recoverable from `ruleId`.
+
+SARIF output is version 2.1.0; suppression rides SARIF's native `result.suppressions` channel and the stable fingerprint rides `partialFingerprints`, so the interchange format carries the suppression and identity semantics without the designed specification's large bag of custom `wardline.*` properties.
+
+### Determinism in the signed bundle
+
+Every list in the attestation payload is sorted on a stable key so the suite's randomised test ordering cannot perturb the canonical bytes; the only date-sensitive field is waiver-debt `days_left`.
+
+:::caution
+**That format has been broken deliberately — twice — and a reader planning to retain bundles for long-horizon assurance should know it.** The bundle schema went from `wardline-attest-1` to `wardline-attest-2` at v1.1.0 as an explicit breaking change (each declared boundary gained a `content_hash` and an entity-body span digest; v1 bundles no longer verify). At v1.5.0 the v2 payload gained a required `sei_diagnostics` array.
+
+**An evidence format that changes shape twice in ten weeks is not a stable attestation standard.** The countervailing observation: the HMAC binds the envelope schema as well as the payload, precisely so a relabelled schema cannot verify against the wrong wire contract, and the breaking bumps were taken rather than papered over with permissive parsing.
+:::
+
+## Property 6 — Taint propagation correctness
+
+**Partly implemented.** Taint propagation is not tested as a separate concern; it is tested **pervasively**, because most corpus specimens are propagation specimens. The manifest notes read as a propagation suite in disguise: single-hop indirection through a local variable, a two-hop variable chain, control-flow joins across `if`/`else`, `try`/`except`, and `match` arms, list and dict aggregation carrying the weakest element, `str()` and f-string wrapping preserving raw, augmented assignment merging raw in, an aliased `json.loads` returning `GUARDED` below a declared `ASSURED`, a body that re-derives raw data behind an `ASSURED` declaration, and two laundering shapes through shadowed stdlib names.
+
+The entity-span freezing in the identity corpus supports the property from the other side: per-entity verdicts are frozen byte-exactly, so a change in how taint resolves for any analysed entity is visible whether or not it produces a finding.
+
+**What is absent.** There is no dedicated taint-flow specimen category with its own minima — no scenario matrix requiring a positive and a negative case for each of direct boundary-to-sink, two-hop indirection, shape-only reaching a semantic sink, container contamination across tiers, and join semantics. Several scenarios are covered incidentally; the coverage is not systematic and no test asserts that it is complete.
+
+**Two designed scenarios cannot be tested at all**, because the machinery they were written to test is not what the implementation runs. The declared-domain-default marker was never built. And the designed "join of two different-tier values produces `MIXED_RAW`" specimen has nothing to assert, because [the shipped combination operator is `least_trusted`](../trust-lattice/#combination-two-operators-one-in-use), not the provenance-clash join table.
+
+:::note
+**That falsification is itself a verification result, and the best one in the repository.** A designed behaviour was specified precisely enough to implement, implemented, measured against real code, found to be wrong, and withdrawn — with an audit and a decision record as the evidence trail. The corpus manifest still carries the audit's date in its header as the basis for the claim that the engine has no live false positive.
+
+Property 6 is therefore satisfied in an unexpected way: the propagation semantics were not merely *tested*, they were **corrected** by testing.
+:::
+
+## Property 7 — Inertness detection
+
+**Implemented.** A scan is inert when it recognised **zero** trust boundaries over **at least five** analysed functions, derived at no analysis cost from the engine's own run metrics, and `--fail-on-inert` turns that verdict into a non-zero exit. The property that makes it a real control rather than a report is that **no suppression channel can clear the trip**, and the agent-facing summary says so explicitly. Mechanics: [Gates, suppression, and the judge](../gates-suppression-and-judge/#inertness).
+
+This is the newest of the seven properties in the parent paper and **the only one derived from an incident rather than from first principles**. The paper's account describes an enforcement pipeline that ran one of its lint gates with **zero rules loaded, exiting green, for months** — two successive acceptance rounds signed off against a gate that would have certified any tree.
+
+> The gate must distinguish "checked and clean" from "didn't look", because a green result from an inert gate is worse than no gate at all — it converts the absence of checking into apparent assurance, and every layer of governance above it inherits the false signal.
+
+### Two honest limits
+
+1. **`--fail-on-inert` defaults to `False`**, so the property is *available* rather than *enforced*. The parent paper's formulation says an inert scan "must fail", and by default this one does not.
+2. **Inertness is a floor, not a coverage measure.** Three boundaries over three thousand functions is not inert, and nothing in the gate remarks on that ratio. `wardline assure` is where coverage is actually reported, **and it is not a gate.**
+
+## Beyond the seven
+
+Three mechanisms do not map onto the parent paper's list and are recorded because an evaluator would want them.
+
+**Waiver discipline as false-positive economics.** `tests/corpus/test_waiver_discipline.py` asserts two invariants over the tool's own repository: every waiver carries a non-empty reason, and the waiver count does not exceed the built-in rule count — on the reasoning that *suppression accumulating faster than the rule set that justifies it is a signal about the rules, not about the code*. What is genuinely exercised should be distinguished from what is a tripwire: the reason requirement is exercised at unit level in both directions; **the count ceiling is currently evaluated against an empty set** — the repository has no `waivers.yaml` — so it has never fired. The ceiling is 26, the size of the built-in Python rule set; an inline comment in the test giving a much smaller figure is stale.
+
+**The frozen identity contract.** The fingerprint is the join key for all three suppression channels, which makes finding identity a **compatibility surface**, not an implementation detail. It is frozen by ADR and enforced by the byte-identity corpus, with `wardline rekey` as the sanctioned migration path across a deliberate break, and with collision-free-fingerprint and rekey collision- and mutation-pair tests. *A tool whose suppression records silently orphan on an engine change has no verification story regardless of its rates.*
+
+**Live-oracle tests, quarantined.** Judge behaviour against a real model is a **weekly scheduled CI job, not a pull-request gate**, and is the only network-dependent surface in the pipeline. This is the correct arrangement for the property it tests — non-determinism confined to a job whose failure cannot block a merge — and the deterministic parts of the judge, principally the `JudgeContractError` contract, are tested without a network.
+
+## See also
+
+- [Minimum verification properties](../../threat-model/response-landscape/#minimum-verification-properties) — the parent paper's criteria, tool-agnostic
+- [Residual Risks](../residual-risks/) — what the verification story does not cover
+- [Roadmap: The Unbuilt](../roadmap-the-unbuilt/) — recall measurement by synthetic failure injection

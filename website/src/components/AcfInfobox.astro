@@ -1,0 +1,219 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+
+type Acf = NonNullable<CollectionEntry<'docs'>['data']['acf']>;
+type AcfPage = CollectionEntry<'docs'> & {
+	data: CollectionEntry<'docs'>['data'] & { acf: Acf };
+};
+
+interface Props {
+	acf: Acf;
+}
+
+const { acf } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const acfPages = await getCollection(
+	'docs',
+	(entry): entry is AcfPage => entry.id.startsWith('acf/') && entry.data.acf !== undefined,
+);
+const acfSlugsById = new Map(acfPages.map((entry) => [entry.data.acf.id, entry.id]));
+const wardlineRules = await getCollection('wardlineRules');
+const detectedBy = wardlineRules
+	.filter((rule) => rule.data.covers_acf.includes(acf.id))
+	.sort((left, right) => left.data.id.localeCompare(right.data.id));
+
+const strideLabels = {
+	spoofing: 'Spoofing',
+	tampering: 'Tampering',
+	repudiation: 'Repudiation',
+	'information-disclosure': 'Information Disclosure',
+	'denial-of-service': 'Denial of Service',
+	'elevation-of-privilege': 'Elevation of Privilege',
+} as const;
+
+const labels: Record<string, string> = {
+	na: 'N/A',
+	'na-design-constraint': 'N/A (design constraint)',
+	'not-covered-bespoke-only': 'Not covered (bespoke only)',
+	'known-class-agent-amplified': 'Known class, agent-amplified',
+};
+
+const label = (value: string) =>
+	labels[value] ?? value.split('-').map((word) => word[0].toUpperCase() + word.slice(1)).join(' ');
+
+const acfHref = (id: string) => {
+	const slug = acfSlugsById.get(id);
+	return slug ? `${base}/${slug}/` : `${base}/acf/`;
+};
+
+const ruleHref = (rule: CollectionEntry<'wardlineRules'>) => {
+	const section = rule.data.language === 'rust' ? 'rust-rules' : `${rule.data.family}-rules`;
+	return `${base}/wardline/rules/${section}/#${rule.data.id.toLowerCase()}`;
+};
+---
+
+<aside class="acf-infobox" aria-label="ACF entry metadata">
+	<div class="acf-infobox__badges" aria-label="Entry classification">
+		<span class="acf-infobox__badge acf-infobox__badge--id">ID {acf.id}</span>
+		{acf.entry_status === 'provisional' && (
+			<span class="acf-infobox__badge acf-infobox__badge--provisional">Provisional</span>
+		)}
+		<span class="acf-infobox__badge acf-infobox__badge--risk" data-risk={acf.risk_level}>
+			{label(acf.risk_level)} risk
+		</span>
+	</div>
+
+	<dl class="acf-infobox__metadata">
+		<div>
+			<dt>STRIDE</dt>
+			<dd>{strideLabels[acf.stride]}</dd>
+		</div>
+		<div>
+			<dt>Failure layer</dt>
+			<dd>{label(acf.failure_layer)}</dd>
+		</div>
+		<div>
+			<dt>Type</dt>
+			<dd>{label(acf.entry_type)}</dd>
+		</div>
+		<div>
+			<dt>Relation</dt>
+			<dd>{label(acf.relation)}</dd>
+		</div>
+		<div>
+			<dt>Detection</dt>
+			<dd>{acf.detection_note ?? label(acf.detection_status)}</dd>
+		</div>
+		<div>
+			<dt>Portable tool (Wardline)</dt>
+			<dd>{label(acf.portable_coverage)}</dd>
+		</div>
+		<div>
+			<dt>Detected by</dt>
+			<dd>
+				{
+					detectedBy.length ? (
+						<ul class="acf-infobox__links">
+							{detectedBy.map((rule) => (
+								<li><a href={ruleHref(rule)}>{rule.data.id}</a></li>
+							))}
+						</ul>
+					) : (
+						'No portable rule'
+					)
+				}
+			</dd>
+		</div>
+		<div>
+			<dt>Language generality</dt>
+			<dd>{label(acf.language_generality)}</dd>
+		</div>
+		{
+			acf.related.length > 0 && (
+				<div class="acf-infobox__related">
+					<dt>Related</dt>
+					<dd>
+						<ul class="acf-infobox__links">
+							{acf.related.map((id) => (
+								<li><a href={acfHref(id)}>{id}</a></li>
+							))}
+						</ul>
+					</dd>
+				</div>
+			)
+		}
+	</dl>
+</aside>
+
+<style>
+	.acf-infobox {
+		border: 1px solid var(--sl-color-hairline);
+		border-left: 0.3rem solid var(--sd-green, var(--sl-color-accent));
+		border-radius: 0.5rem;
+		background: var(--sl-color-bg-nav);
+		margin-block: 1.5rem;
+		padding: 1rem;
+	}
+
+	.acf-infobox__badges {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.acf-infobox__badge {
+		border-radius: 999px;
+		font-size: var(--sl-text-xs);
+		font-weight: 700;
+		line-height: 1.2;
+		padding: 0.3rem 0.55rem;
+	}
+
+	.acf-infobox__badge--id {
+		background: var(--sd-green-light, var(--sl-color-accent-low));
+		color: var(--sd-navy, var(--sl-color-text));
+	}
+
+	.acf-infobox__badge--provisional {
+		background: var(--sd-gold, var(--sl-color-orange));
+		color: var(--sd-navy, var(--sl-color-text));
+	}
+
+	.acf-infobox__badge--risk[data-risk='critical'] {
+		background: var(--sd-salmon, var(--sl-color-red));
+		color: var(--sd-navy, var(--sl-color-text));
+	}
+
+	.acf-infobox__badge--risk[data-risk='high'] {
+		background: var(--sl-color-orange-low);
+		color: var(--sl-color-orange-high);
+	}
+
+	.acf-infobox__badge--risk[data-risk='medium'] {
+		background: var(--sl-color-blue-low);
+		color: var(--sl-color-blue-high);
+	}
+
+	.acf-infobox__metadata {
+		display: grid;
+		gap: 0.75rem 1rem;
+		grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+		margin: 0;
+	}
+
+	.acf-infobox__metadata > div {
+		min-width: 0;
+	}
+
+	.acf-infobox dt {
+		color: var(--sl-color-text);
+		font-size: var(--sl-text-xs);
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+
+	.acf-infobox dd {
+		margin: 0.2rem 0 0;
+	}
+
+	.acf-infobox__links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 0.75rem;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	@media (max-width: 32rem) {
+		.acf-infobox {
+			padding: 0.85rem;
+		}
+
+		.acf-infobox__metadata {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

@@ -1,0 +1,8 @@
+id: PY-WL-114
+language: python
+family: boundary
+base_severity: ERROR
+maturity: stable
+summary: "A builtin trust decorator has a level argument that is statically readable but invalid or out of range"
+cwes: []
+covers_acf: []

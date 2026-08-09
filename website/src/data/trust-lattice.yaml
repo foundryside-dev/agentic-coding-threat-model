@@ -1,0 +1,56 @@
+- id: integral
+  rank: 0
+  state: INTEGRAL
+  origin: declared
+  set_by: 'You — @trusted (default)'
+  meaning: 'Fully trusted data the application produces and relies on.'
+  colour: '#1565C0'
+- id: assured
+  rank: 1
+  state: ASSURED
+  origin: declared
+  set_by: 'You — @trusted(level="ASSURED"), @trust_boundary(to_level="ASSURED")'
+  meaning: 'Trusted after validation; a notch below integral.'
+  colour: '#2E7D32'
+- id: guarded
+  rank: 2
+  state: GUARDED
+  origin: declared
+  set_by: 'You — @trust_boundary(to_level="GUARDED"); also the bundled stdlib table'
+  meaning: 'Partially checked: passed a shape or format guard, not fully assured.'
+  colour: '#7CB342'
+- id: unknown-assured
+  rank: 3
+  state: UNKNOWN_ASSURED
+  origin: inferred
+  set_by: 'The engine (never produced — see §4.4)'
+  meaning: 'Semantically validated, provenance unestablished.'
+  colour: '#FFB300'
+- id: unknown-guarded
+  rank: 4
+  state: UNKNOWN_GUARDED
+  origin: inferred
+  set_by: 'The engine (never produced — see §4.4)'
+  meaning: 'Shape-validated, provenance unestablished.'
+  colour: '#FFA000'
+- id: external-raw
+  rank: 5
+  state: EXTERNAL_RAW
+  origin: declared
+  set_by: 'You — @external_boundary; also the stdlib table'
+  meaning: 'Raw untrusted data crossing into the system from outside.'
+  colour: '#F57C00'
+- id: unknown-raw
+  rank: 6
+  state: UNKNOWN_RAW
+  origin: inferred
+  set_by: 'The engine'
+  meaning: 'Trust could not be established: undecorated code, an unresolved call, the fail-closed fallback. This is the developer-freedom zone.'
+  colour: '#E64A19'
+- id: mixed-raw
+  rank: 7
+  state: MIXED_RAW
+  origin: inferred
+  set_by: 'The engine (not produced under the default configuration — see §4.3–§4.4)'
+  meaning: 'Values of incompatible trust origins were combined. Absorbing top.'
+  colour: '#D32F2F'

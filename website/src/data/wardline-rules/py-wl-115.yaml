@@ -1,0 +1,8 @@
+id: PY-WL-115
+language: python
+family: sink
+base_severity: WARN
+maturity: stable
+summary: "Dynamic code/module load — importlib.import_module, __import__, runpy.run_path, runpy.run_module, importlib.util.spec_from_file_location"
+cwes: [CWE-829, CWE-94]
+covers_acf: [ACF-E2]
