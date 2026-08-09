@@ -52,3 +52,12 @@ jobs:
 
       - name: Rebuild and verify published PDFs
         run: ./source/pdf/build-all.sh --check
+
+      - name: Upload rebuilt PDFs on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: rebuilt-pdfs
+          path: source/pdf/*.pdf
+          if-no-files-found: error
+          retention-days: 7
