@@ -761,7 +761,7 @@ At the time of the earlier observations the enforcement regime was a single AST 
 | Layer | What it enforces |
 |---|---|
 | **1 — semantic taint gate** | External ingress points are declared in code with decorator markers. A pack generator maps those markers onto the trust grammar of a purpose-built taint-analysis scanner, which performs genuine inter-procedural taint tracking — function- and variable-level propagation over an inter-module call graph — rather than AST pattern matching alone. Findings land at the *boundary*, not the sink |
-| **2 — tier-model lints** | A repository-local lint suite enforcing the project's own tier model: nominally type what the system owns, parse what it does not, never accept a structural check as a security control |
+| **2 — tier-model lints** | A repository-local lint suite enforcing the project's own tier model: nominally type whatever the system itself owns, parse everything it does not, never accept a structural check as a security control |
 | **3 — declared output oracles** | A scenario corpus pinning content digests over the *semantic projections* of pipeline runs — a hash over what a pipeline's output means, not merely whether it executes |
 | **4 — write-boundary invariants** | Where the platform is semantically permissive (an embedded development database ignoring column bounds the production engine enforces), the contract is encoded at the write boundary, derived from the schema so the two cannot drift, and verified against the real production engine |
 
@@ -838,7 +838,7 @@ The repository operated under an explicit authority-tier architecture with machi
 
 External data, validated pipeline data, and audit-tier data were subject to distinct failure semantics. Defensive coercion was only permitted at the external boundary.
 
-> "Tier 1: Our Data [...] Bad data in the audit trail = **crash immediately**. No coercion, no defaults, no silent recovery."
+> "Tier 1: Our Data [...] **crash immediately**. No coercion [...] no silent recovery."
 >
 > "Tier 2: No coercion at transform/sink level — if a transform receives `"42"` when it expected `int`, that's a bug in the source or upstream transform."
 >
@@ -852,7 +852,7 @@ The project explicitly prohibited `.get()`/`getattr()`-style defensive access on
 
 > "Defensive Programming: Forbidden. Offensive Programming: Encouraged."
 >
-> "Do not use `.get()`, `getattr()`, `isinstance()`, or silent exception handling to suppress errors from nonexistent attributes, malformed data, or incorrect types."
+> "Do not use `.get()`, `getattr()`, `isinstance()`, or silent exception handling to suppress errors [...] from malformed data, or incorrect types."
 >
 > "Access typed dataclass fields directly (`obj.field`), not defensively (`obj.get('field')`)"
 >
@@ -862,18 +862,18 @@ The project explicitly prohibited `.get()`/`getattr()`-style defensive access on
 
 #### 3. Machine-enforced boundary
 
-These rules were enforced in CI by a tier-model checker (`enforce_tier_model.py`) that scanned core modules for defensive access patterns. Each flagged instance required an allowlist entry with an owner, safety justification, and expiry date. The allowlist supported per-file and per-finding exemptions for adjudicated exceptions. When entries expired, the CI gate failed until they were either resolved in code or renewed with justification.
+These rules were enforced in CI by a tier-model checker that scanned core modules for defensive access patterns. Each flagged instance required an allowlist entry with an owner, safety justification, and expiry date. The allowlist supported per-file and per-finding exemptions for adjudicated exceptions. When entries expired, the CI gate failed until they were either resolved in code or renewed with justification.
 
 ```
-$ .venv/bin/python scripts/cicd/enforce_tier_model.py check \
-    --root src/[project] --allowlist config/cicd/enforce_tier_model
+$ python [checker] check \
+    --root src/[project] --allowlist [allowlist-dir]
 ```
 
 #### 4. Internal defects must surface
 
 Repository policy treated silent recovery from internal bugs as more dangerous than controlled failure.
 
-> "If a transform/process has a bug, we MUST know about it."
+> "If a transform/process has a bug, we MUST know [...]"
 >
 > "A defective plugin that silently produces wrong results is **worse than a crash**."
 >
@@ -885,13 +885,13 @@ Project rules favoured structural fixes over workaround layers or policy-broaden
 
 > "NEVER: Add a lazy import with an apologetic comment. This is the 'Shifting the Burden' archetype."
 >
-> "When something is removed or changed, DELETE THE OLD CODE COMPLETELY."
+> "When something is removed [...] DELETE [...] COMPLETELY."
 
 #### 6. Source boundary normalisation policy
 
-Field names entering the pipeline must be valid Python identifiers. This is an explicit, non-negotiable policy:
+Field names entering the pipeline must be valid Python identifiers, and the rule was stated without qualification:
 
-> "Source field names are normalized to valid Python identifiers at the source boundary. This is non-negotiable — it's not cosmetic cleanup, it's a language boundary requirement."
+> "Source field names are normalized [...] This is non-negotiable — it's not cosmetic cleanup, it's a language boundary requirement."
 
 This policy was codified on 7 March 2026, approximately five weeks after the CSV source plugin was written. It is relevant to the second incident (E.4–E.5).
 
@@ -952,7 +952,7 @@ The agent traced each `.get()` call through the coalesce merge logic, identifyin
 
 Despite identifying this risk, the agent concluded:
 
-> "The `.get()` pattern is the correct one here. These aren't defensive access on typed Tier 1 data — they're optional keys in a dict representation of a dataclass with optional fields. The absence of the key IS the valid value."
+> "The `.get()` pattern is the correct one here. These aren't defensive access on typed [...] data — they're optional keys in a dict representation of a dataclass with optional fields. The absence of the key IS the valid value."
 >
 > "Bottom line: The `.get()` calls are correct. [...] The per-file allowlist with `max_hits: 3` is the right classification for these."
 
@@ -1077,7 +1077,7 @@ The agent immediately accepted the correction and updated the behaviour to `Plug
 
 The agent wrote a 174-line design spec and ran an automated doc review. The reviewer caught a tension: the spec listed field normalisation as out of scope ("XML tag names are already constrained identifiers"), but the project's coding standards file declared normalisation "non-negotiable." The agent investigated:
 
-> "The reviewer caught an important tension: the project's coding standards file says source field normalization is 'non-negotiable', but CSV source defaults `normalize_fields=False` — it's opt-in."
+> "The reviewer caught an important tension: the project's coding standards file says source field normalisation is 'non-negotiable', but CSV source defaults `normalize_fields=False` — it's opt-in."
 
 The agent revised the spec to acknowledge the limitation, fixed several other reviewer findings, and re-ran the review. At this point the original task was progressing normally.
 
@@ -1260,7 +1260,7 @@ The violation rate data provides the frequency context for how often these patte
 
 A standing remediation ticket directed the elimination of "banned attribute masquerading" across a **601-site** target list, prescribing two remedies: declare runtime-checkable protocols, and ban the attribute-probing tokens outright.
 
-The governing decision record — accepted **one day after the ticket was last edited** — named the ticket explicitly and **reversed both instructions**. The protocol pattern was the root cause of the original P0 (it admits impostors that merely declare the right attribute names, and since Python 3.12 rejects genuine dynamic vendor objects), and the probing tokens it banned are now the *prescribed* pattern at external boundaries (sentinel probe → value assertions → owned type). **Following the ticket literally would have reintroduced the P0.**
+The governing decision record — accepted **one day after the ticket was last edited** — named the ticket explicitly and **reversed both instructions**. The protocol pattern was the root cause of the original P0 (it admits impostors that merely declare the expected attribute names, and from Python 3.12 onward rejects genuine dynamic vendor objects), and the probing tokens it banned are now the *prescribed* pattern at external boundaries (sentinel probe → value assertions → owned type). **Following the ticket literally would have reintroduced the P0.**
 
 The executing agent session caught the contradiction — by checking the ticket against the decision records that cite it before acting — and converted the task from a migration into an investigation.
 
@@ -1284,15 +1284,15 @@ The session's survey of all 601 sites is the paper's central technical argument 
 
 #### What shipped: a corpus ratchet
 
-Because the rule's subject cannot be expressed syntactically, the deliverable was **not a migration but a freeze**: a per-site baseline of 320 named entries, three narrow structural amnesties for provably safe shapes, and errors on drift in any direction — new sites, vanished entries, and changed occurrence counts all fail the gate. Deliberately no signatures and no authority-tier coupling: a proportionate, bespoke control. The general pattern is described as [baseline-and-ratchet enforcement]({{< relref "/threat-model/response-landscape" >}}#baseline-and-ratchet-enforcement-for-unpatternable-rules).
+Because the rule's subject cannot be expressed syntactically, the deliverable was **not a migration but a freeze**: a per-site baseline naming every site in the corpus, three narrow structural amnesties for provably safe shapes, and errors on drift in any direction — new sites, vanished entries, and changed occurrence counts all fail the gate. Deliberately no signatures and no authority-tier coupling: a proportionate, bespoke control. The general pattern is described as [baseline-and-ratchet enforcement]({{< relref "/threat-model/response-landscape" >}}#baseline-and-ratchet-enforcement-for-unpatternable-rules).
 
-**The gate carries its own epistemic status.** Most entries were seeded *unadjudicated*, recorded in the baseline's header and in the test messages, so a green gate reads as "nothing new landed" — **not "this corpus is correct."** That is a third epistemic state between "checked and clean" and "didn't look", and it converts the corpus into a visible, classified worklist rather than a silent debt.
+**The gate carries its own epistemic status.** Most entries were seeded *unadjudicated*, recorded in the baseline's header and in the test messages, so a green gate reads as "nothing new landed" rather than **as a claim that the corpus is correct.** That is a third epistemic state between "checked and clean" and "didn't look", and it converts the corpus into a visible, classified worklist rather than a silent debt.
 
-The ratchet's own verification produced a finding worth recording: the first build keyed entries on `(path, function, kind)`, collapsing repeated probes within a single function — leaving **135 sites (29%) invisible to the ratchet**, concentrated on the vendor-admission boundary the governing decision record had just corrected. Occurrence counts closed the gap. The weakening had been documented honestly in two places; only *measuring the distribution* showed that it mattered — measured recall demonstrated against the enforcement tool itself, and the tool-verification recursion handled in practice (with detection disabled, eleven tests fail).
+The ratchet's own verification produced a finding worth recording: the first build keyed entries on `(path, function, kind)`, collapsing repeated probes within a single function — leaving **close to a third of all sites invisible to the ratchet**, clustered on the vendor-admission boundary the governing decision record had just corrected. Occurrence counts closed the gap. The weakening had been documented honestly in two places; only *measuring the distribution* showed that it mattered — measured recall demonstrated against the enforcement tool itself, and the tool-verification recursion handled in practice (with detection disabled, a spread of tests across the suite fail).
 
 #### What was deliberately left
 
-The **471 test-lane sites** were left untouched — not for lack of time, but because the available signal cannot adjudicate them: **a green suite is the expected outcome of both a correct rewrite and a rewrite that neutered the test.** That is the coverage-illusion argument applied prospectively, as a review-planning constraint. The session recorded two defects rather than fixing them, and routed the adjudication to lead review, because *"recorded, not fixed"* was the honest posture the evidence supported.
+The test-lane sites — **the substantial majority of the corpus** — were left untouched — not for lack of time, but because the available signal cannot adjudicate them: **a green suite is the expected outcome of both a correct rewrite and a rewrite that neutered the test.** That is the coverage-illusion argument applied prospectively, as a review-planning constraint. The session recorded two defects rather than fixing them, and routed the adjudication to lead review, because *"recorded, not fixed"* was the honest posture the evidence supported.
 
 ---
 

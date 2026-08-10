@@ -91,7 +91,7 @@ write_audit_record(transaction)
 
 **Q2 to ask:** "If this operation fails, does someone need to *know* it failed — not just that something was logged?"
 
-In the taxonomy, this is *Audit Trail Destruction* — rated *High*. The code appears to handle errors gracefully, but "graceful" is the wrong response when the audit trail is the legal record. A gap in the audit trail is not a logging failure — it is a compliance failure that may have legal consequences.
+In the taxonomy, this is *Audit Trail Destruction* — rated *High*. The code appears to handle errors gracefully, but "graceful" is the wrong response when the audit trail constitutes the legal record. A gap in the audit trail is not a logging failure — it is a compliance failure that may have legal consequences.
 
 > **Why This Matters:** Under many compliance frameworks, a missing audit record is not a bug — it may be indistinguishable from evidence of tampering without additional investigation.
 

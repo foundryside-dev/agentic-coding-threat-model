@@ -34,7 +34,7 @@ Agent workflows optimise for completing the assigned task. Unrelated evidence co
 
 ```text
 Test run:
-  FAILED test_llm_config.py::test_reserved_suffix_warns
+  FAILED test_[component].py::test_reserved_suffix_warns
   1 failed, 847 passed
 
 Agent:

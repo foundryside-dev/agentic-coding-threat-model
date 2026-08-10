@@ -72,7 +72,7 @@ A "known" vulnerability class produced identically across every codebase using t
 - **Language-general** (applicable across Python, Java, C#, TypeScript, Go, etc.): ACF-T1 (authority tier conflation), ACF-T2 (silent coercion), ACF-R1 (audit trail destruction), ACF-R2 (partial completion), ACF-I1 (verbose error response), ACF-D1 (finding flood), ACF-D2 (review capacity exhaustion), ACF-E1 (implicit privilege grant), ACF-E2 (unvalidated delegation). The failure *patterns* differ by language (e.g., `catch (Exception e)` in Java, `catch` in C++, `recover()` in Go), but the failure *mode* is the same.
 - **Python-specific surface form** (same underlying failure, different manifestation in other languages): ACF-S1, ACF-S2, ACF-S3, and ACF-S4.[^cross-language-analogues]
 
-Organisations working in other languages should read the *Description* and *Why it's dangerous* fields as language-general, and treat the *Example* and *Detection approach* fields as Python-specific reference implementations. **For SQL-specific treatment** — including `COALESCE` as fabricated default, `INSERT ... SELECT` as authority tier conflation, silent overwrites as audit trail destruction, and SQL-specific risks not covered by the Python taxonomy — see Appendix C.
+Organisations working in other languages should read the *Description* and *Why it's dangerous* fields as language-general, and treat the *Example* and *Detection approach* fields as Python-specific reference implementations. **For SQL-specific treatment** — including `COALESCE` as fabricated default, `INSERT ... SELECT` as authority tier conflation, silent overwrites as destruction of the audit trail, and SQL-specific risks not covered by the Python taxonomy — see Appendix C.
 
 #### ACF-S1: Fabricated Default
 
@@ -289,12 +289,12 @@ amount = float(row["measurement"].replace(",", "."))
 from decimal import Decimal, InvalidOperation
 
 if "transaction_amount" not in row:
-    return TransformResult.error({"reason": "missing_amount", "row_id": row_id})
+    return RecordOutcome.error({"reason": "missing_amount", "row_id": row_id})
 raw_amount = row["transaction_amount"]
 try:
     amount = Decimal(raw_amount)  # Preserve precision; float would silently lose it
 except (InvalidOperation, TypeError) as e:
-    return TransformResult.error(
+    return RecordOutcome.error(
         {"reason": "invalid_amount", "raw": raw_amount, "error": str(e)}
     )
 ```
@@ -406,7 +406,7 @@ def upload_and_record(blob_data, ctx):
     # that logs and continues.
 ```
 
-**Why it's dangerous:** In regulatory contexts, the audit trail is the legal record. A gap in the audit trail is not just a logging failure — it is a compliance failure that may have legal consequences. "We made a decision but cannot prove what it was based on" is an unacceptable answer in a formal inquiry. Form (b) is particularly difficult to catch because the agent has followed the project's explicit rule ("don't swallow audit failures") and the code *does* propagate — the failure is in the exception's *type*, not its *handling*. A codebase audit looking for catch-and-swallow patterns (form a) will not find form (b), because there is no `except` block to flag. In one observed project, correcting form (a) across a codebase revealed twelve instances of form (b) across six plugins — the correlated failure property in action, with the same untyped-propagation pattern repeated identically at every `record_call` site.
+**Why it's dangerous:** In regulatory contexts, the audit trail constitutes the legal record. A gap in the audit trail is not just a logging failure — it is a compliance failure that may have legal consequences. "We made a decision but cannot prove what it was based on" is an unacceptable answer in a formal inquiry. Form (b) is particularly difficult to catch because the agent has followed the project's explicit rule ("don't swallow audit failures") and the code *does* propagate — the failure is in the exception's *type*, not its *handling*. A codebase audit looking for catch-and-swallow patterns (form a) will not find form (b), because there is no `except` block to flag. In one observed project, correcting form (a) across a codebase revealed twelve instances of form (b) across six plugins — the correlated failure property in action, with the same untyped-propagation pattern repeated identically at every `record_call` site.
 
 The two forms also compose. An agent producing form (b) — an untyped `Exception` propagating from an audit-critical operation — creates an exception that has no guaranteed destination. A different agent, or the same agent in a different session, may independently add a catch-all `except Exception` handler further up the call stack, because the application "keeps crashing" on certain code paths and broad exception handling is the training-data default for making crashes stop. The untyped audit exception lands in the catch-all, is logged as a generic error, and the operation continues — form (a) and form (b) working together, neither introduced by the same agent or in the same session, composing into a silent audit trail gap that neither detection rule in isolation would flag.
 
@@ -1149,13 +1149,13 @@ class DataverseSource:
 
 ```
 ● Bash(pytest tests/ -x -q 2>&1 | tail -20)
-  ⎿  FAILED tests/unit/plugins/llm/test_llm_config.py::test_reserved_suffix_warns
+  ⎿  FAILED tests/unit/[module]/test_[component].py::test_reserved_suffix_warns
      1 failed, 847 passed
 
-● Good — the failing test is in test_llm_config.py which we didn't
+● Good — the failing test is in test_[component].py which we didn't
   touch. Let me confirm it fails on the unchanged code too.
 
-● Bash(git stash && pytest tests/.../test_llm_config.py -x -q)
+● Bash(git stash && pytest tests/.../test_[component].py -x -q)
   ⎿  FAILED
 
 ● Pre-existing failure, unrelated to our changes.
@@ -1196,6 +1196,8 @@ Several pairs of entries describe adjacent failure modes. The distinguishing cri
 **ACF-T2 vs ACF-T3:** T2 silently coerces a *type*; T3 silently parses *prose as structure*. Both produce values that look correct today and silently degrade when the source changes, but the mechanisms differ — T2 converts data, T3 fabricates structure from text.
 
 **ACF-R1 vs ACF-R2:** R1 destroys auditability by swallowing or suppressing failures that should be recorded or propagated. R2 destroys atomicity by allowing a multi-step operation to complete partially without rollback or compensating action. R1 corrupts the record of what happened; R2 corrupts the state that resulted.
+
+**ACF-S1 and ACF-R1 — companion views under Design by Contract.** Read through Meyer's Design by Contract (§1.6, Appendix H), a missing or malformed field at a trust boundary is a precondition violation — the caller's defect, not the callee's to quietly repair. ACF-S1 describes what happens to the *data*: the callee fabricates a value the precondition should have guaranteed, and downstream code proceeds on invented input. ACF-R1 describes what happens to the *evidence*: because the fabrication is silent, nothing records that a precondition was violated or by whom, so the audit trail cannot attribute the defect to its source. A single `.get()` with a default on audited Tier 1 data is therefore not two independent findings but one defect examined from two STRIDE angles — S1 asks what was fabricated, R1 asks what was erased in the fabricating.
 
 **ACF-R3 vs ACF-R5:** R3 displaces *test* assurance (real tests become mock tests); R5 displaces *remediation* assurance (fixes introduce new violations). Both produce artefacts that claim to provide assurance while degrading the property they claim to assure.
 

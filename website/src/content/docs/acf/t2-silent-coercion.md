@@ -49,12 +49,12 @@ amount = float(row["measurement"].replace(",", "."))
 from decimal import Decimal, InvalidOperation
 
 if "transaction_amount" not in row:
-    return TransformResult.error({"reason": "missing_amount", "row_id": row_id})
+    return RecordOutcome.error({"reason": "missing_amount", "row_id": row_id})
 raw_amount = row["transaction_amount"]
 try:
     amount = Decimal(raw_amount)  # Preserve precision; float would silently lose it
 except (InvalidOperation, TypeError) as e:
-    return TransformResult.error(
+    return RecordOutcome.error(
         {"reason": "invalid_amount", "raw": raw_amount, "error": str(e)}
     )
 ```

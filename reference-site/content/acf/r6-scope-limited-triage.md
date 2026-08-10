@@ -40,13 +40,13 @@ The following is a process description from an agent session transcript, illustr
 
 ```
 > Bash(pytest tests/ -x -q 2>&1 | tail -20)
-  FAILED tests/unit/plugins/llm/test_llm_config.py::test_reserved_suffix_warns
+  FAILED tests/unit/[module]/test_[component].py::test_reserved_suffix_warns
      1 failed, 847 passed
 
-> Good — the failing test is in test_llm_config.py which we didn't
+> Good — the failing test is in test_[component].py which we didn't
   touch. Let me confirm it fails on the unchanged code too.
 
-> Bash(git stash && pytest tests/.../test_llm_config.py -x -q)
+> Bash(git stash && pytest tests/.../test_[component].py -x -q)
   FAILED
 
 > Pre-existing failure, unrelated to our changes.

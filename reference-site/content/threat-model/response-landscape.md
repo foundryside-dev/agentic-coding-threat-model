@@ -25,7 +25,7 @@ The responses available to organisations fall into three categories of increasin
 
 Most organisations will implement behavioural controls, aspire to procedural controls, and underinvest in technical controls — because technical controls constrain the velocity that motivated adoption. A long-standing principle of security engineering applies here: controls that shape the environment are stronger than controls that depend on restraint. A rule that developers must not bypass review is an aspiration; a pipeline that physically prevents unreviewed code from reaching protected branches is a control.
 
-All three control types have a role, but assurance should not rest primarily on behavioural or procedural controls where technical enforcement is feasible. Organisations that rely on behavioural and procedural controls without technical enforcement should understand that their assurance argument rests on sustained human compliance with rules that run directly against the productivity incentive that makes agentic development attractive.
+All three control types matter, but assurance should not rest chiefly on behavioural or procedural controls wherever technical enforcement is feasible. Organisations that rely on behavioural and procedural controls without technical enforcement should understand that their assurance argument rests on sustained human compliance with rules that run directly against the productivity incentive that makes agentic development attractive.
 
 ## Process controls
 
@@ -247,7 +247,7 @@ The machine then enforces the property it *can* check ("no unadjudicated change"
 
 **Two design details carry the assurance value.**
 
-*The gate must declare its own epistemic status.* A baseline seeded with unadjudicated entries must say so in its own header and failure messages, so that green reads as "nothing new landed," not "this corpus is correct" — **a third epistemic state between "checked and clean" and "didn't look"** (verification property 7).
+*The gate must declare its own epistemic status.* A baseline seeded with unadjudicated entries must say so in its own header and failure messages, so that green reads as "nothing new landed" rather than as a claim of correctness — **a third epistemic state between "checked and clean" and "didn't look"** (verification property 7).
 
 *The ratchet must key on occurrence counts, not merely site presence.* A working example caught its own recall gap when entry keys collapsed repeated occurrences within one function, leaving 29% of sites invisible until the distribution was measured.
 
